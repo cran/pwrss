@@ -1,0 +1,125 @@
+---
+title: "Power and Sample Size Calculation Tools"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pwrss)
+```
+
+To install and load `pwrss`:
+```{r,  message = FALSE, eval = FALSE}
+install.packages("pwrss")
+library(pwrss)
+```
+
+`pwrss` R package allows statistical power and minimum required sample size calculations for 
+
+  - `(1)` testing a proportion (one-sample) against a constant, 
+  - `(2)` testing a mean (one-sample) against a constant,  
+  - `(3)` testing difference between two proportions (independent samples),
+  - `(4)` testing difference between two means (independent and paired samples),
+  - `(5)` testing a correlation (one-sample) against a constant,  
+  - `(6)` testing difference between two correlations (independent samples),
+  - `(7)` testing an R-squared against zero in linear regression 
+  - `(8)` testing an R-squared difference against zero in hierarchical regression,
+  - `(9)` testing an eta-squared or f-squared (for main and interaction effects) against zero in analysis of variance (ANOVA) (could be one-way, two-way, and three-way), 
+  - `(10)` testing an eta-squared or f-squared (for main and interaction effects) against zero in analysis of covariance (ANCOVA) (could be one-way, two-way, and three-way), 
+  - `(11)` testing an eta-squared or f-squared (for between, within, and interaction effects) against zero in one-way repeated measures analysis of variance (RM-ANOVA) (with non-sphericity correction and repeated measures correlation). 
+  
+  Alternative hypothesis can be formulated as "not equal", "less", "greater",  "non-inferior", "superior", or "equivalent" in `(1)`, `(2)`, `(3)`, and `(4)`;
+  as "not equal", "less", or "greater" in `(5)` and `(6)`; but always as "greater" in `(7)`, `(8)`, `(9)`, `(10)`, and `(11)`. 
+  
+**If you find the package and related material useful, along with other references, please cite as:**
+
+- Bulus, M. (2022). pwrss: Power and Sample Size Calculation Tools. R package version 0.1.0. https://CRAN.R-project.org/package=pwrss
+
+- Bulus, M., & Polat, C. (2022, November 7). Istatistiksel Guc Analizine Giris [Introduction to Statistical Power Analysis]. https://doi.org/10.35542/osf.io/tfyxq 
+
+**A Few Snapshots** 
+  
+**1. Generic Functions for _z_, _t_, and _F_ tests**
+
+These generic functions calculate and return statistical power along with optional plots for Type I and Type II error rates (as long as the test statistic and degrees of freedom is known). They can be useful for calculating statistical power after data analysis (ex-post). 
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = FALSE}
+power.t.test(ncp = 1.96, df = 99, alpha = 0.05, alternative = "equivalent")
+power.z.test(ncp = 1.96, alpha = 0.05, alternative = "equivalent")
+power.f.test(ncp = 2, df1 = 2, df2 = 98, alpha = 0.05)
+
+```
+
+`plot()` function (S3 method) is a wrapper around the generic functions above. 
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = FALSE}
+design1 <- pwrss.t.2means(mu1 = 0.20, margin = -0.05, paired = TRUE,
+                         power = 0.80, alternative = "non-inferior")
+plot(design1)
+
+design2 <- pwrss.f.ancova(eta2 = 0.10, n.levels = c(2,3),
+                         power = .80)
+plot(design2)
+
+```
+
+**2. Standardizd versus Unstandardized Input for _t_ Test**
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+# it is sufficient to provide standardized difference between two groups for 'mu1'
+# e.g. Cohen's d = 0.50 for mu1, because mu2 = 0 by default
+pwrss.t.2means(mu1 = 0.50, power = .80)
+pwrss.t.2means(mu1 = 0.50, power = .80, paired  = TRUE)
+
+# it is sufficient to provide pooled standard deviation for sd1
+# because sd2 = sd1 by default
+pwrss.t.2means(mu1 = 10, mu2 = 5, sd1 = 10, power = .80)
+```
+
+**3. One-way, Two-way, and Three-way Analysis of Variance (ANOVA) or Analysis of Covariance (ANCOVA)**
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+
+# one-way ANOVA
+pwrss.f.ancova(n.levels = 2, n.covariates = 0,
+               power = .80, eta2 = 0.10)
+# one-way ANCOVA
+pwrss.f.ancova(n.levels = 2, n.covariates = 1,
+               power = .80, eta2 = 0.08)
+
+# two-way ANOVA
+pwrss.f.ancova(n.levels = c(2,3), n.covariates = 0,
+               power = .80, eta2 = 0.10)
+# two-way ANCOVA
+pwrss.f.ancova(n.levels = c(2,3), n.covariates = 1,
+               power = .80, eta2 = 0.08)
+
+# three-way ANOVA
+pwrss.f.ancova(n.levels = c(2,3,2), n.covariates = 0,
+               power = .80, eta2 = 0.10)
+# three-way ANCOVA
+pwrss.f.ancova(n.levels = c(2,3,2), n.covariates = 1,
+               power = .80, eta2 = 0.08)
+
+```
+
+**4. One-way Repeated Measures Analysis of Variance (RM-ANOVA)**
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+
+pwrss.f.rmanova(eta2 = 0.10,  n.levels = 2, n.measurements = 3,
+                 repmeasures.r = 0.50, type = "between", power = 0.80)
+
+pwrss.f.rmanova(eta2 = 0.10,  n.levels = 2, n.measurements = 3,
+                repmeasures.r = 0.50, epsilon = 1,
+                type = "within", power = 0.80)
+
+pwrss.f.rmanova(eta2 = 0.10,  n.levels = 2, n.measurements = 3,
+                repmeasures.r = 0.50, epsilon = 1,
+                type = "interaction", power = 0.80)
+
+```
+
+--o--
