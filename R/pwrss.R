@@ -1674,6 +1674,297 @@ pwrss.f.rmanova <- function (eta2 = 0.10, f2 = eta2/(1 - eta2),
 
 #################################################################################
 
+# if the predictor is binary
+# provide sdx = sqrt(p * (1 - p))
+# use defaults if beta is standardized
+# p = proportion of subjects in treatment group
+pwrss.t.reg <- function (beta = 0.25, beta0 = 0,
+                         sdx = 1, sdy = 1,
+                         k = 1, r2 = (beta * sdx / sdy)^2,
+                         alpha = 0.05, n = NULL, power = NULL,
+                         alternative = c("not equal", "less", "greater"),
+                         verbose = TRUE) {
+
+  if (is.null(n) & is.null(power))
+    stop("`n` and `power` cannot be `NULL` at the same time",
+         call. = FALSE)
+  if (!is.null(n) & !is.null(power))
+    stop("one of the `n` or `power` should be `NULL`",
+         call. = FALSE)
+
+  if(r2 < (beta * sdx / sdy)^2)
+    warning("possibly incongruent arguments, need a larger 'r2'", call. = FALSE)
+
+  alternative <- match.arg(alternative)
+  if (alternative == "greater" & (beta < beta0)) stop("alternative = 'greater' but beta < beta0", call. = FALSE)
+  if (alternative == "less" & (beta > beta0)) stop("alternative = 'less' but beta > beta0", call. = FALSE)
+
+  if(is.null(power)) {
+    lambda <- (beta - beta0) / ((sdy / sdx) * sqrt((1 - r2) / n))
+    v <- n - k - 1
+    power <- power.t.test(ncp = lambda, df = v, alpha = alpha, alternative = alternative, plot = FALSE)
+  }
+
+  if(is.null(n)) {
+    n <- uniroot(function(n) {
+      lambda <- (beta - beta0) / ((sdy / sdx) * sqrt((1 - r2) / n))
+      v <- n - k - 1
+      power - power.t.test(ncp = lambda, df = v, alpha = alpha, alternative = alternative, plot = FALSE)
+    }, interval = c(k + 2, 1e10))$root
+    lambda <- (beta - beta0) / ((sdy / sdx) * sqrt((1 - r2) / n))
+    v <- n - k - 1
+  }
+
+  if(verbose) {
+    cat(" Linear regression coefficient (one sample t test) \n",
+        "H0: beta = beta0 \n HA: beta != beta0 \n",
+        "------------------------------ \n",
+        " Statistical power =", round(power, 3), "\n",
+        " n =", ceiling(n), "\n",
+        "------------------------------ \n",
+        "Degrees of freedom =", round(v, 3), "\n",
+        "Non-centrality parameter =", round(lambda, 3), "\n",
+        "Type I error rate =", round(alpha, 3), "\n",
+        "Type II error rate =", round(1 - power, 3), "\n")
+  }
+
+  invisible(structure(list(parms = list(beta = beta, beta0 = beta0, sdx = sdx, sdy = sdy, k = k, r2 = r2,
+                                        alpha = alpha, alternative = alternative, verbose = verbose),
+                           test = "t",
+                           df = v,
+                           ncp = lambda,
+                           power = power,
+                           n = n),
+                      class = c("pwrss", "t", "reg")))
+
+}
+
+#################################################################################
+
+# if the predictor is binary
+# provide sdx = sqrt(p * (1 - p))
+# use defaults if beta is standardized
+# p = proportion of subjects in treatment group
+# k is defined only for bare minimum sample size
+pwrss.z.reg <- function (beta = 0.25, beta0 = 0,
+                         sdx = 1, sdy = 1,
+                         k = 1, r2 = (beta * sdx / sdy)^2,
+                         alpha = 0.05, n = NULL, power = NULL,
+                         alternative = c("not equal", "less", "greater"),
+                         verbose = TRUE) {
+
+
+  if (is.null(n) & is.null(power))
+    stop("`n` and `power` cannot be `NULL` at the same time",
+         call. = FALSE)
+  if (!is.null(n) & !is.null(power))
+    stop("one of the `n` or `power` should be `NULL`",
+         call. = FALSE)
+
+  if(r2 < (beta * sdx / sdy)^2)
+    warning("possibly incongruent arguments, need a larger 'r2'", call. = FALSE)
+
+  alternative <- match.arg(alternative)
+  if (alternative == "greater" & (beta < beta0)) stop("alternative = 'greater' but beta < beta0", call. = FALSE)
+  if (alternative == "less" & (beta > beta0)) stop("alternative = 'less' but beta > beta0", call. = FALSE)
+
+  if(is.null(power)) {
+    lambda <- (beta - beta0) / ((sdy / sdx) * sqrt((1 - r2) / n))
+    power <- power.z.test(ncp = lambda, alpha = alpha, alternative = alternative, plot = FALSE)
+  }
+
+  if(is.null(n)) {
+    n <- uniroot(function(n) {
+      lambda <- (beta - beta0) / ((sdy / sdx) * sqrt((1 - r2) / n))
+      power - power.z.test(ncp = lambda, alpha = alpha, alternative = alternative, plot = FALSE)
+    }, interval = c(k + 2, 1e10))$root
+    lambda <- (beta - beta0) / ((sdy / sdx) * sqrt((1 - r2) / n))
+  }
+
+  if(verbose) {
+    cat(" Linear regression coefficient (one sample z test) \n",
+        "H0: beta = beta0 \n HA: beta != beta0 \n",
+        "------------------------------ \n",
+        " Statistical power =", round(power, 3), "\n",
+        " n =", ceiling(n), "\n",
+        "------------------------------ \n",
+        "Non-centrality parameter =", round(lambda, 3), "\n",
+        "Type I error rate =", round(alpha, 3), "\n",
+        "Type II error rate =", round(1 - power, 3), "\n")
+  }
+
+  invisible(structure(list(parms = list(beta = beta, beta0 = beta0, sdx = sdx, sdy = sdy, r2 = r2,
+                                        alpha = alpha, alternative = alternative, verbose = verbose),
+                           test = "z",
+                           ncp = lambda,
+                           power = power,
+                           n = n),
+                      class = c("pwrss", "z", "reg")))
+
+}
+
+#################################################################################
+
+## 'cp = 0' by default, implying complete mediation (it increases explanatory power of the covariate x so increase power (produces lower bound of power))
+# use 'r2m.x' and 'r2y.mx' to adjust standard error for other predictors in mediation and outcome model
+pwrss.z.med  <- function(a, b, cp = 0,
+                         sdx = 1, sdm = 1, sdy = 1,
+                         r2m.x = a^2 * sdx^2 / sdm^2,
+                         r2y.mx = (b^2 * sdm^2 + cp^2 * sdx^2) / sdy^2,
+                         n = NULL, power = NULL,
+                         alpha = 0.05, alternative = c("not equal", "less", "greater"),
+                         mc = TRUE, nsims = 1000, ndraws = 1000,
+                         verbose = TRUE) {
+
+  if (is.null(n) & is.null(power))
+    stop("`n` and `power` cannot be `NULL` at the same time",
+         call. = FALSE)
+  if (!is.null(n) & !is.null(power))
+    stop("one of the `n` or `power` should be `NULL`",
+         call. = FALSE)
+
+  alternative <- match.arg(alternative)
+  if (alternative == "greater" & (a * b < 0)) stop("alternative = 'greater' but a * b < 0", call. = FALSE)
+  if (alternative == "less" & (a * b > 0)) stop("alternative = 'less' but a * b > 0", call. = FALSE)
+
+  if(r2m.x < a^2 * sdx^2 / sdm^2)
+    warning("possibly incongruent arguments, need a larger 'r2m.x'", call. = FALSE)
+
+  if(r2y.mx < (b^2 * sdm^2 + cp^2 * sdx^2) / sdy^2)
+    warning("possibly incongruent arguments, need a larger 'r2y.mx'", call. = FALSE)
+
+  .se.a <- function(sdm, sdx, r2m.x, n) {
+    var.a <- (1 / n) * (sdm^2) * (1 - r2m.x) / (sdx^2)
+    sqrt(var.a)
+  }
+
+  .se.b <- function(sdy, sdm, r2y.mx, r2m.x, n) {
+    var.b <- (1 / n) * (sdy^2) * (1 - r2y.mx) / ((sdm^2) * (1 - r2m.x))
+    sqrt(var.b)
+  }
+
+  if(is.null(power)) {
+
+    se.a <- .se.a(sdm, sdx, r2m.x, n)
+    se.b <- .se.b(sdy, sdm, r2y.mx, r2m.x, n)
+
+    # https://quantpsy.org/sobel/sobel.htm
+    # sobel, aroian, goodman tests
+    sobel.se <- sqrt(a^2 * se.b^2  + b^2 * se.a^2)
+    aroian.se <- sqrt(a^2 * se.b^2  + b^2 * se.a^2 + se.a^2 * se.b^2)
+    goodman.se <- sqrt(a^2 * se.b^2  + b^2 * se.a^2 - se.a^2 * se.b^2)
+    lambda.sobel <- (a * b) / sobel.se
+    lambda.aroian <- (a * b) / aroian.se
+    lambda.goodman <- (a * b) / goodman.se
+    power.sobel <- power.z.test(ncp = lambda.sobel, alpha = alpha, alternative = alternative, plot = FALSE)
+    power.aroian <- power.z.test(ncp = lambda.aroian, alpha = alpha, alternative = alternative, plot = FALSE)
+    power.goodman <- power.z.test(ncp = lambda.goodman, alpha = alpha, alternative = alternative, plot = FALSE)
+
+    # joint test
+    power.a <- power.z.test(ncp = a / se.a, alpha = alpha, alternative = alternative, plot = FALSE)
+    power.b <- power.z.test(ncp = b / se.b, alpha = alpha, alternative = alternative, plot = FALSE)
+    power.joint <- power.a * power.b
+
+    # monte carlo interval test
+    if(mc) {
+      rejmc <- NULL
+      for (i in 1:nsims){
+        a.star <- rnorm(1, a, se.a)
+        b.star <- rnorm(1, b, se.b)
+        rejmc <- c(rejmc, quantile(rnorm(ndraws, a.star, se.a) * rnorm(ndraws, b.star, se.b),
+                                   probs = ifelse(alternative == "not equal", alpha/2, alpha), na.rm = TRUE) > 0)
+      }
+      power.mc <- mean(rejmc)
+    } else {
+      power.mc <- NA
+    }
+
+    n.sobel <- n.aroian <- n.goodman <- n
+
+  }
+
+
+  if(is.null(n)) {
+
+    n.sobel <- uniroot(function(n) {
+      se.a <- .se.a(sdm, sdx, r2m.x, n)
+      se.b <- .se.b(sdy, sdm, r2y.mx, r2m.x, n)
+      sobel.se <- sqrt(a^2 * se.b^2  + b^2 * se.a^2)
+      lambda.sobel <- (a * b) / sobel.se
+      power - power.z.test(ncp = lambda.sobel, alpha = alpha, alternative = alternative, plot = FALSE)
+    }, interval = c(10, 1e10))$root
+
+    se.a <- .se.a(sdm, sdx, r2m.x, n.sobel)
+    se.b <- .se.b(sdy, sdm, r2y.mx, r2m.x, n.sobel)
+    sobel.se <- sqrt(a^2 * se.b^2  + b^2 * se.a^2)
+    lambda.sobel <- (a * b) / sobel.se
+
+    n.aroian <- uniroot(function(n) {
+      se.a <- .se.a(sdm, sdx, r2m.x, n)
+      se.b <- .se.b(sdy, sdm, r2y.mx, r2m.x, n)
+      aroian.se <- sqrt(a^2 * se.b^2  + b^2 * se.a^2 + se.a^2 * se.b^2)
+      lambda.aroian <- (a * b) / aroian.se
+      power - power.z.test(ncp = lambda.aroian, alpha = alpha, alternative = alternative, plot = FALSE)
+
+    }, interval = c(10, 1e10))$root
+
+    n.goodman <- uniroot(function(n) {
+      se.a <- .se.a(sdm, sdx, r2m.x, n)
+      se.b <- .se.b(sdy, sdm, r2y.mx, r2m.x, n)
+      if(a^2 * se.b^2  + b^2 * se.a^2 < se.a^2 * se.b^2) {
+        goodman.se <- 1
+      } else {
+        goodman.se <- sqrt(a^2 * se.b^2  + b^2 * se.a^2 - se.a^2 * se.b^2)
+      }
+      lambda.goodman <- (a * b) / goodman.se
+      power - power.z.test(ncp = lambda.goodman, alpha = alpha, alternative = alternative, plot = FALSE)
+
+    }, interval = c(10, 1e10))$root
+
+    lambda.goodman <-lambda.aroian <- lambda.sobel
+    power.sobel <- power.aroian <- power.goodman <- power
+    power.joint <- power.mc <- NA
+  }
+
+  if(verbose) {
+    cat(" Indirect effect in the mediation model\n",
+        "H0: a * b = 0 \n HA: a * b != 0 \n",
+        "------------------------------ \n",
+        "Statistical power for \n",
+        "      Sobel's z test =", round(power.sobel, 3), "\n",
+        "     Aroian's z test =", round(power.aroian, 3), "\n",
+        "    Goodman's z test =", round(power.goodman, 3), "\n",
+        "          Joint test =", round(power.joint, 3), "\n",
+        "    Monte Carlo test =", round(power.mc, 3), "\n",
+        "------------------------------ \n",
+        "Sample size for \n",
+        "      Sobel's z test =", ceiling(n.sobel), "\n",
+        "     Aroian's z test =", ceiling(n.aroian), "\n",
+        "    Goodman's z test =", ceiling(n.goodman), "\n",
+        "------------------------------ \n",
+        "Non-centrality parameter for \n",
+        "      Sobel's z test =", round(lambda.sobel, 3), "\n",
+        "     Aroian's z test =", round(lambda.aroian, 3), "\n",
+        "    Goodman's z test =", round(lambda.goodman, 3), "\n",
+        "------------------------------ \n",
+        "Type I error rate =", round(alpha, 3), "\n")
+  }
+
+  invisible(structure(list(parms = list(a = a, b = b, cp = cp,
+                                        sdx = sdx, sdm = sdm, sdy = sdy,
+                                        r2m.x = r2m.x, r2y.mx = r2y.mx,
+                                        alpha = alpha, alternative = alternative, verbose = verbose),
+                           test = "z",
+                           ncp = c(sobel = lambda.sobel, aroian = lambda.aroian, goodman = lambda.goodman),
+                           power = c(sobel = power.sobel, aroian = power.aroian,
+                                     goodman = power.goodman, joint = power.joint, mc = power.mc),
+                           n = c(sobel = n.sobel, aroian = n.aroian, goodman = n.goodman)),
+                      class = c("pwrss", "z", "med")))
+
+}
+
+#################################################################################
+
 # power for the generic t test wit type I and type II erro plots
 power.t.test <- function(ncp, df, alpha, alternative,
                          plot = TRUE, plot.main = NULL, plot.sub = NULL){
@@ -1691,9 +1982,9 @@ power.t.test <- function(ncp, df, alpha, alternative,
   if(ncp < 0) stop("'ncp' sould be positive - provide the absolute value", call. = FALSE)
 
   if(alternative == 0) {
-    talpha <- qnorm(alpha / 2, lower.tail = FALSE)
+    talpha <- qt(alpha / 2, df = df, ncp = 0, lower.tail = FALSE)
   } else {
-    talpha <- qnorm(alpha, lower.tail = FALSE)
+    talpha <- qt(alpha, df = df, ncp = 0, lower.tail = FALSE)
   }
 
   if(alternative == 0) {
@@ -2009,9 +2300,30 @@ plot.pwrss <- function(x, ...) {
                  alpha = x$parms$alpha,
                  alternative = x$parms$alternative)
   } else if(all(c("pwrss","z") %in% class(x))) {
-    power.z.test(ncp = abs(x$ncp),
-                 alpha = x$parms$alpha,
-                 alternative = x$parms$alternative)
+
+    if("med" %in% class(x)) {
+      layout(matrix(c(1,3,
+                      2,3), nrow = 2, ncol = 2))
+      default.pars <- par(no.readonly = TRUE)
+      on.exit(par(default.pars))
+
+      power.z.test(ncp = abs(x$ncp["sobel"]), plot.main = "Sobel",
+                   alpha = x$parms$alpha,
+                   alternative = x$parms$alternative)
+      power.z.test(ncp = abs(x$ncp["aroian"]), plot.main = "Aroian",
+                   alpha = x$parms$alpha,
+                   alternative = x$parms$alternative)
+      power.z.test(ncp = abs(x$ncp["goodman"]), plot.main = "Goodman",
+                   alpha = x$parms$alpha,
+                   alternative = x$parms$alternative)
+
+      par(mfrow = c(1,1))
+    } else {
+      power.z.test(ncp = abs(x$ncp),
+                   alpha = x$parms$alpha,
+                   alternative = x$parms$alternative)
+    }
+
   } else if(all(c("pwrss","f") %in% class(x))) {
 
     if("reg" %in% class(x)) {

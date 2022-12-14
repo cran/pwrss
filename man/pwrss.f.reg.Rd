@@ -2,7 +2,7 @@
 \alias{pwrss.f.reg}
 
 
-\title{R-squared Deviation from 0 (zero) or R-squared Difference in Hierarchical Regression (F Test)}
+\title{R-squared Deviation from 0 (zero) or R-squared Difference in Hierarchical Multiple Linear Regression (F Test)}
 
 \description{
 Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test R-squared Deviation from 0 (zero) or to test R-squared difference from 0 (zero) in hierarchical regression.

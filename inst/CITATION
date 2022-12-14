@@ -2,7 +2,7 @@ citHeader("To cite pwrss in publications use:")
 bibentry(bibtype = "Manual",
          title        = "{pwrss}: Power and Sample Size Calculation Tools",
          author       = as.person("Metin Bulus"),
-         note         = "R package version 0.1.0",
+         note         = "R package version 0.2.0",
          year         = "2022",
          url = "https://CRAN.R-project.org/package=pwrss",
          textVersion  =
