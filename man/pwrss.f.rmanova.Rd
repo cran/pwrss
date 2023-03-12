@@ -1,4 +1,4 @@
-\name{pwrss.f.rmanova}
+\name{Repeated Measures Analysis of Variance (RM-ANOVA) (F test)}
 \alias{pwrss.f.rmanova}
 
 
@@ -6,11 +6,13 @@
 
 \description{
 Calculates statistical power or minimum required sample size for one-way Repeated Measures Analysis of Variance (RM-ANOVA).
+
+Formulas are validated using Monte Carlo simulation, G*Power, and tables in PASS documentation.
 }
 
 \usage{
 pwrss.f.rmanova(eta2 = 0.10, f2 = eta2/(1 - eta2),
-                repmeasures.r = 0.50, n.levels = 2, n.measurements = 2,
+                corr.rm = 0.50, n.levels = 2, n.rm = 2,
                 epsilon = 1, alpha = 0.05,
                 type = c("between","within","interaction"),
                 n = NULL, power = NULL, verbose = TRUE)
@@ -18,16 +20,16 @@ pwrss.f.rmanova(eta2 = 0.10, f2 = eta2/(1 - eta2),
 }
 
 \arguments{
-  \item{eta2}{Expected Eta-squared}
+  \item{eta2}{expected (partial) Eta-squared}
   \item{f2}{Cohen's f2 (an alternative to \code{eta2} specification). f2 = eta2 / (1 - eta2)}
-  \item{repmeasures.r}{correlation between repeated measures}
-  \item{n.levels}{number of levels (groups)}
-  \item{n.measurements}{number of measurements}
-  \item{epsilon}{non-sperhicity correction f, default 1 (means no violation of sphericity). Lower bound for \code{epsilon} = 1 / (\code{n.measurements} - 1)}
+  \item{corr.rm}{correlation between repeated measures. For example, for pretest/posttest designs, this is the correlation between pretest and posttest scores regardless of group membership. The default is 0.50}
+  \item{n.levels}{number of levels (groups). For example, for randomized controlled trials with two arms (treatment/control) it takes a value of 2}
+  \item{n.rm}{number of measurements. For example, for pretest/posttest designs it takes a value of 2. When there is a follow-up test it takes a value of 3}
+  \item{epsilon}{non-sperhicity correction factor, default 1 (means no violation of sphericity). Lower bound for \code{epsilon} = 1 / (\code{n.rm} - 1)}
   \item{n}{total sample size}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{alpha}{probability of type I error}
-  \item{type}{the effect to be tested: "between", "within", or "interaction"}
+  \item{type}{the effect to be tested: "between", "within", or "interaction". The type of the effect depends on the hypothesis test. One may wish to test one or all three effect types. If the interest is the difference between groups use "between"; if the interest is the change in the subjects scores after controlling for the group membership use "within"; if the change in the subject scores depends on the group membership use "interaction"}
   \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
 }
 
@@ -38,27 +40,69 @@ pwrss.f.rmanova(eta2 = 0.10, f2 = eta2/(1 - eta2),
   \item{df2}{denominator degrees of freedom}
   \item{ncp}{non-centrality parameter}
   \item{power}{statistical power \eqn{(1-\beta)}}
-  \item{n}{sample size}
+  \item{n}{total sample size}
 }
 
 
 \examples{
-pwrss.f.rmanova(eta2 = 0.10,  n.levels = 2, n.measurements = 3,
-                type = "between", n = 10)
-pwrss.f.rmanova(eta2 = 0.10,  n.levels = 2, n.measurements = 3,
-                type = "between", power = 0.80)
+######################################################
+# pretest-posttest design with treatment group only  #
+######################################################
 
-pwrss.f.rmanova(eta2 = 0.10,  n.levels = 2, n.measurements = 3,
-                type = "within", n = 10)
-pwrss.f.rmanova(eta2 = 0.10,  n.levels = 2, n.measurements = 3,
-                type = "within", power = 0.80)
+# a researcher is expecting a difference of Cohen's d = 0.30
+# between posttest and pretest score translating into
+# Eta-squared = 0.022
+pwrss.f.rmanova(eta2 = 0.022,  n.levels = 1, n.rm = 2,
+                corr.rm = 0.50, type = "within",
+                alpha = 0.05, power = 0.80)
 
-pwrss.f.rmanova(eta2 = 0.10,  n.levels = 2, n.measurements = 3,
-                type = "interaction", n = 10)
-pwrss.f.rmanova(eta2 = 0.10,  n.levels = 2, n.measurements = 3,
-                type = "interaction", power = 0.80)
+# paired t-test approach
+pwrss.t.2means(mu1 = 0.30, mu2 = 0,
+               sd1 = 1, sd2 = 1,
+               paired = TRUE, paired.r = 0.50,
+               alpha = 0.05, power = 0.80)
+
+##########################################################
+# posttest only design with treatment and control groups #
+##########################################################
+
+# a researcher is expecting a difference of Cohen's d = 0.50
+# on the posttest score between treatment and control groups
+# translating into Eta-squared = 0.059
+pwrss.f.rmanova(eta2 = 0.059,  n.levels = 2, n.rm = 1,
+                type = "between",
+                alpha = 0.05, power = 0.80)
+
+# independent t-test approach
+pwrss.t.2means(mu1 = 0.50, mu2 = 0,
+               sd1 = 1, sd2 = 1,
+               alpha = 0.05, power = 0.80)
+
+#############################################################
+# pretest-posttest design with treatment and control groups #
+#############################################################
+
+# a researcher is expecting a difference of Cohen's d = 0.40
+# on the posttest score between treatment and control groups
+# after controlling for the pretest translating into
+# partial Eta-squared = 0.038
+pwrss.f.rmanova(eta2 = 0.038,  n.levels = 2, n.rm = 2,
+                corr.rm = 0.50, type = "between",
+                alpha = 0.05, power = 0.80)
+
+# regression approach
+p <- 0.50 # proportion of subjects in treatment group
+pwrss.t.reg(beta1 = 0.40, r2 = 0.25, k = 2,
+            sdx = sqrt(p*(1-p)),
+            alpha = 0.05, power = 0.80)
+
+# a researcher is expecting an interaction effect
+# (between groups and time) of Eta-squared = 0.01
+pwrss.f.rmanova(eta2 = 0.01,  n.levels = 2, n.rm = 2,
+                corr.rm = 0.50, type = "interaction",
+                alpha = 0.05, power = 0.80)
 }
 
 \references{
-Add references.
+Bulus, M., & Polat, C. (2023). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Under review. \url{https://osf.io/ua5fc}
 }
