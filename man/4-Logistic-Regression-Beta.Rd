@@ -1,8 +1,8 @@
-\name{Logistic Regression (z Test)}
+\name{pwrss.z.logreg}
 \alias{pwrss.z.logreg}
 \alias{pwrss.z.logistic}
 
-\title{Test of a Single Coefficient in Logistic Regression (Large Sample Approx. Wald's z Test)}
+\title{Logistic Regression: Single Coefficient (Large Sample Approx. Wald's z Test)}
 
 \description{
 Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test a single coefficient in logistic regression. \code{pwrss.z.logistic()} and \code{pwrss.z.logreg()} are the same functions. The distribution of the predictor variable can be one of the following: \code{c("normal", "poisson", "uniform", "exponential", "binomial", "bernouilli", "lognormal")} for Demidenko (2007) procedure but only \code{c("normal", "binomial", "bernouilli")} for Hsieh et al. (1998) procedure. The default parameters for these distributions are
@@ -41,24 +41,24 @@ pwrss.z.logistic(p1 = 0.10, p0 = 0.15,
 }
 
 \arguments{
-  \item{p1}{rate under alternative hypothesis (probability that an event occurs when the value of the predictor X is increased by one unit) (\code{exp(beta1) = (p1 / (1 - p1)) / (p0 / (1 - p0))} which is odds ratio)}
-  \item{p0}{base rate under null hypothesis (probability that an event occurs without the influence of the predictor X - or when the value of the predictor is zero) (\code{exp(beta0) = p0 / (1 - p0)})}
-  \item{odds.ratio}{odds ratio defined as \code{exp(beta1)} or \code{(p1 / (1 - p1)) / (p0 / (1 - p0))}}
-  \item{beta0}{regression coefficient (log odds)}
-  \item{beta1}{regression coefficient (log odds ratio)}
+  \item{p0}{base probability under null hypothesis (probability that an event occurs without the influence of the predictor X - or when the value of the predictor is zero)}
+  \item{p1}{probability under alternative hypothesis (probability that an event occurs when the value of the predictor X is increased by one unit)}
+  \item{beta0}{regression coefficient defined as \cr \code{beta0 = log( p0/(1-p0) )}}
+  \item{beta1}{regression coefficient for the predictor X defined as \cr \code{beta1 = log( (p1/(1-p1)) / (p0/(1-p0)) )}}
+  \item{odds.ratio}{odds ratio defined as \cr \code{odds.ratio = exp(beta1) = (p1/(1-p1)) / (p0/(1-p0))}}
   \item{n}{total sample size}
   \item{power}{statistical power \eqn{(1-\beta)}}
-  \item{r2.other.x}{proportion of variance in the predictor X explained by other covariates. Not to be confused with explanatory power of covariates in the outcome model (pseudo R-squared)}
+  \item{r2.other.x}{proportion of variance in the predictor X explained by other covariates. Not to be confused with pseudo R-squared}
   \item{alpha}{probability of type I error}
   \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", "less"}
   \item{method}{calculation method. \code{"demidenko(vc)"} stands for Demidenko (2007) procedure with variance correction; \code{"demidenko"} stands for Demidenko (2007) procedure without variance correction; \code{"hsieh"} stands for Hsieh et al. (1998) procedure. \code{"demidenko"} and \code{"hsieh"} methods produce similiar results but \code{"demidenko(vc)"} is more precise}
-  \item{distribution}{distribution family. Can be one of the \code{c("normal", "poisson", "uniform", "exponential", "binomial", "bernouilli", "lognormal")} for Demidenko (2007) procedure but only \code{c("normal", "binomial", "bernouilli")} for Hsieh et al. (1998) procedure}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{distribution}{distribution family. Can be one of the \code{c("noramal", "poisson", "uniform", "exponential", "binomial", "bernouilli", "lognormal")} for Demidenko (2007) procedure but only \code{c("normal", "binomial", "bernouilli")} for Hsieh et al. (1998) procedure}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (z test)}
   \item{ncp}{non-centrality parameter}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{n}{total sample size}

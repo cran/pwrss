@@ -1,8 +1,8 @@
-\name{Repeated Measures Analysis of Variance (RM-ANOVA) (F test)}
+\name{pwrss.f.rmanova}
 \alias{pwrss.f.rmanova}
 
 
-\title{Repeated Measures Analysis of Variance (RM-ANOVA) (F test)}
+\title{Repeated Measures Analysis of Variance (F test)}
 
 \description{
 Calculates statistical power or minimum required sample size for one-way Repeated Measures Analysis of Variance (RM-ANOVA).
@@ -21,21 +21,21 @@ pwrss.f.rmanova(eta2 = 0.10, f2 = eta2/(1 - eta2),
 
 \arguments{
   \item{eta2}{expected (partial) Eta-squared}
-  \item{f2}{Cohen's f2 (an alternative to \code{eta2} specification). f2 = eta2 / (1 - eta2)}
-  \item{corr.rm}{correlation between repeated measures. For example, for pretest/posttest designs, this is the correlation between pretest and posttest scores regardless of group membership. The default is 0.50}
+  \item{f2}{expected Cohen's f-squared (an alternative to \code{eta2} specification). \code{f2 = eta2 / (1 - eta2)}}
+  \item{corr.rm}{expected correlation between repeated measures. For example, for pretest/posttest designs, this is the correlation between pretest and posttest scores regardless of group membership. The default is 0.50}
   \item{n.levels}{number of levels (groups). For example, for randomized controlled trials with two arms (treatment/control) it takes a value of 2}
   \item{n.rm}{number of measurements. For example, for pretest/posttest designs it takes a value of 2. When there is a follow-up test it takes a value of 3}
-  \item{epsilon}{non-sperhicity correction factor, default 1 (means no violation of sphericity). Lower bound for \code{epsilon} = 1 / (\code{n.rm} - 1)}
+  \item{epsilon}{non-sperhicity correction factor, default is 1 (means no violation of sphericity). Lower bound for this argument is \code{epsilon} = 1 / (\code{n.rm} - 1)}
   \item{n}{total sample size}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{alpha}{probability of type I error}
-  \item{type}{the effect to be tested: "between", "within", or "interaction". The type of the effect depends on the hypothesis test. One may wish to test one or all three effect types. If the interest is the difference between groups use "between"; if the interest is the change in the subjects scores after controlling for the group membership use "within"; if the change in the subject scores depends on the group membership use "interaction"}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{type}{the effect to be tested: "between", "within", or "interaction". The type of the effect depends on the hypothesis test. If the interest is in the group effect after controlling for the time effect use "between"; if the interest is the time effect after controlling for the group membership use "within"; if the interest is in the group x time interaction use "interaction"}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (F test)}
   \item{df1}{numerator degrees of freedom}
   \item{df2}{denominator degrees of freedom}
   \item{ncp}{non-centrality parameter}
@@ -104,5 +104,5 @@ pwrss.f.rmanova(eta2 = 0.01,  n.levels = 2, n.rm = 2,
 }
 
 \references{
-Bulus, M., & Polat, C. (2023). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Under review. \url{https://osf.io/ua5fc}
+Bulus, M., & Polat, C. (in press). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Ahi Evran Universitesi Kirsehir Egitim Fakultesi Dergisi. \url{https://osf.io/ua5fc/download/}
 }

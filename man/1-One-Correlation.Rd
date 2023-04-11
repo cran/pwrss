@@ -1,8 +1,9 @@
-\name{One Correlation (z Test)}
+\name{pwrss.z.corr}
 \alias{pwrss.z.corr}
+\alias{pwrss.z.cor}
 
 
-\title{A Correlation against a Constant (One Sample z Test)}
+\title{One Correlation against a Constant (One Sample z Test)}
 
 \description{
 Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test a (Pearson) correlation against a constant using Fisher's z transformation.
@@ -18,17 +19,17 @@ pwrss.z.corr(r = 0.50, r0 = 0, alpha = 0.05,
 
 \arguments{
   \item{r}{expected correlation}
-  \item{r0}{constant proportion to be compared}
+  \item{r0}{constant to be compared (a correlation)}
   \item{n}{sample size}
   \item{power}{statistical power \eqn{(1-\beta)}}
-  \item{alpha}{probability of type I error.}
+  \item{alpha}{probability of type I error}
   \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", or "less"}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (z test)}
   \item{ncp}{non-centrality parameter}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{n}{sample size}
@@ -48,7 +49,7 @@ pwrss.z.corr(r = 0.20, r0 = 0.10,
 }
 
 \references{
-Bulus, M., & Polat, C. (2023). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Under review. \url{https://osf.io/ua5fc}
+Bulus, M., & Polat, C. (in press). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Ahi Evran Universitesi Kirsehir Egitim Fakultesi Dergisi. \url{https://osf.io/ua5fc/download/}
 
 Chow, S. C., Shao, J., Wang, H., & Lokhnygina, Y. (2018). Sample size calculations in clinical research (3rd ed.). Taylor & Francis/CRC.
 

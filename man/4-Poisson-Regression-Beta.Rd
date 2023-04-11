@@ -1,8 +1,8 @@
-\name{Poisson Regression}
+\name{pwrss.z.poisreg}
 \alias{pwrss.z.poisreg}
 \alias{pwrss.z.poisson}
 
-\title{Test of a Single Coefficient in Poisson Regression (Large Sample Approx. Wald's z Test)}
+\title{Poisson Regression: Single Coefficient (Large Sample Approx. Wald's z Test)}
 
 \description{
 Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test a single coefficient in poisson regression. \code{pwrss.z.poisson()} and \code{pwrss.z.poisreg()} are the same functions. The distribution of the predictor variable can be one of the following: \code{c("normal", "poisson", "uniform", "exponential", "binomial", "bernouilli", "lognormal")}. The default parameters for these distributions are
@@ -38,24 +38,24 @@ pwrss.z.poisson(exp.beta0 = 1.10, exp.beta1 = 1.16,
 }
 
 \arguments{
-  \item{exp.beta0}{the base event rate}
-  \item{exp.beta1}{rate ratio: the relative increase of the event rate for one unit increase in the predictor X over the base event rate of exp(beta0) (similiar to odds ratio in logistic regression)}
-  \item{beta0}{\code{log(exp.beta0)} or natural logarithm of the base event rate}
-  \item{beta1}{\code{log(exp.beta1)} or natural logarithm of the relative increase of the event rate for one unit increase in the predictor X over the base event rate}
+  \item{exp.beta0}{the base mean event rate}
+  \item{exp.beta1}{event rate ratio: the relative increase in the mean event rate for one unit increase in the predictor X (similiar to odds ratio in logistic regression)}
+  \item{beta0}{\code{log(exp.beta0)} or natural logarithm of the base mean event rate}
+  \item{beta1}{\code{log(exp.beta1)} or natural logarithm of the relative increase in the mean event rate for one unit increase in the predictor X}
   \item{mean.exposure}{the mean exposure time (should be > 0). Usually 1}
   \item{n}{total sample size}
   \item{power}{statistical power \eqn{(1-\beta)}}
-  \item{r2.other.x}{proportion of variance in the predictor X explained by other covariates. Not to be confused with explanatory power of covariates in the outcome model (pseudo R-squared)}
+  \item{r2.other.x}{proportion of variance in the predictor X explained by other covariates. Not to be confused with the pseudo R-squared}
   \item{alpha}{probability of type I error}
   \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", "less"}
   \item{method}{calculation method. \code{"demidenko(vc)"} stands for Demidenko (2007) procedure with variance correction; \code{"demidenko"} stands for Demidenko (2007) procedure without variance correction; \code{"signorini"} stands for Signorini (1991) procedure. \code{"demidenko"} and \code{"signorini"} methods produce similiar results but \code{"demidenko(vc)"} is more precise}
   \item{distribution}{distribution family. Can be one of the \code{c("normal", "poisson", "uniform", "exponential", "binomial", "bernouilli", "lognormal")}}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (z test)}
   \item{ncp}{non-centrality parameter}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{n}{total sample size}

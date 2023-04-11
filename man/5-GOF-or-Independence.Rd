@@ -1,11 +1,11 @@
-\name{Chi-square Goodness-of-Fit or Independence Test (Non-parametric)}
+\name{pwrss.chisq.gofit}
 \alias{pwrss.chisq.gofit}
 
 
-\title{Chi-square Goodness-of-Fit or Independence Test}
+\title{Goodness-of-Fit or Independence (Chi-square Test)}
 
 \description{
-Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test goodness-of-fit or independence.
+Calculates statistical power or minimum required sample size (only one can be NULL at a time) for Chi-square goodness-of-fit or independence test.
 }
 
 \usage{
@@ -18,19 +18,19 @@ pwrss.chisq.gofit(p1 = c(0.50, 0.50),
 }
 
 \arguments{
-  \item{p1}{a vector or a matrix of cell probabilities under alternative hypothesis}
-  \item{p0}{a vector or a matrix of cell probabilities under null hypothesis}
-  \item{w}{effect size. By default, it is computed from \code{p1} and \code{p0}; however, when specified by the user it can be any of the Cohen's W, Phi coefficient, Cramer's V, etc. Phi coefficient is defined as \code{sqrt(X2/n)} and Cramer's V is defined as \code{sqrt(X2/(n*v))} where \code{v} is \code{min(nrow - 1, ncol - 1)}}
-  \item{df}{degrees of freedom. (Number of cells - 1) for a vector, (Number of rows - 1) * (Number of columns - 1) for a matrix}
+  \item{p1}{a vector or matrix of cell probabilities under alternative hypothesis}
+  \item{p0}{a vector or matrix of cell probabilities under null hypothesis. Calculated automatically when \code{p1} is specified. The default can be overwritten by the user via providing a vector of the same size or matrix of the same dimensions as \code{p1}}
+  \item{w}{effect size. Computed from \code{p1} and \code{p0} automatically; however, it can be any of Cohen's W, Phi coefficient, Cramer's V, etc. when specified by the user. Phi coefficient is defined as \code{sqrt(X2/n)} and Cramer's V is defined as \code{sqrt(X2/(n*v))} where \code{v} is \code{min(nrow - 1, ncol - 1)} and X2 is the chi-square statistic}
+  \item{df}{degrees of freedom.  Defined as (ncells - 1) if \code{p1} is a vector, and as (nrows - 1) * (ncols - 1) if \code{p1} is a matrix}
   \item{n}{total sample size}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{alpha}{probability of type I error}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (Chi-square test)}
   \item{df}{degrees of freedom}
   \item{ncp}{non-centrality parameter}
   \item{power}{statistical power \eqn{(1-\beta)}}

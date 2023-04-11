@@ -1,11 +1,11 @@
-\name{Generic t Test}
+\name{power.t.test}
 \alias{power.t.test}
 
-\title{Statistical Power for the Generic t Test with (optional) Type I and Type II Error Plots}
+\title{Statistical Power for the Generic t Test}
 
 \description{
 Calculates statistical power for the generic t test with (optional) Type I and Type II error plots.
-Unlike other more specific functions \code{power.t.test()} function allows specification of multiple values for one parameter at a time (only when \code{plot = FALSE}).
+Unlike other more specific functions \code{power.t.test()} function allows multiple values for one parameter at a time (only when \code{plot = FALSE}).
 }
 
 \usage{
@@ -18,10 +18,10 @@ power.t.test(ncp, df, alpha = 0.05,
 
 \arguments{
   \item{ncp}{non-centrality parameter (lambda)}
-  \item{df}{degrees of freedom for the t test}
+  \item{df}{degrees of freedom}
   \item{alpha}{probability of type I error}
-  \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", "less", "equivalent", "non-inferior", or "superior". This information is needed only for power calculation}
-  \item{plot}{if \code{TRUE} plots Type I and Type II error plots}
+  \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", "less", "equivalent", "non-inferior", or "superior". The same non-centrality parameters will produce the same power rates for "greater", "less", "non-inferior", and "superior" tests. Different labels have been used merely for consistency. However, it should be noted that the non-centrality parameter should conform to the specific test type}
+  \item{plot}{if \code{TRUE} plots Type I and Type II error}
   \item{plot.main}{plot title}
   \item{plot.sub}{plot subtitle}
   \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
@@ -63,7 +63,7 @@ power.t.test(ncp = 1.94, df = 99, alpha = 0.05,
 power.t.test(ncp = 1.96, df = 999, alpha = 0.05,
              alternative = "equivalent")
 # or, define lower and upper bound with rbind()
-power.t.test(ncp = rbind(-1.96,1.96),
+power.t.test(ncp = rbind(-1.96, 1.96),
              df = 999, alpha = 0.05,
              alternative = "equivalent")
 }

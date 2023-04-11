@@ -24,7 +24,7 @@ pwrss.z.prop <- function (p, p0 = 0, margin = 0, arcsin.trans = FALSE,
                 `non-inferior` = 2*asin(sqrt(p)) - 2*asin(sqrt(p0 + margin)),
                 `superior` = 2*asin(sqrt(p)) - 2*asin(sqrt(p0 + margin)),
                 `equivalent` = c(2*asin(sqrt(p)) - 2*asin(sqrt(p0 + margin)), 2*asin(sqrt(p)) - 2*asin(sqrt(p0 - margin))))
-    if(verbose) cat(" Approach: Arcsine transformation \n")
+    if(verbose) cat(" Approach: Arcsine Transformation \n")
   } else {
     var.num <- p * (1 - p)
     h <- switch(alternative,
@@ -34,7 +34,7 @@ pwrss.z.prop <- function (p, p0 = 0, margin = 0, arcsin.trans = FALSE,
                 `non-inferior` = p - p0 - margin,
                 `superior` = p - p0 - margin,
                 `equivalent` = c(p - p0 - margin, p - p0 + margin))
-    if(verbose) cat(" Approach: Normal approximation \n")
+    if(verbose) cat(" Approach: Normal Approximation \n")
   }
 
   if (alternative == "not equal") {
@@ -109,7 +109,7 @@ pwrss.z.prop <- function (p, p0 = 0, margin = 0, arcsin.trans = FALSE,
   }
 
   if(verbose) {
-    cat(" One proportion compared to a constant (z test) \n",
+    cat(" A Proportion against a Constant (z Test) \n",
         switch(alternative,
                `not equal` = "H0: p = p0 \n HA: p != p0 \n",
                `greater` = "H0: p = p0 \n HA: p > p0 \n",
@@ -127,7 +127,8 @@ pwrss.z.prop <- function (p, p0 = 0, margin = 0, arcsin.trans = FALSE,
         "Type II error rate =", round(1 - power, 3), "\n")
   }
 
-  invisible(structure(list(parms = list(p = p, p0 = p0, arcsin.trans = arcsin.trans,
+  invisible(structure(list(call = call,
+                           parms = list(p = p, p0 = p0, arcsin.trans = arcsin.trans,
                                         alpha = alpha, margin = margin, alternative = alternative, verbose = verbose),
                            test = "z",
                            ncp = lambda,
@@ -170,7 +171,7 @@ pwrss.z.2props <- function (p1, p2, margin = 0, arcsin.trans = FALSE,
 
     # 2*asin(sqrt(p1)) - 2*asin(sqrt(p2 + margin)) is same as
     # 2*asin(sqrt(p1)) - 2*asin(sqrt(p2)) - (2*asin(sqrt(p2 + margin)) - 2*asin(sqrt(p2)))
-    if(verbose) cat(" Approach: Arcsine transformation \n", "Cohen's h =", round(h,3), "\n")
+    if(verbose) cat(" Approach: Arcsine Transformation \n", "Cohen's h =", round(h,3), "\n")
   } else {
     h <- switch(alternative,
                 `not equal` = p1 - p2,
@@ -180,7 +181,7 @@ pwrss.z.2props <- function (p1, p2, margin = 0, arcsin.trans = FALSE,
                 `superior` = p1 - p2 - margin,
                 `equivalent` = c(p1 - p2 - margin,
                                  p1 - p2 + margin))
-    if(verbose) cat(" Approach: Normal approximation \n")
+    if(verbose) cat(" Approach: Normal Approximation \n")
   }
 
   if (alternative == "not equal") {
@@ -313,7 +314,7 @@ pwrss.z.2props <- function (p1, p2, margin = 0, arcsin.trans = FALSE,
   }
 
   if(verbose) {
-    cat(" Difference between two proportions (z test) \n",
+    cat(" Difference between Two Proportions \n (Independent Samples z Test) \n",
         switch(alternative,
                `not equal` = "H0: p1 = p2 \n HA: p1 != p2 \n",
                `greater` = "H0: p1 = p2 \n HA: p1 > p2 \n",
@@ -350,6 +351,7 @@ pwrss.z.mean <- function (mu, sd = 1, mu0 = 0, margin = 0, alpha = 0.05,
                                           "equivalent", "non-inferior", "superior"),
                           n = NULL, power = NULL, verbose = TRUE)
 {
+
   if (length(alternative) > 1)
     alternative <- alternative[1]
   if (is.null(n) & is.null(power))
@@ -443,7 +445,7 @@ pwrss.z.mean <- function (mu, sd = 1, mu0 = 0, margin = 0, alpha = 0.05,
   hypothesis <- alternative
 
   if(verbose) {
-    cat(" One mean compared to a constant (one sample z test) \n",
+    cat(" A Mean against a Constant (z Test) \n",
         switch(hypothesis,
                `not equal` = "H0: mu = mu0 \n HA: mu != mu0 \n",
                `greater` = "H0: mu = mu0 \n HA: mu > mu0 \n",
@@ -479,6 +481,7 @@ pwrss.t.mean <- function (mu, sd = 1, mu0 = 0, margin = 0, alpha = 0.05,
                                           "equivalent", "non-inferior", "superior"),
                           n = NULL, power = NULL, verbose = TRUE)
 {
+
   if (length(alternative) > 1)
     alternative <- alternative[1]
   if (is.null(n) & is.null(power))
@@ -541,22 +544,28 @@ pwrss.t.mean <- function (mu, sd = 1, mu0 = 0, margin = 0, alpha = 0.05,
     pwr.fun.body <- quote({
       lambda = (HA_H0) / sqrt(sd^2 / n)
       power <- 2*(1 - pt(qt(alpha, df = n - 1, lower.tail = FALSE), df = n - 1, ncp = abs(lambda))) - 1
-      if(power < 0) stop("design is not feasible", call. = FALSE)
     })
 
-  }
-  else {
+  } else {
+
     stop("`alternative` should be in c('not equal', 'greater', 'less', 'equivalent', 'non-inferior', 'superior')",
          call. = FALSE)
+
   }
 
   if (is.null(power)) {
+
     power <- eval(pwr.fun.body)
+    if(power < 0) power <- 0
+
   } else if(is.null(n)) {
+
     n <- uniroot(function(n){
       power - eval(pwr.fun.body)
     }, interval = c(2, 1e+09))$root
+
     lambda <- (HA_H0) / sqrt(sd^2 / n)
+
   }
 
   n <- ceiling(n)
@@ -564,7 +573,7 @@ pwrss.t.mean <- function (mu, sd = 1, mu0 = 0, margin = 0, alpha = 0.05,
   hypothesis <- alternative
 
   if(verbose) {
-    cat(" One mean compared to a constant (one sample t test) \n",
+    cat(" A Mean against a Constant (t Test) \n",
         switch(hypothesis,
                `not equal` = "H0: mu = mu0 \n HA: mu != mu0 \n",
                `greater` = "H0: mu = mu0 \n HA: mu > mu0 \n",
@@ -603,6 +612,7 @@ pwrss.z.2means <- function (mu1, mu2 = 0, sd1 = 1, sd2 = sd1, margin = 0,
                                             "equivalent", "non-inferior", "superior"),
                             n2 = NULL, power = NULL, verbose = TRUE)
 {
+
   # sd1 <- sd2 <- sd # pooled standard devation
   if (length(alternative) > 1)
     alternative <- alternative[1]
@@ -710,7 +720,7 @@ pwrss.z.2means <- function (mu1, mu2 = 0, sd1 = 1, sd2 = sd1, margin = 0,
   hypothesis <- alternative
 
   if(verbose) {
-    cat(" Difference between two means (independent samples z test) \n",
+    cat(" Difference between Two Means (Independent Samples z Test) \n",
         switch(hypothesis,
                `not equal` = "H0: mu1 = mu2 \n HA: mu1 != mu2 \n",
                `greater` = "H0: mu1 = mu2 \n HA: mu1 > mu2 \n",
@@ -1052,8 +1062,8 @@ pwrss.t.2means <- function (mu1, mu2 = 0, margin = 0,
 
   if(verbose) {
     cat(ifelse(paired,
-               " Difference between two means (paired samples t test) \n",
-               " Difference between two means (independent samples t test) \n"),
+               " Difference between Two means \n (Paired Samples t Test) \n",
+               " Difference between Two means \n (Independent Samples t Test) \n"),
         switch(hypothesis,
                `not equal` = "H0: mu1 = mu2 \n HA: mu1 != mu2 \n",
                `greater` = "H0: mu1 = mu2 \n HA: mu1 > mu2 \n",
@@ -1091,10 +1101,11 @@ pwrss.t.2means <- function (mu1, mu2 = 0, margin = 0,
 # one correlation z test #
 ##########################
 
-pwrss.z.corr <- function (r = 0.50, r0 = 0, alpha = 0.05,
+pwrss.z.cor <- pwrss.z.corr <- function (r = 0.50, r0 = 0, alpha = 0.05,
                           alternative = c("not equal", "greater", "less"),
                           n = NULL, power = NULL, verbose = TRUE)
 {
+
   if (length(alternative) > 1)
     alternative <- alternative[1]
 
@@ -1164,7 +1175,7 @@ pwrss.z.corr <- function (r = 0.50, r0 = 0, alpha = 0.05,
   hypothesis <- alternative
 
   if(verbose) {
-    cat(" One correlation compared to a constant (one sample z test) \n",
+    cat(" A Correlation against a Constant (z Test) \n",
         switch(hypothesis,
                `not equal` = "H0: r = r0 \n HA: r != r0 \n",
                `greater` = "H0: r = r0 \n HA: r > r0 \n",
@@ -1192,11 +1203,12 @@ pwrss.z.corr <- function (r = 0.50, r0 = 0, alpha = 0.05,
 # two correlations z test #
 ###########################
 
-pwrss.z.2corrs <- function (r1 = 0.50, r2 = 0.30,
+pwrss.z.2cors <- pwrss.z.2corrs <- function (r1 = 0.50, r2 = 0.30,
                             alpha = 0.05, kappa = 1,
                             alternative = c("not equal", "greater", "less"),
                             n2 = NULL, power = NULL, verbose = TRUE)
 {
+
   if (length(alternative) > 1)
     alternative <- alternative[1]
 
@@ -1270,7 +1282,7 @@ pwrss.z.2corrs <- function (r1 = 0.50, r2 = 0.30,
   hypothesis <- alternative
 
   if(verbose) {
-    cat(" Difference between two correlations (independent samples z test) \n",
+    cat(" Difference between Two Correlations \n (Independent Samples z Test) \n",
         switch(hypothesis,
                `not equal` = "H0: r1 = r2 \n HA: r1 != r2 \n",
                `greater` = "H0: r1 = r2 \n HA: r1 > r2 \n",
@@ -1307,9 +1319,10 @@ pwrss.z.2corrs <- function (r1 = 0.50, r2 = 0.30,
 # specify k = m (the default) to test r2 difference from zero
 # specify k > m to test r2 change from zero
 pwrss.f.regression <- pwrss.f.reg <- function (r2 = 0.10, f2 = r2 /(1 - r2),
-                         k = 4, m = k, alpha = 0.05,
+                         k = 1, m = k, alpha = 0.05,
                          n = NULL, power = NULL, verbose = TRUE)
 {
+
   if (is.null(n) & is.null(power))
     stop("`n` and `power` cannot be `NULL` at the same time",
          call. = FALSE)
@@ -1343,8 +1356,8 @@ pwrss.f.regression <- pwrss.f.reg <- function (r2 = 0.10, f2 = r2 /(1 - r2),
 
   if(verbose) {
     cat(ifelse(m == k,
-               " R-squared compared to 0 in linear regression (F test) \n",
-               " R-squared change in hierarchical linear regression (F test) \n"),
+               " Linear Regression (F test) \n R-squared Deviation from 0 (zero) \n",
+               " Hierarchical Linear Regression (F test) \n R-squared Change \n"),
         "H0: r2 = 0 \n HA: r2 > 0 \n",
         "------------------------------ \n",
         " Statistical power =", round(power, 3), "\n",
@@ -1379,6 +1392,7 @@ pwrss.f.ancova <- function(eta2 = 0.01, f2 = eta2 / (1 - eta2),
                            n.levels = 2, n.covariates = 0, alpha = 0.05,
                            n = NULL, power = NULL, verbose = TRUE)
 {
+
   if (is.null(n) & is.null(power))
     stop("`n` and `power` cannot be `NULL` at the same time",
          call. = FALSE)
@@ -1783,11 +1797,11 @@ pwrss.f.rmanova <- function (eta2 = 0.10, f2 = eta2/(1 - eta2),
   ncp <- f2 * n * epsilon
 
   if(verbose) {
-    cat(" One-way repeated measures analysis of variance (F test) \n",
+    cat(" One-way Repeated Measures \n Analysis of Variance (F test) \n",
         "H0: eta2 = 0 (or f2 = 0) \n HA: eta2 > 0 (or f2 > 0) \n",
         "------------------------------ \n",
         "Number of levels (groups) =", n.levels, "\n",
-        "Number of measurement time points =",n.rm, "\n",
+        "Number of repeated measurements =", n.rm, "\n",
         "------------------------------ \n",
         " Statistical power =", round(power, 3), "\n",
         " Total n =", ceiling(n), "\n",
@@ -1828,6 +1842,7 @@ pwrss.t.regression <- pwrss.t.reg <- function (beta1 = 0.25, beta0 = 0, margin =
                                                alternative = c("not equal", "less", "greater",
                                                                "non-inferior", "superior", "equivalent"),
                                                verbose = TRUE) {
+
 
   alternative <- tolower(match.arg(alternative))
   user.parms.names <- names(as.list(match.call()))
@@ -1920,7 +1935,7 @@ pwrss.t.regression <- pwrss.t.reg <- function (beta1 = 0.25, beta0 = 0, margin =
   }
 
   if(verbose) {
-    cat(" Linear regression coefficient (t test) \n",
+    cat(" Linear Regression Coefficient (t Test) \n",
         switch(alternative,
                `not equal` = "H0: beta1 = beta0 \n HA: beta1 != beta0 \n",
                `greater` = "H0: beta1 = beta0 \n HA: beta1 > beta0 \n",
@@ -1969,6 +1984,7 @@ pwrss.z.regression <- pwrss.z.reg <- function (beta1 = 0.25, beta0 = 0, margin =
                                                alternative = c("not equal", "less", "greater",
                                                                "non-inferior", "superior", "equivalent"),
                                                verbose = TRUE) {
+
 
   alternative <- tolower(match.arg(alternative))
   user.parms.names <- names(as.list(match.call()))
@@ -2061,7 +2077,7 @@ pwrss.z.regression <- pwrss.z.reg <- function (beta1 = 0.25, beta0 = 0, margin =
   }
 
   if(verbose) {
-    cat(" Linear regression coefficient (z test) \n",
+    cat(" Linear Regression Coefficient (z Test) \n",
         switch(alternative,
                `not equal` = "H0: beta1 = beta0 \n HA: beta1 != beta0 \n",
                `greater` = "H0: beta1 = beta0 \n HA: beta1 > beta0 \n",
@@ -2110,6 +2126,9 @@ pwrss.z.mediation  <- pwrss.z.med  <- function(a, b, cp = 0,
                                                mc = TRUE, nsims = 1000, ndraws = 1000,
                                                verbose = TRUE) {
 
+
+  user.parms.names <- names(as.list(match.call()))
+
   if (is.null(n) & is.null(power))
     stop("`n` and `power` cannot be `NULL` at the same time",
          call. = FALSE)
@@ -2121,11 +2140,14 @@ pwrss.z.mediation  <- pwrss.z.med  <- function(a, b, cp = 0,
   if (alternative == "greater" & (a * b < 0)) stop("alternative = 'greater' but a * b < 0", call. = FALSE)
   if (alternative == "less" & (a * b > 0)) stop("alternative = 'less' but a * b > 0", call. = FALSE)
 
+  if(r2y.mx == 0 & "cp" %in% user.parms.names)
+    warning("ignoring any specification to 'cp'", call. = FALSE)
+
   if(r2m.x < a^2 * sdx^2 / sdm^2)
-    warning("possibly incongruent arguments, need a larger 'r2m.x'", call. = FALSE)
+    warning("specified 'r2m.x' is smaller than the base 'r2m.x'", call. = FALSE)
 
   if(r2y.mx < (b^2 * sdm^2 + cp^2 * sdx^2) / sdy^2)
-    warning("possibly incongruent arguments, need a larger 'r2y.mx'", call. = FALSE)
+    warning("specified 'r2y.mx' is smaller than the base 'r2y.mx'", call. = FALSE)
 
   .se.a <- function(sdm, sdx, r2m.x, n) {
     var.a <- (1 / n) * (sdm^2) * (1 - r2m.x) / (sdx^2)
@@ -2159,12 +2181,14 @@ pwrss.z.mediation  <- pwrss.z.med  <- function(a, b, cp = 0,
 
     # monte carlo interval test
     if(mc) {
+      a <- abs(a)
+      b <- abs(b)
       rejmc <- NULL
       for (i in 1:nsims){
         a.star <- rnorm(1, a, se.a)
         b.star <- rnorm(1, b, se.b)
         rejmc <- c(rejmc, quantile(rnorm(ndraws, a.star, se.a) * rnorm(ndraws, b.star, se.b),
-                                   probs = ifelse(alternative == "not equal", alpha/2, alpha), na.rm = TRUE) > 0)
+                                   probs = ifelse(alternative == "not equal", alpha / 2, alpha), na.rm = TRUE) > 0)
       }
       power.mc <- mean(rejmc)
     } else {
@@ -2221,9 +2245,10 @@ pwrss.z.mediation  <- pwrss.z.med  <- function(a, b, cp = 0,
 
   if(verbose) {
 
-    cat(" Indirect effect in mediation model\n",
-        "H0: a * b = 0 \n HA: a * b != 0 \n",
-        "--------------------------- \n")
+    if(alternative == "not equal") H0HA.test <- "H0: a * b = 0 \n HA: a * b != 0 \n"
+    if(alternative == "greater") H0HA.test <- "H0: a * b <= 0 \n HA: a * b > 0 \n"
+    if(alternative == "less") H0HA.test <- "H0: a * b >= 0 \n HA: a * b < 0 \n"
+    cat(" Indirect Effect in Mediation Model\n", H0HA.test, "--------------------------- \n")
 
     test <- c("Sobel", "Aroian", "Goodman", "Joint", "Monte Carlo")
     power <- c(round(power.sobel, 3),
@@ -2248,8 +2273,7 @@ pwrss.z.mediation  <- pwrss.z.med  <- function(a, b, cp = 0,
                      ncp = ncp),
           row.names = FALSE)
 
-    cat("---------------------------- \n",
-        "Type I error rate =", round(alpha, 3), "\n")
+    cat("---------------------------- \n", "Type I error rate =", round(alpha, 3), "\n")
 
   }
 
@@ -2273,7 +2297,7 @@ pwrss.z.mediation  <- pwrss.z.med  <- function(a, b, cp = 0,
 plot.pwrss <- function(x, ...) {
 
    if(all(c("pwrss","t") %in% class(x))) {
-    power.t.test(ncp = abs(x$ncp),
+    power.t.test(ncp = abs(max(x$ncp)),
                  df = x$df,
                  alpha = x$parms$alpha,
                  alternative = x$parms$alternative,
@@ -2301,7 +2325,7 @@ plot.pwrss <- function(x, ...) {
 
       par(mfrow = c(1,1))
     } else {
-      power.z.test(ncp = abs(x$ncp),
+      power.z.test(ncp = abs(max(x$ncp)),
                    alpha = x$parms$alpha,
                    alternative = x$parms$alternative,
                    verbose = FALSE)
@@ -2401,13 +2425,14 @@ plot.pwrss <- function(x, ...) {
                    df2 = x$df2,
                    alpha = x$parms$alpha,
                    verbose = FALSE)
-    } else if("chisq" %in% class(x)) {
-      power.chisq.test(ncp = abs(x$ncp),
-                   df = x$df,
-                   alpha = x$parms$alpha,
-                   verbose = FALSE)
     }
 
+  } else  if(all(c("pwrss","chisq") %in% class(x))) {
+
+    power.chisq.test(ncp = abs(x$ncp),
+                     df = x$df,
+                     alpha = x$parms$alpha,
+                     verbose = FALSE)
 
   } else {
 
@@ -2424,7 +2449,7 @@ plot.pwrss <- function(x, ...) {
 # margin should be on the same scale as mu1 and mu2
 # just specify mu1 for cohen's d
 # just specify sd1 for pooled standard deviation
-pwrss.np.2means <- function(mu1 = 0.20, mu2 = 0,
+pwrss.np.2groups <- pwrss.np.2means <- function(mu1 = 0.20, mu2 = 0,
                             sd1 = ifelse(paired, sqrt(1/(2*(1-paired.r))), 1), sd2 = sd1,
                             margin = 0, alpha = 0.05, paired = FALSE, paired.r = 0.50,
                             kappa = 1, n2 = NULL, power = NULL,
@@ -2434,6 +2459,7 @@ pwrss.np.2means <- function(mu1 = 0.20, mu2 = 0,
                                              "laplace", "logistic"),
                             method = c("guenther", "noether"),
                             verbose = TRUE) {
+
 
   alternative <- tolower(match.arg(alternative))
   distribution <- tolower(match.arg(distribution))
@@ -2663,16 +2689,9 @@ pwrss.np.2means <- function(mu1 = 0.20, mu2 = 0,
 
   if(verbose) {
     cat(ifelse(paired,
-               " Difference between two means (dependent samples) \n Wilcoxon signed-rank test for matched pairs \n",
-               " Difference between two means (independent samples) \n Mann-Whitney U or Wilcoxon rank-sum test \n (a.k.a Wilcoxon-Mann-Whitney test) \n"),
+               " Non-parametric Difference between Two Groups (Dependent samples) \n Wilcoxon signed-rank Test for Matched Pairs \n",
+               " Non-parametric Difference between Two Groups (Independent samples) \n Mann-Whitney U or Wilcoxon Rank-sum Test \n (a.k.a Wilcoxon-Mann-Whitney Test) \n"),
         "Method:", toupper(method), "\n",
-        switch(alternative,
-               `not equal` = "H0: mu1 = mu2 \n HA: mu1 != mu2 \n",
-               `greater` = "H0: mu1 = mu2 \n HA: mu1 > mu2 \n",
-               `less` = "H0: mu1 = mu2 \n HA: mu1 < mu2 \n",
-               `non-inferior` = "H0: mu1 - mu2 <= margin \n HA: mu1 - mu2 > margin \n",
-               `superior` = "H0: mu1 - mu2 <= margin \n HA: mu1 - mu2 > margin \n",
-               `equivalent` = "H0: |mu1 - mu2| >= margin \n HA: |mu1 - mu2| < margin \n"),
         "------------------------------ \n",
         " Statistical power =", round(power, 3), "\n",
         ifelse(paired,
@@ -2718,6 +2737,7 @@ pwrss.z.logistic <- pwrss.z.logreg <-
            alpha = 0.05, alternative = c("not equal", "less", "greater"),
            method = c("demidenko(vc)", "demidenko", "hsieh"),
            distribution = "normal", verbose = TRUE) {
+
 
     user.parms.names <- names(as.list(match.call()))
 
@@ -3033,7 +3053,7 @@ pwrss.z.logistic <- pwrss.z.logreg <-
     }
 
     if(verbose) {
-      cat(" Logistic regression coefficient (large sample approx. Wald's z test) \n",
+      cat(" Logistic Regression Coefficient \n (Large Sample Approx. Wald's z Test) \n",
           switch(alternative,
                  `not equal` = "H0: beta1 = 0 \n HA: beta1 != 0 \n",
                  `greater` = "H0: beta1 = 0 \n HA: beta1 > 0 \n",
@@ -3084,6 +3104,7 @@ pwrss.z.poisson <- pwrss.z.poisreg <-
            alpha = 0.05, alternative = c("not equal", "less", "greater"),
            method = c("demidenko(vc)", "demidenko", "signorini"),
            distribution = "normal", verbose = TRUE) {
+
 
     user.parms.names <- names(as.list(match.call()))
 
@@ -3318,7 +3339,7 @@ pwrss.z.poisson <- pwrss.z.poisreg <-
     ncp <- beta1 / sqrt(var.beta1 / (n * (1 - r2.other.x)))
 
     if(verbose) {
-      cat(" Poisson regression coefficient (large sample approx. Wald's z test) \n",
+      cat(" Poisson Regression Coefficient \n (Large Sample Approx. Wald's z Test) \n",
           switch(alternative,
                  `not equal` = "H0: beta1 = 0 \n HA: beta1 != 0 \n",
                  `greater` = "H0: beta1 = 0 \n HA: beta1 > 0 \n",
@@ -3416,7 +3437,7 @@ pwrss.chisq.gofit <- function (p1 = c(0.50, 0.50),
   }
 
   if(verbose) {
-    cat(" Pearson's Chi-square goodness of fit test \n for contingency tables \n",
+    cat(" Pearson's Chi-square Goodness-of-fit Test \n for Contingency Tables \n",
         "------------------------------ \n",
         " Statistical power =", round(power, 3), "\n",
         " Total n =", ceiling(n), "\n",
@@ -3552,7 +3573,7 @@ pwrss.chisq.gofit <- function (p1 = c(0.50, 0.50),
     .plot.t.dist(ncp = 0, df = df, xlim = xlim, type = 2)
 
     text(0, dt(0, df = df, ncp = 0) + 0.05,
-         labels = "Aternative \n Hypothesis",
+         labels = "Alternative \n Hypothesis",
          cex = cex.legend, col = adjustcolor(4, alpha.f = 1))
 
   } else {
@@ -3562,7 +3583,7 @@ pwrss.chisq.gofit <- function (p1 = c(0.50, 0.50),
     .plot.t.dist(ncp = 0, df = df, xlim = xlim, type = 1)
 
     text(ncp, dt(ncp, df = df, ncp = ncp) + 0.05,
-         labels = "Aternative \n Hypothesis",
+         labels = "Alternative \n Hypothesis",
          cex = cex.legend, col = adjustcolor(4, alpha.f = 1))
 
   } # end of plots
@@ -4113,11 +4134,8 @@ power.f.test <- function(ncp, df1, df2, alpha = 0.05,
     dchisq(x, df = df, ncp = ncp)
   }
 
-  mod.y <- max(dchisq(max(df - 2, 0), df = df),
-               dchisq(max(df - 2 + ncp, 0), df = df, ncp = ncp))
-
   # plot central t distribution
-  ylim <- c(0, mod.y + 0.05)
+  ylim <- c(0, 0.25)
   plot(funchisq, xlim = xlim, ylim = ylim,
        xaxs = "i", yaxs = "i", bty = "l",
        col = color, lwd = 2, lty = type,

@@ -1,11 +1,11 @@
-\name{One Mean (z and t Test)}
+\name{pwrss.t.mean}
 \alias{pwrss.z.mean}
 \alias{pwrss.t.mean}
 
-\title{A Mean against a Constant (z or t Test)}
+\title{One Mean against a Constant (z or t Test)}
 
 \description{
-Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test a mean against a constant mean.
+Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test a mean against a constant.
 
 Formulas are validated using \url{http://powerandsamplesize.com/}, and tables in PASS documentation.
 }
@@ -25,18 +25,18 @@ pwrss.z.mean(mu, sd = 1, mu0 = 0, margin = 0, alpha = 0.05,
 \arguments{
   \item{mu}{expected mean}
   \item{sd}{expected standard devation}
-  \item{mu0}{constant to be tested against (a mean)}
+  \item{mu0}{constant to be compared (a mean)}
   \item{n}{sample size}
   \item{power}{statistical power \eqn{(1-\beta)}}
-  \item{alpha}{probability of type I error.}
+  \item{alpha}{probability of type I error}
   \item{margin}{non-inferority, superiority, or equivalence margin (margin: boundry of \code{mu - mu0} that is practically insignificant)}
   \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", "less", "equivalent", "non-inferior", or "superior"}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (z or t test)}
   \item{ncp}{non-centrality parameter}
   \item{df}{degrees of freedom}
   \item{power}{statistical power \eqn{(1-\beta)}}
@@ -60,5 +60,5 @@ pwrss.t.mean(mu = 0.50, mu0 = 0, sd = 1,
 }
 
 \references{
-Bulus, M., & Polat, C. (2023). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Under review. \url{https://osf.io/ua5fc}
+Bulus, M., & Polat, C. (in press). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Ahi Evran Universitesi Kirsehir Egitim Fakultesi Dergisi. \url{https://osf.io/ua5fc/download/}
 }

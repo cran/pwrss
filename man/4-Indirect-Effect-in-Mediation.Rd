@@ -1,11 +1,11 @@
-\name{Indirect Effect in Mediation Models (z, Joint, Monte Carlo Tests)}
+\name{pwrss.z.med}
 \alias{pwrss.z.med}
 \alias{pwrss.z.mediation}
 
-\title{Test of Indirect Effects in Mediation Analysis (z Test, Joint Test, and Monte Carlo Test)}
+\title{Indirect Effect in Mediation Analysis (z, Joint, and Monte Carlo Tests)}
 
 \description{
-Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test indirect effects in mediation analysis. One can consider explanatory power of the covariates in the mediation and outcome model via specifying R-squared values accordingly. \code{pwrss.z.mediation()} and \code{pwrss.z.med()} are the same functions.
+Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test indirect effects in mediation analysis (z test, joint test, and Monte Carlo test). One can consider explanatory power of the covariates in the mediator and outcome model via specifying R-squared values accordingly. \code{pwrss.z.mediation()} and \code{pwrss.z.med()} are the same functions.
 
 Formulas are validated using Monte Carlo simulation.
 }
@@ -22,27 +22,27 @@ pwrss.z.med(a, b, cp = 0,
 }
 
 \arguments{
-  \item{a}{expected regression coefficient for X -> M path. One can use standardized regression coefficient, but should use \code{sdx = 1} and \code{sdm = 1} or leave them out as they are default specifications}
-  \item{b}{expected regression coefficient for M -> Y path. One can use standardized regression coefficient, but should use \code{sdm = 1} and \code{sdy = 1} or leave them out as they are default specifications}
-  \item{cp}{expected regression coefficient for X -> Y path. One can use standardized regression coefficient, but should use \code{sdx = 1} and \code{sdy = 1} or leave them out as they are default specifications}
-  \item{sdx}{standard deviation of the predictor (X). For a binary predictor, \code{sdx = sqrt(p*(1-p))} where\code{p} is the proportion of subjects in one of the groups}
-  \item{sdm}{standard deviation of the mediator (M)}
-  \item{sdy}{standard deviation of the outcome (Y)}
+  \item{a}{expected regression coefficient for X -> M path. One can use standardized regression coefficient, but should keep \code{sdx = 1} and \code{sdm = 1} or leave them out as they are default specifications}
+  \item{b}{expected regression coefficient for M -> Y path. One can use standardized regression coefficient, but should keep \code{sdm = 1} and \code{sdy = 1} or leave them out as they are default specifications}
+  \item{cp}{expected regression coefficient for X -> Y path (the direct path). One can use standardized regression coefficient, but should keep \code{sdx = 1} and \code{sdy = 1} or leave them out as they are default specifications}
+  \item{sdx}{expected standard deviation of the predictor (X). For a binary predictor, \code{sdx = sqrt(p*(1-p))} where\code{p} is the proportion of subjects in one of the groups}
+  \item{sdm}{expected standard deviation of the mediator (M)}
+  \item{sdy}{expected standard deviation of the outcome (Y)}
   \item{r2m.x}{expected R-squared value for the mediator model (M ~ X). The default is \code{r2m.x = a^2 * sdx^2 / sdm^2} assuming that X is the only predictor. Thus, an \code{r2m.x} below this value will throw a warning. To consider other covariates in the mediator model provide a value greater than the default}
   \item{r2y.mx}{expected R-squared value for the outcome model (Y ~ M + X). The default is \code{r2y.mx = (b^2 * sdm^2 + cp^2 * sdx^2) / sdy^2} assuming that M and X are the only predictors. Thus, an \code{r2y.mx} below this value will throw a warning. To consider other covariates in the outcome model provide a value greater than the default}
   \item{n}{total sample size}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{alpha}{probability of type I error}
-  \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", "less"}
-  \item{mc}{logical; if \code{TRUE}, statistical power based on monte carlo simulation}
-  \item{nsims}{number of replications, if \code{mc = TRUE}}
-  \item{ndraws}{number of draws from the distribution of the path coefficients for each replication, if \code{mc = TRUE}}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{alternative}{direction of the hypothesis test: "not equal", "greater", "less". It applies to all tests (for path `a`, `b`, and the indirect effect) and typically specified as "not equal". If path `a` and `b` have the opposite signs there will be a warning for "greater" or "less" tests (it can be ignored)}
+  \item{mc}{logical; if \code{TRUE}, statistical power is based on monte carlo simulation}
+  \item{nsims}{number of replications (applies when \code{mc = TRUE})}
+  \item{ndraws}{number of draws from the distribution of the path coefficients for each replication (applies when \code{mc = TRUE})}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (z test)}
   \item{ncp}{non-centrality parameter}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{n}{total sample size}

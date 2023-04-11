@@ -1,20 +1,44 @@
 <h2> Statistical Power and Sample Size Calculation Tools </h2>
 
-To install and load `pwrss`:
 
-`install.packages("pwrss")`
+:::: {style="display: flex;"}
 
-`library(pwrss)`
+::: {}
+To install, load, and use pwrss in R: <br>
+`install.packages("pwrss")`  <br>
+`library(pwrss)` <br>
 
-`pwrss` R package allows statistical power and minimum required sample size calculations for 
+<img src = "vignettes/hex.png" height = %100 width = 100%></img>
+:::
+
+::: {}
+<p>&nbsp;</p>
+:::
+
+::: {}
+Alternatively calculations can be performed using links below: 
+
+| Language | User Interface |
+|:----------|:---------------|
+| English  | [https://pwrss.shinyapps.io/index/](https://pwrss.shinyapps.io/index/) |
+| English  | [https://pwrss.shinyapps.io/lang-en/](https://pwrss.shinyapps.io/lang-en/) |
+| Turkish  | [https://pwrss.shinyapps.io/lang-tr/](https://pwrss.shinyapps.io/lang-tr/) |
+
+[<img src = "vignettes/app.png" height = %100 width = 100%></img>](https://pwrss.shinyapps.io/index/)
+
+:::
+
+::::
+
+pwrss R package allows statistical power and minimum required sample size calculations for 
 
   - `(1)` testing a proportion (one-sample) against a constant, 
   - `(2)` testing a mean (one-sample) against a constant,  
   - `(3)` testing difference between two proportions (independent samples),
-  - `(4)` testing difference between two means (parametric and non-parametric tests for independent and paired samples),
+  - `(4)` testing difference between two means/groups (parametric and non-parametric tests for independent and paired samples),
   - `(5)` testing a correlation (one-sample) against a constant,  
   - `(6)` testing difference between two correlations (independent samples),
-  - `(7)` testing a coefficient (with standardized or unstandardized coefficients, with no covariates or covariate adjusted) in multiple linear regression, logistic regression, and poisson regression,
+  - `(7)` testing a coefficient (with standardized or unstandardized coefficients, with no covariates or covariate adjusted) in multiple linear regression, logistic regression, and Poisson regression,
   - `(8)` testing an indirect effect (with standardized or unstandardized coefficients, with no covariates or covariate adjusted) in the mediation analysis (Sobel, Joint, and Monte Carlo),
   - `(9)` testing an R-squared against zero in linear regression 
   - `(10)` testing an R-squared difference against zero in hierarchical regression
@@ -27,9 +51,9 @@ To install and load `pwrss`:
   
 **If you find the package and related material useful please cite as:**
 
-- Bulus, M. (2023). pwrss: Statistical Power and Sample Size Calculation Tools. R package version 0.3.0. https://CRAN.R-project.org/package=pwrss
+- Bulus, M. (2023). pwrss: Statistical Power and Sample Size Calculation Tools. R package version 0.3.1. https://CRAN.R-project.org/package=pwrss
 
-- Bulus, M., & Polat, C. (2023). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. https://osf.io/ua5fc
+- Bulus, M., & Polat, C. (in press). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Ahi Evran Universitesi Kirsehir Egitim Fakultesi Dergisi. https://osf.io/ua5fc/download/
 
 
 

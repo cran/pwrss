@@ -1,4 +1,4 @@
-\name{Difference between Two Means (t or z Test)}
+\name{pwrss.t.2means}
 \alias{pwrss.t.2means}
 \alias{pwrss.z.2means}
 
@@ -32,23 +32,23 @@ pwrss.z.2means(mu1, mu2 = 0, sd1 = 1, sd2 = sd1, margin = 0,
 \arguments{
   \item{mu1}{expected mean in the first group}
   \item{mu2}{expected mean in the second group}
-  \item{sd1}{standard deviation in the first group}
-  \item{sd2}{standard deviation in the second group}
-  \item{kappa}{\code{n1/n2}}
+  \item{sd1}{expected standard deviation in the first group}
+  \item{sd2}{expected standard deviation in the second group}
   \item{paired}{if \code{TRUE} paired samples t test}
-  \item{paired.r}{correlation between the two repeated measures (e.g., pretest and posttest)}
+  \item{paired.r}{correlation between repeated measures for paired samples (e.g., pretest and posttest)}
   \item{n2}{sample size in the second group (or for the single group in paired samples)}
+  \item{kappa}{\code{n1/n2} ratio (applies to independent samples only)}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{alpha}{probability of type I error}
-  \item{welch.df}{if \code{TRUE} uses Welch degrees of freedom adjustment when groups sizes or variances are not equal (applies to independent samples t test)}
+  \item{welch.df}{if \code{TRUE} uses Welch's degrees of freedom adjustment when groups sizes or variances are not equal (applies to independent samples t test only)}
   \item{margin}{non-inferority, superiority, or equivalence margin (margin: boundry of \code{mu1 - mu2} that is practically insignificant)}
   \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", "less", "equivalent", "non-inferior", or "superior"}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (z or t test)}
   \item{df}{degrees of freedom}
   \item{ncp}{non-centrality parameter}
   \item{power}{statistical power \eqn{(1-\beta)}}
@@ -125,7 +125,7 @@ pwrss.t.2means(mu1 = 0.25, mu2 = 0.25, margin = 0.05,
 }
 
 \references{
-Bulus, M., & Polat, C. (2023). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Under review. \url{https://osf.io/ua5fc}
+Bulus, M., & Polat, C. (in press). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Ahi Evran Universitesi Kirsehir Egitim Fakultesi Dergisi. \url{https://osf.io/ua5fc/download/}
 
 Chow, S. C., Shao, J., Wang, H., & Lokhnygina, Y. (2018). Sample size calculations in clinical research (3rd ed.). Taylor & Francis/CRC.
 

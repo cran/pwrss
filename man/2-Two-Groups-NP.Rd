@@ -1,18 +1,19 @@
-\name{Difference between Two Means (Non-parametric)}
+\name{pwrss.np.2groups}
 \alias{pwrss.np.2means}
+\alias{pwrss.np.2groups}
 
-\title{Difference between Two Means (Non-parametric Test for Independent and Paired Samples)}
+\title{Difference between Two Groups (Non-parametric Tests for Independent and Paired Samples)}
 
 \description{
-  Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test difference between two means.
-  For standardized mean difference (Cohen's d) set \code{mu1 = d} and use defaults for \code{mu2}, \code{sd1}, and \code{sd2}.
-  If pooled standard deviation (psd) is available set \code{sd1 = psd}.
+Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test difference between two groups. Although means and standard deviations are some of the arguments in the function below, what is actually being tested is the difference between mean ranks. First, the mean difference is converted into Cohen's d, and then into probability of superiority, which is the probability of an observation in group 1 being higher than an observation in group 2. Probability of superiority can be extracted as \code{pwrss.np.2groups()$parms$prob1}. This parameterization, expressed as means and standard deviations, helps in making comparisons and switching back and forth between parametric and non-parametric tests.
 
-  Formulas are validated using Monte Carlo simulation, G*Power, and tables in PASS documentation.
+For standardized mean difference (Cohen's d) set \code{mu1 = d} and use defaults for \code{mu2}, \code{sd1}, and \code{sd2}. If pooled standard deviation (psd) is available set \code{sd1 = psd}.
+
+Formulas are validated using Monte Carlo simulation, G*Power, and tables in PASS documentation.
 }
 
 \usage{
-pwrss.np.2means(mu1 = 0.20, mu2 = 0,
+pwrss.np.2groups(mu1 = 0.20, mu2 = 0,
                 sd1 = ifelse(paired, sqrt(1/(2*(1-paired.r))), 1), sd2 = sd1,
                 margin = 0, alpha = 0.05, paired = FALSE, paired.r = 0.50,
                 kappa = 1, n2 = NULL, power = NULL,
@@ -28,24 +29,24 @@ pwrss.np.2means(mu1 = 0.20, mu2 = 0,
 \arguments{
   \item{mu1}{expected mean in the first group}
   \item{mu2}{expected mean in the second group}
-  \item{sd1}{standard deviation in the first group}
-  \item{sd2}{standard deviation in the second group}
-  \item{kappa}{\code{n1/n2}}
+  \item{sd1}{expected standard deviation in the first group}
+  \item{sd2}{expected standard deviation in the second group}
   \item{paired}{if \code{TRUE} paired samples}
-  \item{paired.r}{correlation between the two repeated measures (e.g., pretest and posttest)}
+  \item{paired.r}{correlation between repeated measures for paired samples (e.g., pretest and posttest)}
   \item{n2}{sample size in the second group (or for the single group in paired samples)}
+  \item{kappa}{\code{n1/n2} ratio (applies to independent samples only)}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{alpha}{probability of type I error}
   \item{margin}{non-inferority, superiority, or equivalence margin (margin: boundry of \code{mu1 - mu2} that is practically insignificant)}
   \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", "less", "equivalent", "non-inferior", or "superior"}
   \item{distribution}{parent distribution: "normal", "uniform", "double exponential", "laplace", or "logistic"}
   \item{method}{non-parametric method: "guenther" (default) or "noether"}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (z or t test)}
   \item{df}{degrees of freedom}
   \item{ncp}{non-centrality parameter}
   \item{power}{statistical power \eqn{(1-\beta)}}

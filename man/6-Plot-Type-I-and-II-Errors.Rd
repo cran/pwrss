@@ -1,10 +1,10 @@
 \name{plot}
 \alias{plot.pwrss}
 
-\title{Type I and Type II Error Plots for t, z, and F Tests}
+\title{Type I and Type II Error Plot}
 
 \description{
-Plots Type I (alpha) and Type II (beta) errors for t, z, and F tests.
+Plots Type I (alpha) and Type II (beta) errors for t, z, F, and Chi-square tests.
 }
 
 \usage{

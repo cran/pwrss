@@ -1,10 +1,10 @@
-\name{One Proportion (z Test)}
+\name{pwrss.z.prop}
 \alias{pwrss.z.prop}
 
-\title{A Proportion against a Constant (z Test)}
+\title{One Proportion against a Constant (z Test)}
 
 \description{
-Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test a proportion against a constant proportion.
+Calculates statistical power or minimum required sample size (only one can be NULL at a time) to test a proportion against a constant.
 
 Formulas are validated using Monte Carlo simulation, G*Power, \url{http://powerandsamplesize.com/} and tables in PASS documentation.
 
@@ -19,19 +19,19 @@ pwrss.z.prop(p, p0 = 0, margin = 0, arcsin.trans = FALSE, alpha = 0.05,
 
 \arguments{
   \item{p}{expected proportion}
-  \item{p0}{constant to be tested against (a proportion)}
-  \item{arcsin.trans}{if \code{TRUE} uses Cohen's arcsin transformation, if \code{FALSE} uses normal approximation (default)}
+  \item{p0}{constant to be compared (a proportion)}
+  \item{arcsin.trans}{if \code{TRUE} uses Cohen's arcsine transformation, if \code{FALSE} uses normal approximation (default)}
   \item{n}{sample size}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{alpha}{probability of type I error.}
   \item{margin}{non-inferority, superiority, or equivalence margin (margin: boundry of \code{p - p0} that is practically insignificant)}
   \item{alternative}{direction or type of the hypothesis test: "not equal", "greater", "less", "equivalent", "non-inferior", or "superior"}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (z or t test)}
   \item{ncp}{non-centrality parameter}
   \item{power}{statistical power \eqn{(1-\beta)}}
   \item{n}{sample size}
@@ -129,7 +129,7 @@ pwrss.z.prop(p = 0.50, p0 = 0.50, margin = 0.01,
 }
 
 \references{
-Bulus, M., & Polat, C. (2023). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Under review. \url{https://osf.io/ua5fc}
+Bulus, M., & Polat, C. (in press). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Ahi Evran Universitesi Kirsehir Egitim Fakultesi Dergisi. \url{https://osf.io/ua5fc/download/}
 
 Chow, S. C., Shao, J., Wang, H., & Lokhnygina, Y. (2018). Sample size calculations in clinical research (3rd ed.). Taylor & Francis/CRC.
 

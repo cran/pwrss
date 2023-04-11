@@ -1,9 +1,9 @@
 ---
-title: "<span style = 'color: grey;'> A Practical Guide to Statistical Power and Sample Size Calculations in R </span>"
+title: "A Practical Guide to Statistical Power and Sample Size Calculations in R"
 date: "`r Sys.Date()`"
 author: Metin Bulus
 output:
-  rmarkdown::html_document: # html_vignette: 
+  rmarkdown::html_document: 
     toc: true
     number_sections: true
     toc_float: true
@@ -14,32 +14,79 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+<style type="text/css">
+
+div.tocify {
+  width: 30%;
+  max-width: 260px;
+  max-height: 100%;
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 35px;
+  text-indent: 0;
+}
+
+</style>
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(pwrss)
 ```
 
-If you find the package and related material useful please cite as:
+:::: {style="display: flex;"}
 
-<div style = "background-color:rgb(245, 245, 245); padding:2px 30px 2px 30px;">
-Bulus, M. (2023). pwrss: Statistical Power and Sample Size Calculation Tools. R package version 0.3.0. [https://CRAN.R-project.org/package=pwrss](https://CRAN.R-project.org/package=pwrss)
-
-Bulus, M., & Polat, C. (2023). pwrss R paketi ile istatistiksel güç analizi [Statistical power analysis with pwrss R package]. [https://osf.io/ua5fc](https://osf.io/ua5fc)
-</div>
-
+::: {}
 Install and load pwrss R package:
-
 ```{r,  message = FALSE, eval = FALSE, warning = FALSE}
 install.packages("pwrss")
 library(pwrss)
 ```
+<br>
+![](hex.png){width=65%} 
+:::
+
+::: {}
+<p>&nbsp;</p>
+:::
+
+::: {}
+Alternatively, use the web app below: <br>
+
+
+[<img src = "app.png" height = %100 width = 100%></img>](https://pwrss.shinyapps.io/index/)
+
+:::
+
+::::
+
+
+If you find the package and related material useful please cite as:
+
+<div style = "background-color:rgb(245, 245, 245); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
+Bulus, M. (2023). pwrss: Statistical Power and Sample Size Calculation Tools. R package version 0.3.1. [https://CRAN.R-project.org/package=pwrss](https://CRAN.R-project.org/package=pwrss)
+
+Bulus, M., & Polat, C. (in press). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Ahi Evran Universitesi Kirsehir Egitim Fakultesi Dergisi. [https://osf.io/ua5fc/download/](https://osf.io/ua5fc/download/)
+</div>
+
+**Acknowledgements**
+
+I would like to thank Roland Thijs and Fred Oswald, who caught some typos in the earlier version of this vignette. 
 
 Please send any bug reports, feedback, or questions to [bulusmetin [at] gmail.com](mailto:bulusmetin@gmail.com)
+
+<br>
+<br>
 
 # Generic Functions
 <div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
 
-These generic functions calculate and return statistical power along with optional Type I and Type II error plots (as long as the test statistic and degrees of freedom is known). These functions are handy because _z_, _t_, $\chi^{2}$, and _F_ statistics and associated degress of freedom can be readily found in reports, published articles, or standard software output (SAS, SPSS, Jamovi, etc.). Statistical power can be calculated via putting the test statistics for `ncp` in the functions below; however, do not to overinterpret power rates if calculated post hoc. 
+These generic functions calculate and return statistical power along with optional Type I and Type II error plots (as long as the test statistic and degrees of freedom is known). These functions are handy because _z_, _t_, $\chi^{2}$, and _F_ statistics and associated degrees of freedom can be readily found in reports, published articles, or standard software output (such as SAS, Stata, SPSS, Jamovi, etc.). Statistical power can be calculated via putting the test statistics for `ncp` in the functions below; however, do not overinterpret post-hoc power rates. 
 
 ## *t* Test
 
@@ -58,14 +105,14 @@ power.z.test(ncp = 1.96, alpha = 0.05,
 ## $\chi^2$ Test
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-power.chisq.test(ncp = 2, df = 98,
+power.chisq.test(ncp = 15, df = 20,
                  alpha = 0.05, plot = TRUE)
 ```
 
 ## *F* Test
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-power.f.test(ncp = 2, df1 = 2, df2 = 98,
+power.f.test(ncp = 3, df1 = 2, df2 = 98,
              alpha = 0.05, plot = TRUE)
 ```
 
@@ -111,18 +158,18 @@ plot(design3)
 <br>
 <br>
 
-# Difference between Two Means
+# Mean Difference (*t* Tests)
 <div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
 
 ## Parametric Tests 
 
 ### Independent Samples *t* Test
 
-More often than not, unstandardized means and standard deviations are reported in publications for descriptive purposes. Another reason is that they are more intuative and interpretable (e.g. depression scale). Assume that for the first and second groups expected means are 30 and 12, and expected standard deviations are 12 and 8, respectively. 
+More often than not, unstandardized means and standard deviations are reported in publications for descriptive purposes. Another reason is that they are more intuitive and interpretable (e.g. depression scale). Assume that for the first and second groups expected means are 30 and 28, and expected standard deviations are 12 and 8, respectively. 
 
 **Calculate Statistical Power**
 
-What is the statistical power given that the sample size for group 2 is 50 and groups have equal sample sizes (`kappa = n1 / n2 = 1`)?  
+What is the statistical power given that the sample size for the second group is 50 (`n2 = 50`) and groups have equal sample sizes (`kappa = n1 / n2 = 1`)?  
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 pwrss.t.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, kappa = 1, 
@@ -132,7 +179,7 @@ pwrss.t.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, kappa = 1,
 
 **Calculate Minimum Required Sample Size** 
 
-What is the minimum required sample size given that groups have equal sample sizes (`kappa = n1 / n2 = 1`)?  
+What is the minimum required sample size given that groups have equal sample sizes (`kappa = 1`)?  ($\kappa = n_1 / n_2$)
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 pwrss.t.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, kappa = 1, 
@@ -157,7 +204,7 @@ pwrss.t.2means(mu1 = 0.196, kappa = 1,
 
 ### Paired Samples *t* Test
 
-Assume for the first (e.g. pretest) and second (e.g. posttest) time points expected means are 30 and 12 (a reduction of 8 points), and expected standard deviations are 12 and 8, respectively. Also assume a correlation of 0.50 (the default in the function) between first and second measurements. What is the minimum required sample size? 
+Assume for the first (e.g. pretest) and second (e.g. posttest) time points expected means are 30 and 28 (a reduction of 2 points), and expected standard deviations are 12 and 8, respectively. Also assume a correlation of 0.50 between first and second measurements (by default `paired.r = 0.50`). What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 pwrss.t.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
@@ -175,7 +222,7 @@ pwrss.t.2means(mu1 = 30, mu2 = 28, sd1 = 10.583,
                alternative = "not equal")
 ```
 
-It is sufficient to put Cohen's *d* or Hedge's *g* (standardized difference between two groups) for `mu1` because `mu2 = 0`, `sd1 = sqrt(1/(2*(1-paired.r)))`, and `sd2 = sd1` by default. For example, for an effect size as small as 0.1883 (based on previous example) the minimum required sample size can be calculated as
+It is sufficient to put Cohen's *d* or Hedge's *g* (standardized difference between two time points) for `mu1` because `mu2 = 0`, `sd1 = sqrt(1/(2*(1-paired.r)))`, and `sd2 = sd1` by default. For example, for an effect size as small as 0.1883 (based on previous example) the minimum required sample size can be calculated as
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 pwrss.t.2means(mu1 = 0.1883, paired = TRUE, paired.r = 0.50,
@@ -185,15 +232,18 @@ pwrss.t.2means(mu1 = 0.1883, paired = TRUE, paired.r = 0.50,
 
 ## Non-parametric Tests 
 
-The variable of interest for which means are compared between two groups (or between two time points) may not follow normal distribution. 
-In this case *t* test could produce biased results. One reason is that the sample size could be small. Another reason is that the parent distribution (distribution in the population) may not follow normal distribution (e.g., uniform, exponential, double exponential, or logistic). 
+The variable of interest for which means are compared may not follow normal distribution. One reason is that the sample size could be small. Another reason is that the parent distribution (distribution in the population) may not be normal (e.g., could be uniform, exponential, double exponential, or logistic). In these cases *t* test could produce biased results.
 
-For non-parametric tests use `pwrss.np.2means()` function instead of `pwrss.t.2means()`. All arguments are same. Additionally, however, the parent distribution can be specified. In the following examples the parent distrbution is "normal" (not shown because it is the default) and can be changed with the `distribution` argument. 
+For non-parametric tests use `pwrss.np.2groups()` function instead of `pwrss.t.2means()`. All arguments are the same. Additionally, however, the parent distribution can be specified as "normal", "uniform", "exponential", "double exponential", or "logistic". In the following examples the parent distribution is "normal" (not shown because it is the default) and can be changed with the `dist` or `distribution` argument (e.g. `dist = "uniform"`). 
+
+Although means and standard deviations are some of the arguments in the function below, what is actually being tested is the difference between mean ranks. First, the mean difference is converted into Cohen's d, and then into probability of superiority, which is the probability of an observation in group 1 being higher than an observation in group 2. This parameterization, expressed as means and standard deviations, helps in making comparisons and switching back and forth between parametric and non-parametric tests.
 
 ### Independent Samples (Wilcoxon-Mann-Whitney Test)
 
+The example below uses the same parameters as the example in the independent *t* test section. 
+
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-pwrss.np.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, kappa = 1, 
+pwrss.np.2groups(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, kappa = 1, 
                power = .80, alpha = 0.05,
                alternative = "not equal")
 
@@ -202,23 +252,29 @@ pwrss.np.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, kappa = 1,
 
 ### Paired Samples (Wilcoxon Signed-rank Test)
 
+The example below uses the same parameters as the example in the paired (dependent) *t* test section.  
+
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-pwrss.np.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
+pwrss.np.2groups(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
                paired = TRUE, paired.r = 0.50,
                power = .80, alpha = 0.05,
                alternative = "not equal")
 
 ```
 
-It is sufficient to put Cohen's *d* or Hedge's *g* (standardized difference between two groups) for `mu1` without specifying `mu2`, `sd1`, and `sd2`. 
+It is sufficient to put Cohen's *d* or Hedge's *g* (standardized difference between two groups or measurements) for `mu1` without specifying `mu2`, `sd1`, and `sd2`. 
 
 ## Non-inferiority, Superiority, and Equivalence 
 
-These tests are useful for testing practically significant difference (non-inferiority, superiority) or practically null difference (equivalence). 
+These tests are useful for testing practically significant difference (non-inferiority/superiority) or practically null difference (equivalence). 
 
 ### Parametric Tests
 
-**Non-inferiority**: Mean of group 1 is practically not smaller than the mean of group 2. The `mu1 - mu2` difference can be as small as -1 (`margin = -1`). When higher values of the outcome is better margin takes NEGATIVE values for non-inferiority test; whereas when lower values of the outcome is better margin takes POSITIVE values. 
+**Non-inferiority**: The mean of group 1 is practically not smaller than the mean of group 2. The `mu1 - mu2` difference can be as small as -1 (`margin = -1`) but it will still be considered non-inferior. What is the minimum required sample size? 
+
+<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
+When higher values of an outcome is better the margin takes NEGATIVE values; whereas when lower values of the outcome is better margin takes POSITIVE values.
+</div> 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 pwrss.t.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
@@ -226,7 +282,11 @@ pwrss.t.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8,
                alternative = "non-inferior")
 ```
 
-**Superiority**: Mean of group 1 is practically greater than the mean of group 2. The `mu1 - mu2` difference is at least greater than 1 (`margin = 1`). When higher values of the outcome is better margin takes POSITIVE values for non-inferiority test; whereas when lower values of the outcome is better margin takes NEGATIVE values. 
+**Superiority**: The mean of group 1 is practically greater than the mean of group 2. The `mu1 - mu2` difference is at least greater than 1 (`margin = 1`). What is the minimum required sample size? 
+
+<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
+When higher values of an outcome is better margin takes POSITIVE values; whereas when lower values of the outcome is better margin takes NEGATIVE values. 
+</div>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 pwrss.t.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
@@ -234,7 +294,11 @@ pwrss.t.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8,
                alternative = "superior")
 ```
 
-**Equivalence**: Mean of group 1 is practically same as mean of group 2. The `mu1 - mu2` difference can be as small as -1 and as high as 1 (`margin = 1`). Specify the absolute value for the margin. 
+**Equivalence**: The mean of group 1 is practically same as mean of group 2. The `mu1 - mu2` difference can be as small as -1 and as high as 1 (`margin = 1`). What is the minimum required sample size? 
+
+<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
+Specify the absolute value for the margin. 
+</div>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 pwrss.t.2means(mu1 = 30, mu2 = 30, sd1 = 12, sd2 = 8, 
@@ -244,26 +308,26 @@ pwrss.t.2means(mu1 = 30, mu2 = 30, sd1 = 12, sd2 = 8,
 
 ### Non-parametric Tests
 
-**Non-inferiority**: Mean of group 1 is practically not smaller than the mean of group 2. The `mu1 - mu2` difference can be as small as -1 (`margin = -1`).
+**Non-inferiority**: The mean of group 1 is practically not smaller than the mean of group 2. The `mu1 - mu2` difference can be as small as -1 (`margin = -1`). What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-pwrss.np.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
+pwrss.np.2groups(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
                margin = -1, power = 0.80,
                alternative = "non-inferior")
 ```
 
-**Superiority**: Mean of group 1 is practically greater than the mean of group 2. The `mu1 - mu2` difference is at least greater than 1 (`margin = 1`).
+**Superiority**: The mean of group 1 is practically greater than the mean of group 2. The `mu1 - mu2` difference is at least greater than 1 (`margin = 1`). What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-pwrss.np.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
+pwrss.np.2groups(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
                margin = 1, power = 0.80,
                alternative = "superior")
 ```
 
-**Equivalence**: Mean of group 1 is practically same as mean of group 2. The `mu1 - mu2` difference can be as small as -1 and as high as 1 (`margin = 1`).
+**Equivalence**: The mean of group 1 is practically same as mean of group 2. The `mu1 - mu2` difference can be as small as -1 and as high as 1 (`margin = 1`). What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-pwrss.np.2means(mu1 = 30, mu2 = 30, sd1 = 12, sd2 = 8, 
+pwrss.np.2groups(mu1 = 30, mu2 = 30, sd1 = 12, sd2 = 8, 
                margin = 1, power = 0.80,
                alternative = "equivalent")
 ```
@@ -271,7 +335,7 @@ pwrss.np.2means(mu1 = 30, mu2 = 30, sd1 = 12, sd2 = 8,
 <br>
 <br>
 
-# Multiple Linear Regression
+# Linear Regression (*F* and *t* Tests)
 <div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
 
 ## Omnibus $F$ Test 
@@ -282,10 +346,10 @@ Omnibus F test in multiple liner regression is used to test whether $R^2$ is gre
 Assume that we want to predict a continuous variable $Y$ using $X_{1}$, $X_{2}$, and $X_{2}$ variables (a combination of binary or continuous).
 
 $$\begin{eqnarray}
-  Y_{i} &=& \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3} + r_{i}, \quad r_{i} \thicksim N(0,\sigma^2) \newline
+  Y &=& \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3} + r, \quad r \thicksim N(0,\sigma^2) \newline
   \end{eqnarray}$$
 
-We are expecting that these three variables explain 30% of the variance in the outcome  ($R^2 = 0.30$). What is the minimum required sample size?  
+We are expecting that these three variables explain 30% of the variance in the outcome  ($R^2 = 0.30$ or `r2 = 0.30` in the code). What is the minimum required sample size?  
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.reg(r2 = 0.30, k = 3, power = 0.80, alpha = 0.05)
@@ -294,10 +358,10 @@ pwrss.f.reg(r2 = 0.30, k = 3, power = 0.80, alpha = 0.05)
 
 ### $\Delta R^2 > 0$ in Hierarchical Regression 
 
-Assume that we want to add two more predictors to the earlier regression model ($X_{4}$, and $X_{5}$) and test whether increase in $R^2$ is greater than 0 (zero). We are expecting an increase of $\Delta R^2 = 0.15$. What is the minimum required sample size? 
+Assume that we want to add two more predictors to the earlier regression model ($X_{4}$, and $X_{5}$; thus `m = 2`) and test whether increase in $R^2$ is greater than 0 (zero). In total there are five predictors in the model (`k = 5`). By adding two predictors we are expecting an increase of $\Delta R^2 = 0.15$. What is the minimum required sample size? 
 
 $$\begin{eqnarray}
-  Y_{i} &=& \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3} + \beta_{4}X_{4} + \beta_{5}X_{5} + r_{i}, \quad r_{i} \thicksim N(0,\sigma^2) \newline
+  Y &=& \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3} + \beta_{4}X_{4} + \beta_{5}X_{5} + r, \quad r \thicksim N(0,\sigma^2) \newline
   \end{eqnarray}$$
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
@@ -305,14 +369,14 @@ pwrss.f.reg(r2 = 0.15, k = 5, m = 2, power = 0.80, alpha = 0.05)
 
 ```
 
-## Single Regression Coefficient 
+## Single Regression Coefficient (*z* or *t* Test)
 
 ### Standardized versus Unstandardized Input
 
 In the earlier example, assume that we want to predict a continuous variable $Y$ using a continuous predictor $X_{1}$ but control for $X_{2}$, and $X_{2}$ variables (a combination of binary or continuous). We are mainly interested in the effect of $X_{1}$ and expect a standardized regression coefficient of $\beta_{1} = 0.20$. 
 
 $$\begin{eqnarray}
-  Y_{i} &=& \beta_{0} + \color{red} {\beta_{1} X_{1}} + \beta_{2}X_{2} + \beta_{3}X_{3} + r_{i}, \quad r_{i} \thicksim N(0,\sigma^2) \newline
+  Y &=& \beta_{0} + \color{red} {\beta_{1} X_{1}} + \beta_{2}X_{2} + \beta_{3}X_{3} + r, \quad r \thicksim N(0,\sigma^2) \newline
   \end{eqnarray}$$
   
 Again, we are expecting that these three variables explain 30% of the variance in the outcome  ($R^2 = 0.30$). What is the minimum required sample size? It is sufficient to provide standardized regression coefficient for `beta1` because `sdx = 1` and `sdy = 1` by default. 
@@ -330,119 +394,329 @@ pwrss.t.reg(beta1 = 0.60, sdy = 12, sdx = 4, k = 3, r2 = 0.30,
 
 ```
 
-If $X_{1}$ variable is binary (e.g. treatment/control), the standardized regression coefficient is Cohen's *d*. Standard deviation of the main predictor is $\sqrt{p(1-p)}$ where *p* is the proportion of sample in one of the groups. Assume half of the sample is in the first group $p = 0.50$. What is the minimum required sample size? It is sufficient to provide Cohen's *d* for `beta1` (standardized difference between two groups) but specify `sdx = sqrt(p*(1-p))` where *p* is the proportion of subjects in one of the groups. 
+If the main predictor is binary (e.g. treatment/control), the standardized regression coefficient is Cohen's *d*. Standard deviation of the main predictor is $\sqrt{p(1-p)}$ where *p* is the proportion of sample in one of the groups. Assume half of the sample is in the first group $p = 0.50$. What is the minimum required sample size? It is sufficient to provide Cohen's *d* for `beta1` (standardized difference between two groups) but specify `sdx = sqrt(p*(1-p))` where *p* is the proportion of subjects in one of the groups. 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-pwrss.t.reg(beta1 = 0.20, k = 3, r2 = 0.30, sdx = sqrt(0.50*(1-0.50)),
+p <- 0.50
+pwrss.t.reg(beta1 = 0.20, k = 3, r2 = 0.30, sdx = sqrt(p*(1-p)),
             power = .80, alpha = 0.05, alternative = "not equal")
 
 ```
 
 ### Non-inferiority, Superiority, and Equivalence
 
-These tests are useful for testing practically significant effects (non-inferiority, superiority) or practically null effects (equivalence).
+These tests are useful for testing practically significant effects (non-inferiority/superiority) or practically null effects (equivalence).
 
-**Non-inferiority**: The intervention is expected to be non-inferior to some earlier or other interventions. Assume that the effect of an earlier or some other intervention is `beta0 = 0.10`. The `beta1 - beta0` is expected to be positive and should be at least -0.05 (`margin = -0.05`). This is the case when higher values of an outcome is better. When lower values of an outcome is better the `beta1 - beta0` difference is expected to be NEGATIVE and the `margin` takes POSITIVE values.
+**Non-inferiority**: The intervention is expected to be non-inferior to some earlier or other interventions. Assume that the effect of an earlier or some other intervention is `beta0 = 0.10`. The `beta1 - beta0` is expected to be positive and should be at least -0.05 (`margin = -0.05`). What is the minimum required sample size? 
+
+<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
+This is the case when higher values of an outcome is better. When lower values of an outcome is better the `beta1 - beta0` difference is expected to be NEGATIVE and the `margin` takes POSITIVE values.
+</div> 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+p <- 0.50
 pwrss.t.reg(beta1 = 0.20, beta0 = 0.10, margin = -0.05, 
-            k = 3, r2 = 0.30, sdx = sqrt(0.50*(1-0.50)),
+            k = 3, r2 = 0.30, sdx = sqrt(p*(1-p)),
             power = .80, alpha = 0.05, alternative = "non-inferior")
 
 ```
 
-**Superiority**: The intervention is expected to be superior to some earlier or other interventions. Assume that the effect of an earlier or some other intervention is `beta0 = 0.10`. The `beta1 - beta0` is expected to be positive and should be at least 0.05 (`margin = 0.05`). 
-This is the case when higher values of an outcome is better. When lower values of an outcome is better and the `beta1 - beta0` difference is expected to be NEGATIVE and the `margin` takes NEGATIVE values.
+**Superiority**: The intervention is expected to be superior to some earlier or other interventions. Assume that the effect of an earlier or some other intervention is `beta0 = 0.10`. The `beta1 - beta0` is expected to be positive and should be at least 0.05 (`margin = 0.05`). What is the minimum required sample size? 
+
+<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
+This is the case when higher values of an outcome is better. When lower values of an outcome is better `beta1 - beta0` difference is expected to be NEGATIVE and the `margin` takes NEGATIVE values.
+</div>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+p <- 0.50
 pwrss.t.reg(beta1 = 0.20, beta0 = 0.10, margin = 0.05, 
-            k = 3, r2 = 0.30, sdx = sqrt(0.50*(1-0.50)),
+            k = 3, r2 = 0.30, sdx = sqrt(p*(1-p)),
             power = .80, alpha = 0.05, alternative = "superior")
 ```
 
-**Equivalence**: The intervention is expected to be equivalent to some earlier or other interventions. Assume the effect of an earlier or some other intervention is `beta0 = 0.20`. The `beta1 - beta0` is expected to be within -0.05 and 0.05 (`margin = 0.05`). `margin` always takes positive values (absolute) for equivalence. 
+**Equivalence**: The intervention is expected to be equivalent to some earlier or other interventions. Assume the effect of an earlier or some other intervention is `beta0 = 0.20`. The `beta1 - beta0` is expected to be within -0.05 and 0.05 (`margin = 0.05`). What is the minimum required sample size? 
+
+<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
+`margin` always takes positive values for equivalence. Specify the absolute value. 
+</div>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+p <- 0.50
 pwrss.t.reg(beta1 = 0.20, beta0 = 0.20, margin = 0.05, 
-            k = 3, r2 = 0.30, sdx = sqrt(0.50*(1-0.50)),
+            k = 3, r2 = 0.30, sdx = sqrt(p*(1-p)),
             power = .80, alpha = 0.05, alternative = "equivalent")
 ```
 
 <br>
 <br>
 
-# Indirect Effect in Mediation Analysis (*z* Test)
+# Logistic Regression (Wald's *z* Test)
 <div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
 
-A simple mediation model can be constructed as in the figure. X is the main predictor, M is the mediator, and Y is the outcome. 
+In logistic regression a binary outcome variable (0/1: failed/passed, dead/alive, absent/present) is modeled by predicting probability of being in group 1 ($P_1$) via logit transformation (natural logarithm of odds). The base probability $P_0$ is the overall probability of being in group 1 without influence of predictors in the model (null). Under alternative hypothesis, the probability of being in group 1 ($P_1$) deviate from $P_0$ depending on the value of the predictor; whereas under null it is same as the $P_0$. A model with one main predictor ($X_1$) and two other covariates ($X_2$ and $X_3$) can be constructed as
 
-![**Simple Mediation Model**](med.tiff)
+$$\begin{eqnarray}
+  ln(\frac{P_1}{1- P_1}) &=& \beta_{0} + \color{red} {\beta_{1} X_{1}} + \beta_{2}X_{2} + \beta_{3}X_{3} \newline
+  \end{eqnarray}$$
+
+where <br> 
+$$\beta_0 = ln(\frac{P_0}{1- P_0})$$ <br> 
+$$\beta_1 = ln(\frac{P_1}{1- P_1} / \frac{P_0}{1- P_0})$$ <br> 
+Odds ratio is defined as 
+$$OR = exp(\beta_1) = \frac{P_1}{1- P_1} / \frac{P_0}{1- P_0}$$ <br> 
+
+**Example**: 
+
+Assume
+
+- A squared multiple correlation of 0.20 between $X_1$ and other covariates (`r2.other.x = 0.20` in the code). It can be found in the form of adjusted R-square via regressing $X_1$ on $X_2$ and $X_3$. Higher values require larger sample sizes. The default is 0 (zero). 
+- A base probability of $P_0 = 0.15$. This is the rate when predictor $X_1 = 0$ or when $\beta_1 = 0$. 
+- Increasing $X_1$ from 0 to 1 reduces the probability of being in group 1 from 0.15 to 0.10 ($P_1 = 0.10$).
+
+What is the minimum required sample size? There are three types of specification to statistical power or sample size calculations; (i) probability specification, (ii) odds ratio specification, and (iii) regression coefficient specification (as in standard software output).
+
+**Probability specification**: 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+pwrss.z.logreg(p0 = 0.15, p1 = 0.10, r2.other.x = 0.20,
+               power = 0.80, alpha = 0.05, 
+               dist = "normal")
+```
+
+**Odds ratio specification**: 
+$$OR = \frac{P_1}{1-P1} / \frac{P_0}{1-P_0} = \frac{0.10}{1-0.10} / \frac{0.15}{1-0.15} = 0.6296$$
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+pwrss.z.logreg(p0 = 0.15, odds.ratio = 0.6296, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = "normal")
+```
+
+**Regression coefficient specification**: 
+$$\beta_1 = ln(\frac{P_1}{1-P1} / \frac{P_0}{1-P_0}) = ln(0.6296) = -0.4626$$ 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = "normal")
+```
+
+**Change the distribution's parameters for predictor X**: 
+
+The mean and standard deviation of a normally distributed main predictor is 0 and 1 by default. They can be modified. In the following example the mean is 25 and the standard deviation is 8. 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+dist.x <- list(dist = "normal", mean = 25, sd = 8)
+
+pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = dist.x)
+```
+
+**Change the distribution family of predictor X**:
+
+More distribution types are supported by the function. For example, the main predictor can be binary (e.g. treatment/control groups). Often half of the sample is assigned to the treatment group and the other half to the control (`prob = 0.50` by default). 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = "bernoulli")
+```
+
+**Change the treatment group allocation rate of the binary predictor X** (`prob = 0.40`): 
+
+The per-subject cost in a treatment group is sometimes substantially higher than the per-subject cost in control group. At other times, it is difficult to recruit subjects for a treatment whereas there are plenty of subjects to be considered for the control group (e.g. a long wait-list). In such cases there is some leeway to pick an unbalanced sample (but not too much unbalanced). Assume the treatment group allocation rate is 40%. What is the minimum required sample size?  
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+dist.x <- list(dist = "bernoulli", prob = 0.40)
+
+pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = dist.x)
+```
+
+<br>
+<br>
+
+# Poisson Regression (Wald's *z* Test)
+<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+
+In Poisson regression a count outcome variable (e.g. number of hospital/store/website visits, number of absence/dead/purchase in a day/week/month) is modeled by predicting incidence rate ($\lambda$) via logarithmic transformation (natural logarithm of rates). A model with one main predictor ($X_1$) and two other covariates ($X_2$ and $X_3$) can be constructed as
+
+$$\begin{eqnarray}
+  ln(\lambda) &=& \beta_{0} + \color{red} {\beta_{1} X_{1}} + \beta_{2}X_{2} + \beta_{3}X_{3} \newline
+  \end{eqnarray}$$
+
+where $exp(\beta_0)$ is the base incidence rate. <br> 
+$$\beta_1 = ln(\frac{\lambda(X_1=1)}{\lambda(X_1=0)})$$ <br> 
+Incidence rate ratio is defined as 
+$$exp(\beta_1) = \frac{\lambda(X_1=1)}{\lambda(X_1=0)}$$<br>
+
+Assume
+
+- The expected base incidence rate is 1.65: $exp(0.50) = 1.65$.
+- Increasing $X_1$ from 0 to 1 reduces the mean incidence rate from 1.65 to 0.905: $exp(-0.10) = 0.905$. 
+
+What is the minimum required sample size? There are two types of specification; (i) rate ratio specification (exponentiated regression coefficient), and (ii) raw regression coefficient specification (as in standard software output). 
+
+**Regression coefficient specification**:
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+pwrss.z.poisreg(beta0 = 0.50, beta1 = -0.10,
+                power = 0.80, alpha = 0.05, 
+                dist = "normal")
+```
+
+**Rate ratio specification**:
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+pwrss.z.poisreg(exp.beta0 = exp(0.50),
+                exp.beta1 = exp(-0.10),
+                power = 0.80, alpha = 0.05, 
+                dist = "normal")
+```
+
+**Change the distribution's parameters for predictor X**: 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+dist.x <- list(dist = "normal", mean = 25, sd = 8)
+
+pwrss.z.poisreg(exp.beta0 = exp(0.50),
+                exp.beta1 = exp(-0.10),
+                alpha = 0.05, power = 0.80,
+                dist = dist.x)
+```
+
+The function accomodates other types of distribution. For example, the main predictor can be binary (e.g. treatment/control groups). 
+
+**Regression coefficient specification**:
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+pwrss.z.poisreg(beta0 = 0.50, beta1 = -0.10,
+                alpha = 0.05, power = 0.80,
+                dist = "bernoulli")
+```
+
+**Rate ratio specification**:
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+pwrss.z.poisreg(exp.beta0 = exp(0.50),
+                exp.beta1 = exp(-0.10),
+                alpha = 0.05, power = 0.80,
+                dist = "bernoulli")
+```
+
+**Change treatment group allocation rate of the binary predictor X** (`prob = 0.40`):
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+dist.x <- list(dist = "bernoulli", prob = 0.40)
+
+pwrss.z.poisreg(exp.beta0 = exp(0.50),
+                exp.beta1 = exp(-0.10),
+                alpha = 0.05, power = 0.80,
+                dist = dist.x)
+```
+
+<br>
+<br>
+
+# Indirect Effect (Sobel's *z* Test)
+<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+
+A simple mediation model can be constructed as in the figure. 
+
+![**Simple Mediation Model**](med.png)
 
 Regression models take the form of
 
 $$\begin{eqnarray}
-  M_i &=& \beta_{0M} + \color{red} {a} X_{i} + e_i\newline
-  Y_i &=& \beta_{0Y} + \color{red} {b} M_{i} + \color{red} {cp} X_{i} + \epsilon_i \newline
+  M &=& \beta_{0M} + \color{red} {a} X + e\newline
+  Y &=& \beta_{0Y} + \color{red} {b} M + \color{red} {cp} X + \epsilon \newline
   \end{eqnarray}$$
 
-*a*, *b*, and *cp* path coefficients are needed to calculate the minimum required sample size. They can be standardized or unstandardized. By default, path coefficients are assumed to be standardized because standard deviation of the main predictor, mediator, and outcome is `sdx = 1`,  `sdm = 1`, and `sdy = 1`, respectively. For unstandardized regression coefficients `sdx`, `sdm`, and `sdy` should be specified (they can be found in descriptive tables in reports/publications).
+*Y* is the outcome, *M* is the mediator, and *X* is the main predictor. The indirect effect is the product of *a* and *b* path coefficients. *cp* is the path coefficient for the direct effect. Path coefficients can be standardized or unstandardized. They are presumed to be standardized by default because the main predictor, mediator, and outcome all have standard deviations of `sdx = 1`,  `sdm = 1`, and `sdy = 1` in the function. Standard deviations should be specified for unstandardized path coefficients (you can find these values in descriptive tables in reports/publications). 
 
-## No Covariates 
+**_X_ is continuous:**
 
-**The main predictor is continuous:**
+Most software applications presume no covariates in the mediator and outcome models ($R^2_M = 0$ and $R^2_M = 0$). Even with no covariates, *X* explain some of the variance in *M* ($R^2_M > 0$) and *M* & *X* explains some of the variance in *Y* ($R^2_Y > 0$). We will almost never have an R-squared value of 0 (zero). The explained variance in the basic mediation model (the base R-squared values) can be non-trivial and is taken into account in the function by default. Thus, results may seem different from other software outputs.
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-# X (cont.), M (cont.) , Y (cont.)
+# mediation model with base R-squared values
 pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10,
             power = 0.80, alpha = 0.05)
 ```
 
-**The main predictor is binary (e.g. treatment/control):**
+To match results with other software packages, explicitly specify these parameters as 0 (zero) (`r2m = 0` and `r2y = 0`). There will be some warnings indicating that the function expects R-squared values greater than the base R-squared value. Note that in this case `cp` argument will be ignored. 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-# X (binary), M (cont.) , Y (cont.)
-p <- 0.50 # proportion of subjects in one group
+# base R-squared values are 0 (zero)
+# do not specify 'cp' 
+pwrss.z.med(a = 0.25, b = 0.25, 
+            r2m = 0, r2y = 0,
+            power = 0.80, alpha = 0.05)
+```
+
+**_X_ is binary:**
+
+The case where the main predictor is binary can be useful in practice. A researcher might be interested in whether treatment influence the outcome through some mediators. 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+p <- 0.50 # proportion of subjects in one of the groups
 pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10, 
             sdx = sqrt(p*(1-p)), 
             power = 0.80, alpha = 0.05)
 ```
 
-## With Covariates 
+**Statistical power for joint and Monte Carlo interval tests**
+
+Joint and Monte Carlo tests are only available when power is requested. 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
+# binary X
+p <- 0.50 # proportion of subjects in one of the groups
+pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10, 
+            sdx = sqrt(p*(1-p)), 
+            n = 300, alpha = 0.05)
+```
+
+**Explanatory Power of Covariates**
 
 Covariates can be added to the mediator model, outcome model, or both. Explanatory power of the covariates (R-squared values) for the mediator and outcome models can be specified via `r2m.x` and `r2y.mx` arguments. 
 
-**The main predictor is continuous:**
-
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-# X (cont.), M (cont.) , Y (cont.)
+# continuous X
 pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10,
-            r2m.x = 0.50, r2y.mx = 0.50, 
+            r2m = 0.50, r2y = 0.50, 
             power = 0.80, alpha = 0.05)
 ```
 
-**The main predictor is binary (e.g. treatment/control):**
+In experimental design subjects are randomly assigned to treatment and control groups. The allocation usually takes place with a rate of 50% (or probability of 0.50) meaning that half of the sample is assigned to treatment and the other half to control. Thus, the mediator model is less likely to have confounder. It is more common to add covariates to the outcome model only. 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-# X (binary), M (cont.) , Y (cont.)
-p <- 0.50 # proportion of subjects in one group
+# binary X
+p <- 0.50 # proportion of subjects in one of the groups
 pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10,
-            sdx = sqrt(p*(1-p)), 
-            r2m.x = 0.50, r2y.mx = 0.50, 
+            sdx = sqrt(p*(1-p)), r2y = 0.50, 
             power = 0.80, alpha = 0.05)
 ```
 
 <br>
 <br>
 
-# Analysis of (Co)Variance
+# Analysis of (Co)Variance (*F* Test)
 <div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+
+ANOVA: Analysis of Variance <br>
+ANCOVA: Analysis of Covariance
+
+In a one-way ANOVA, a researcher might be interested in comparing the means of several groups (levels of a factor) with respect to a continuous variable. In a one-way ANCOVA, they may want to adjust means for covariates. Furthermore, they may want to inspect interaction between two or three factors (two-way or three-way ANOVA), or adjust interaction for covariates (two-way or three-way ANCOVA). The following examples illustrate how to determine minimum required sample size for such designs. 
 
 ## One-way
 
 ### ANOVA
 
-A researcher is expecting a difference of Cohen's *d* = 0.50 between treatment and control groups (two levels) translating into $\eta^2 = 0.059$ (`eta2 = 0.059`). What is the minimum required sample size? 
-
+A researcher is expecting a difference of Cohen's *d* = 0.50 between treatment and control groups (two levels) translating into $\eta^2 = 0.059$ (`eta2 = 0.059`). Means are not adjusted for any covariates. What is the minimum required sample size? 
+ 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.ancova(eta2 = 0.059, n.levels = 2,
                power = .80, alpha = 0.05)
@@ -450,18 +724,22 @@ pwrss.f.ancova(eta2 = 0.059, n.levels = 2,
 
 ### ANCOVA
 
-A researcher is expecting an adjusted difference of Cohen's *d* = 0.45 between treatment and control groups (`n.levels = 2`) after controlling for the pretest (`n.cov = 1`) translating into partial $\eta^2 = 0.048$ (`eta2 = 0.048`). 
+A researcher is expecting an adjusted difference of Cohen's *d* = 0.45 between treatment and control groups (`n.levels = 2`) after controlling for the pretest (`n.cov = 1`) translating into partial $\eta^2 = 0.048$ (`eta2 = 0.048`). What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.ancova(eta2 = 0.048, n.levels = 2, n.cov = 1,
                alpha = 0.05, power = .80)
 ```
 
+<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px;">
+`n.cov` (or `n.covariates`) argument has trivial effect on the results. The difference between ANOVA and ANCOVA procedure depends on whether the effect (`eta2`) is unadjusted or covariate-adjusted.
+</div>
+
 ## Two-way
 
 ### ANOVA
 
-A researcher is expecting a partial $\eta^2 = 0.03$ (`eta2 = 0.03`) for interaction of treatment/control (Factor A: two levels) with gender (Factor B: two levels). Thus, `n.levels = c(2,2)`.
+A researcher is expecting a partial $\eta^2 = 0.03$ (`eta2 = 0.03`) for interaction of treatment/control (Factor A: two levels) with gender (Factor B: two levels). Thus, `n.levels = c(2,2)`. What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.ancova(eta2 = 0.03, n.levels = c(2,2),
@@ -470,7 +748,7 @@ pwrss.f.ancova(eta2 = 0.03, n.levels = c(2,2),
 
 ### ANCOVA
 
-A researcher is expecting a partial $\eta^2 = 0.02$ (`eta2 = 0.02`) for interaction of treatment/control (Factor A) with gender (Factor B) adjusted for the pretest (`n.covariates = 1`). 
+A researcher is expecting a partial $\eta^2 = 0.02$ (`eta2 = 0.02`) for interaction of treatment/control (Factor A) with gender (Factor B) adjusted for the pretest (`n.cov = 1`). What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.ancova(eta2 = 0.02, n.levels = c(2,2), n.cov = 1,
@@ -481,7 +759,7 @@ pwrss.f.ancova(eta2 = 0.02, n.levels = c(2,2), n.cov = 1,
 
 ### ANOVA
 
-A researcher is expecting a partial $\eta^2 = 0.02$ (`eta2 = 0.02`) for interaction of treatment/control (Factor A: two levels), gender (Factor B: two levels), and socio-economic status (Factor C: three levels). Thus, `n.levels = c(2,2,3)`. 
+A researcher is expecting a partial $\eta^2 = 0.02$ (`eta2 = 0.02`) for interaction of treatment/control (Factor A: two levels), gender (Factor B: two levels), and socio-economic status (Factor C: three levels). Thus, `n.levels = c(2,2,3)`. What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.ancova(eta2 = 0.02, n.levels = c(2,2,3),
@@ -490,26 +768,30 @@ pwrss.f.ancova(eta2 = 0.02, n.levels = c(2,2,3),
 
 ### ANCOVA
 
-A researcher is expecting a partial $\eta^2 = 0.01$ (`eta2 = 0.01`) for interaction of treatment/control (Factor A), gender (Factor B), and socio-economic status (Factor C: three levels) adjusted for the pretest (`n.covariates = 1`). 
+A researcher is expecting a partial $\eta^2 = 0.01$ (`eta2 = 0.01`) for interaction of treatment/control (Factor A), gender (Factor B), and socio-economic status (Factor C: three levels) adjusted for the pretest (`n.cov = 1`). What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.ancova(eta2 = 0.01, n.levels = c(2,2,3), n.cov = 1,
                alpha = 0.05, power = .80)
 ```
 
-`n.cov` argument has trivial effect on the results. The difference between ANOVA and ANCOVA procedure depends on whether the effect (`eta2`) is unadjusted or covariate-adjusted. 
-
 <br>
 <br>
 
-# Repeated Measures 
+# Repeated Measures (*F* Test)
 <div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
 
-## Between Effect (Group)
+**The group (between) effect**: In a one-way repeated measures ANOVA, a researcher might be interested in comparing the means of several groups (levels of a factor) with respect to an outcome variable (continuous) after controlling for the effect of time. The time effect can be thought as the improvement/grow/loss/deterioration in the outcome variable that happens naturally or due to unknown causes.  
+
+**The time (within) effect**: A researcher might be interested in comparing the means of several time points with respect to the outcome variable after controlling for the group effect. In other words, the change across time points is not due to the group membership but due to the improvement/grow/loss/deterioration in the outcome variable that happens naturally or due to unknown causes. 
+
+**The group x time interaction**: A researcher might suspect that means across groups and means across time points are not independent from each other. The amount of improvement/grow/loss/deterioration in the outcome variable depends the group membership. 
+
+## The Group Effect (Between) 
 
 **Example 1: Posttest only design with treatment and control groups.**
 
-A researcher is expecting a difference of Cohen's *d* = 0.50 on the posttest score between treatment and control groups (`n.levels = 2`), translating into $\eta^2 = 0.059$ (`eta2 = 0.059`). The test is administered at a single time point; thus, the 'number of repeated measures' is `n.rm = 1`.
+A researcher is expecting a difference of Cohen's *d* = 0.50 on the posttest score between treatment and control groups (`n.levels = 2`), translating into $\eta^2 = 0.059$ (`eta2 = 0.059`). The test is administered at a single time point; thus, the 'number of repeated measures' is `n.rm = 1`. What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.rmanova(eta2 = 0.059,  n.levels = 2, n.rm = 1,
@@ -517,12 +799,11 @@ pwrss.f.rmanova(eta2 = 0.059,  n.levels = 2, n.rm = 1,
                 type = "between")
 ```
 
-
-## Within Effect (Time)
+## The Time Effect (Within)
 
 **Example 2: Pretest-posttest design with treatment group only.**
 
-A researcher is expecting a difference of Cohen's *d* = 0.30 between posttest and pretest scores, translating into $\eta^2 = 0.022$ (`eta2 = 0.022`). The test is administered before and after the treatment; thus, the 'number of repeated measures' is `n.rm = 2`. There is treatment group but no control group (`n.levels = 1`). The researcher also expects a correlation of 0.50 (`corr.rm = 0.50`) between pretest and posttest scores. 
+A researcher is expecting a difference of Cohen's *d* = 0.30 between posttest and pretest scores, translating into $\eta^2 = 0.022$ (`eta2 = 0.022`). The test is administered before and after the treatment; thus, the 'number of repeated measures' is `n.rm = 2`. There is treatment group but no control group (`n.levels = 1`). The researcher also expects a correlation of 0.50 (`corr.rm = 0.50`) between pretest and posttest scores. What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.rmanova(eta2 = 0.022,  n.levels = 1, n.rm = 2,
@@ -530,11 +811,11 @@ pwrss.f.rmanova(eta2 = 0.022,  n.levels = 1, n.rm = 2,
                 corr.rm = 0.50, type = "within")
 ```
 
-## Between-within Interaction (Group x Time)
+## The Group x Time Interaction
 
 **Example 3: Pretest-posttest control-group design.**
 
-A researcher is expecting a difference of Cohen's *d* = 0.40 on the posttest scores between treatment and control groups (`n.levels = 2`) after controlling for pretest, translating into partial $\eta^2 = 0.038$ (`eta2 = 0.038`). The test is administered before and after the treatment; thus, the 'number of repeated measures' is `n.rm = 2`. The researcher also expects a correlation of 0.50 (`corr.rm = 0.50`) between pretest and posttest scores. 
+A researcher is expecting a difference of Cohen's *d* = 0.40 on the posttest scores between treatment and control groups (`n.levels = 2`) after controlling for pretest, translating into partial $\eta^2 = 0.038$ (`eta2 = 0.038`). The test is administered before and after the treatment; thus, the 'number of repeated measures' is `n.rm = 2`. The researcher also expects a correlation of 0.50 (`corr.rm = 0.50`) between pretest and posttest scores. What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.rmanova(eta2 = 0.038,  n.levels = 2, n.rm = 2,
@@ -542,7 +823,7 @@ pwrss.f.rmanova(eta2 = 0.038,  n.levels = 2, n.rm = 2,
                 corr.rm = 0.50, type = "between")
 ```
 
-A researcher is expecting a difference of Cohen's *d* = 0.30 between posttest and pretest scores (`n.rm = 2`) after controlling for group membership, translating into partial $\eta^2 = 0.022$ (`eta2 = 0.022`). There is both treatment and control groups (`n.levels = 2`). The researcher also expects a correlation of 0.50 (`corr.rm = 0.50`) between pretest and posttest scores. 
+A researcher is expecting a difference of Cohen's *d* = 0.30 between posttest and pretest scores (`n.rm = 2`) after controlling for group membership, translating into partial $\eta^2 = 0.022$ (`eta2 = 0.022`). There is both treatment and control groups (`n.levels = 2`). The researcher also expects a correlation of 0.50 (`corr.rm = 0.50`) between pretest and posttest scores. What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.rmanova(eta2 = 0.022,  n.levels = 2, n.rm = 2,
@@ -550,7 +831,7 @@ pwrss.f.rmanova(eta2 = 0.022,  n.levels = 2, n.rm = 2,
                 corr.rm = 0.50, type = "within")
 ```
 
-The rationale for inspecting the interaction is that the benefit of the treatment may depend on the pretest score (e.g. those with higher scores on the pretest improve or deteriorate more). A researcher is expecting an interaction effect of partial $\eta^2 = 0.01$ (`eta2 = 0.01`). The test is administered before and after the treatment; thus, the 'number of repeated measures' is `n.rm = 2`.  There is both treatment and control groups (`n.levels = 2`). The researcher also expects a correlation of 0.50 (`corr.rm = 0.50`) between pretest and posttest scores. 
+The rationale for inspecting the interaction is that the benefit of the treatment may depend on the pretest score (e.g. those with higher scores on the pretest improve or deteriorate more). A researcher is expecting an interaction effect of partial $\eta^2 = 0.01$ (`eta2 = 0.01`). The test is administered before and after the treatment; thus, the 'number of repeated measures' is `n.rm = 2`.  There is both treatment and control groups (`n.levels = 2`). The researcher also expects a correlation of 0.50 (`corr.rm = 0.50`) between pretest and posttest scores. What is the minimum required sample size? 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.f.rmanova(eta2 = 0.01,  n.levels = 2, n.rm = 2,
@@ -561,12 +842,12 @@ pwrss.f.rmanova(eta2 = 0.01,  n.levels = 2, n.rm = 2,
 <br>
 <br>
 
-# Goodness-of-fit or Independence ($\chi^2$ Test) 
+# GOF or Independence ($\chi^2$ Test) 
 <div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
 
 ## Vector of k Cells
 
-**Effect size: Cohen's W for goodness-of-fit test for 1 x k or k x 1 table.**  
+**Effect size: Cohen's W for goodness-of-fit test (1 x k or k x 1 table).**  
 
 How many subjects are needed to claim that girls choose STEM related majors less than males? 
 Check the original article at [https://www.aauw.org/resources/research/the-stem-gap/](https://www.aauw.org/resources/research/the-stem-gap/)
@@ -577,7 +858,8 @@ The null hypothesis assume 50% is women and 50% is men.
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 prob.mat <- c(0.28, 0.72) 
-pwrss.chisq.gofit(p1 = c(0.28, 0.72), p0 = c(0.50, 0.50),
+pwrss.chisq.gofit(p1 = c(0.28, 0.72), 
+                  p0 = c(0.50, 0.50),
                   alpha = 0.05, power = 0.80)
 ```
 
@@ -590,9 +872,9 @@ pwrss.chisq.gofit(w = 0.44, df = 1,
 ```
 
 
-## Contingency Table: 2 (row) x 2 (column) 
+## Contingency Table: 2 x 2
 
-**Effect size: Phi Coefficient (or Cramer's V or Cohen's W) for independence test for 2 x 2 contingency table.**
+**Effect size: Phi Coefficient (or Cramer's V or Cohen's W) for independence test (2 x 2 contingency table).**
 
 How many subjects are needed to claim that girls are underdiagnosed with ADHD?  
 Check the original article at [https://time.com/growing-up-with-adhd/](https://time.com/growing-up-with-adhd/)
@@ -620,9 +902,9 @@ pwrss.chisq.gofit(w = 0.1302134, df = 1,
 ```
 
 
-## Contingency Table: j (row) x k (column)  
+## Contingency Table: j x k
 
-**Effect size: Cramer's V (or Cohen's W) for independence test for j x k contingency tables.**
+**Effect size: Cramer's V (or Cohen's W) for independence test (j x k contingency tables).**
 
 How many subjects are needed to detect the relationship between depression severity and gender?  
 Check the original article at [https://doi.org/10.1016/j.jad.2019.11.121](https://doi.org/10.1016/j.jad.2019.11.121)
@@ -651,165 +933,10 @@ pwrss.chisq.gofit(w = 0.03022008, df = 4,
 <br>
 <br>
 
-# Logistic Regression (Wald's *z* Test)
+# Correlation(s) (*z* Test)
 <div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
 
-In logistic regression a binary outcome variable (0/1: failed/passed, dead/alive, absent/present) is modeled by predicting probability of being in group 1 ($P_1$) via logit (natural logarithm of odds) transformation. The base rate $P_0$ is the overall probability of being in group 1 without influence of predictors in the model. When predictors are added, under alternative hypothesis, the probability of being in group 1 ($P_1$) deviate from $P_0$; whereas under null it is same as $P_0$. A model with one main predictor ($X_1$) and two other covariates ($X_2$ and $X_3$) can be constructed as
-
-$$\begin{eqnarray}
-  ln(\frac{P_1}{1- P_1}) &=& \beta_{0} + \color{red} {\beta_{1} X_{1}} + \beta_{2}X_{2} + \beta_{3}X_{3} \newline
-  \end{eqnarray}$$
-
-where <br> 
-$$\beta_0 = ln(\frac{P_0}{1- P_0})$$ <br> 
-$$\beta_1 = ln(\frac{P_1}{1- P_1} / \frac{P_0}{1- P_0})$$ <br> 
-Odds ratio is defined as 
-$$OR = exp(\beta_1) = \frac{P_1}{1- P_1} / \frac{P_0}{1- P_0}$$ <br> 
-
-Assume that the multiple squared correlation between $X_1$ and ($X_2$,$X_3$) is $R^2_{X_1, (X_2,X_3)} = 0.20$. This is 0 (zero) by default implying that there are no covariates in the model besides the main predictor. It can be found in the form of adjusted $R^2$ via regressing $X_1$ on $X_2$ and $X_3$. <br>
-
-There are three types of specification to power calculations; (i) probability specification, (ii) odds ratio specification, and (iii) regression coefficient specification (as in standard software output). 
-
-Assume that the expected base rate is $P_0 = 0.15$. When a continuous predictor $X_1$ (follows normal) is added along with other covariates, the probability of being in group 1 becomes $P_1 = 0.10$. This means that increasing predictor $X_1$ by one unit reduces probability of being in group 1 from 0.15 to 0.10. What is the minimum required sample size? 
-
-**Probability specification**: 
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-pwrss.z.logreg(p0 = 0.15, p1 = 0.10, r2.other.x = 0.20,
-               power = 0.80, alpha = 0.05, 
-               dist = "normal")
-```
-
-**Odds ratio specification**: 
-$$OR = \frac{P_1}{1-P1} / \frac{P_0}{1-P_0} = \frac{0.10}{1-0.10} / \frac{0.15}{1-0.15} = 0.6296$$
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-pwrss.z.logreg(p0 = 0.15, odds.ratio = 0.6296, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = "normal")
-```
-
-**Regression coefficient specification**: 
-$$\beta_1 = ln(\frac{P_1}{1-P1} / \frac{P_0}{1-P_0}) = ln(0.6296) = -0.4626$$ 
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = "normal")
-```
-
-By default, the mean and standard deviation of a normally distributed main predictor is 0 and 1, respectively. They can be changed. In the following example the mean and standard deviation is 10 and 2, respectively. 
-
-**Change parameters of distribution of predictor X**: 
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-dist.x <- list(dist = "normal", mean = 10, sd = 2)
-pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = dist.x)
-```
-
-The function accomodates other types of distribution. For example, the main predictor can be binary (e.g. treatment/control). Often a balanced sample is desired where half of the sample is in treatment group and the other half is in control group (`prob = 0.50` by default). 
-
-**Change distribution family of predictor X**:
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = "bernoulli")
-```
-
-**Change treatment group allocation rate of binary predictor X** (`prob = 0.40`): 
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-dist.x <- list(dist = "bernoulli", prob = 0.40)
-pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = dist.x)
-```
-
-<br>
-<br>
-
-# Poisson Regression (Wald's *z* Test)
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
-
-In poisson regression a count outcome variable (e.g. number of hospital/store/website visits, number of absence/dead/purchase in a day/week/month) is modeled by predicting incidence rate ($\lambda$) via logarithmic (natural logarithm of rates) transformation. A model with one main predictor ($X_1$) and two other covariates ($X_2$ and $X_3$) can be constructed as
-
-$$\begin{eqnarray}
-  ln(\lambda) &=& \beta_{0} + \color{red} {\beta_{1} X_{1}} + \beta_{2}X_{2} + \beta_{3}X_{3} \newline
-  \end{eqnarray}$$
-
-where $exp(\beta_0)$ is the base incidence rate. <br> 
-$$\beta_1 = ln(\frac{\lambda(X_1=1)}{\lambda(X_1=0)})$$ <br> 
-Rate ratio is defined as 
-$$exp(\beta_1) = \frac{\lambda(X_1=1)}{\lambda(X_1=0)}$$<br>
-
-There are two types of specification; (i) rate ratio specification (exponentiated regression coefficient), and (ii) the raw regression coefficient specification (as in standard software output). 
-
-Assume that the expected base rate is $exp(0.50) = 1.65$ and when a continuous predictor $X_1$ (follows normal) is added to the model along with other covariates the expected rate becomes $exp(-0.10) = 0.905$. This means that increasing predictor $X_1$ by one unit reduces reduces the mean incidence rate from 1.65 to 0.905. What is the minimum required sample size? 
-
-**Regression coefficient specification**:
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-pwrss.z.poisreg(beta0 = 0.50, beta1 = -0.10,
-                power = 0.80, alpha = 0.05, 
-                dist = "normal")
-```
-
-**Rate ratio specification**:
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-pwrss.z.poisreg(exp.beta0 = exp(0.50),
-                exp.beta1 = exp(-0.10),
-                power = 0.80, alpha = 0.05, 
-                dist = "normal")
-```
-
-**Change parameters of distribution of predictor X**: 
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-dist.x <- list(dist = "normal", mean = 10, sd = 2)
-pwrss.z.poisreg(exp.beta0 = exp(0.50),
-                exp.beta1 = exp(-0.10),
-                alpha = 0.05, power = 0.80,
-                dist = dist.x)
-```
-
-The function accomodates other types of distribution. For example, the main predictor can be binary (e.g. treatment/control). 
-
-**Regression coefficient specification**:
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-pwrss.z.poisreg(beta0 = 0.50, beta1 = -0.10,
-                alpha = 0.05, power = 0.80,
-                dist = "bernoulli")
-```
-
-**Rate ratio specification**:
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-pwrss.z.poisreg(exp.beta0 = exp(0.50),
-                exp.beta1 = exp(-0.10),
-                alpha = 0.05, power = 0.80,
-                dist = "bernoulli")
-```
-
-**Change treatment group allocation rate of the binary predictor X** (`prob = 0.40`):
-
-```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
-dist.x <- list(dist = "bernoulli", prob = 0.40)
-pwrss.z.poisreg(exp.beta0 = exp(0.50),
-                exp.beta1 = exp(-0.10),
-                alpha = 0.05, power = 0.80,
-                dist = dist.x)
-```
-
-<br>
-<br>
-
-# Single Correlation
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+## One Correlation 
 
 **One-sided Test**: Assume that the expected correlation is 0.20 and it is greater than 0.10. What is the minimum required sample size? 
 
@@ -827,11 +954,7 @@ pwrss.z.corr(r = 0.20, r0 = 0,
              alternative = "not equal")
 ```
 
-<br>
-<br>
-
-# Two Correlations (Independent Samples) 
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+## Difference between Two Correlations (Independent)
 
 Assume that the expected correlations in the first and second groups are 0.30 and 0.20, respectively (`r1 = 0.30` and `r2 = 0.20`). 
 
@@ -853,8 +976,10 @@ pwrss.z.2corrs(r1 = 0.30, r2 = 0.20,
 <br>
 <br>
 
-# Single Proportion 
+# Proportion(s)  (*z* Test)
 <div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+
+## One Proportion
 
 In the following examples `p` is the proportion under alternative hypothesis and `p0` is the proportion under null hypothesis. 
 
@@ -914,7 +1039,7 @@ pwrss.z.prop(p = 0.55, p0 = 0.50, margin = 0.01,
              alternative = "superior")
 ```
 
-**Equivalence Test*: Expecting `p - p0` between -0.01 and 0.01.
+**Equivalence Test**: Expecting `p - p0` between -0.01 and 0.01.
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 pwrss.z.prop(p = 0.50, p0 = 0.50, margin = 0.01,
@@ -922,11 +1047,7 @@ pwrss.z.prop(p = 0.50, p0 = 0.50, margin = 0.01,
              alternative = "equivalent")
 ```
 
-<br>
-<br>
-
-# Two Proportions (Independent Samples)
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+## Difference between Two Proportions (Independent)
 
 In the following examples `p1` and `p2` are proportions for the first and second groups under alternative hypothesis. The null hypothesis state `p1 = p2` or `p1 - p2 = 0`.  
 
@@ -993,9 +1114,19 @@ pwrss.z.2props(p1 = 0.50, p2 = 0.50, margin = 0.01,
                alternative = "equivalent")
 ```
 
---o-- <br>
-*The end of the document.* 
-<div style = "background-color:rgb(245, 245, 245); padding:5px 5px 5px 5px;">
+<div style = "background-color:rgb(245, 245, 245); padding:5px 5px 5px 5px; margin:2px 0px 10px 0px;">
 Please send any bug reports, feedback or questions to [bulusmetin [at] gmail.com](mailto:bulusmetin@gmail.com). 
 </div>
+
+--o-- <br>
+
+This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"> Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License </a>.
+
+[![License](license.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+
+
+
+
+
 

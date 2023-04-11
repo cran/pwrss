@@ -1,11 +1,11 @@
-\name{Generic F Test}
+\name{power.f.test}
 \alias{power.f.test}
 
-\title{Statistical Power for the Generic F Test with (optional) Type I and Type II Error Plots}
+\title{Statistical Power for the Generic F Test}
 
 \description{
 Calculates statistical power for the generic F test with (optional) Type I and Type II error plots.
-Unlike other more specific functions \code{power.f.test()} function allows specification of multiple values for one parameter at a time (only when \code{plot = FALSE}).
+Unlike other more specific functions \code{power.f.test()} function allows multiple values for one parameter at a time (only when \code{plot = FALSE}).
 }
 
 \usage{
@@ -17,9 +17,9 @@ power.f.test(ncp, df1, df2, alpha = 0.05, plot = TRUE,
 \arguments{
   \item{ncp}{non-centrality parameter (lambda)}
   \item{alpha}{probability of type I error}
-  \item{df1}{numerator degrees of freedom for the F test}
-  \item{df2}{denominator degrees of freedom for the F test}
-  \item{plot}{if \code{TRUE} plots Type I and Type II error plots}
+  \item{df1}{numerator degrees of freedom}
+  \item{df2}{denominator degrees of freedom}
+  \item{plot}{if \code{TRUE} plots Type I and Type II error}
   \item{plot.main}{plot title}
   \item{plot.sub}{plot subtitle}
   \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}

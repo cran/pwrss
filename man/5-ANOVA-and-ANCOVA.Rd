@@ -1,12 +1,12 @@
-\name{Analysis of Variance (ANOVA) or Analysis of Covariance (ANCOVA) (F test)}
+\name{pwrss.f.ancova}
 \alias{pwrss.f.anova}
 \alias{pwrss.f.ancova}
 
 
-\title{Analysis of Variance (ANOVA) or Analysis of Covariance (ANCOVA) (F test)}
+\title{Analysis of (Co)Variance (F test)}
 
 \description{
-Calculates statistical power or minimum required sample size for One-way/Two-way/Three-way Analysis of Variance (ANOVA) and Analysis of Covariance (ANCOVA). Set \code{n.covariates = 0} for ANOVA, and \code{n.covariates > 0} for ANCOVA. Note that in each case, the effect size (partial) (\code{eta2} or \code{f2}) should be obtained from the relevant model.
+Calculates statistical power or minimum required sample size for one-way, two-way, or three-way ANOVA/ANCOVA. Set \code{n.covariates = 0} for ANOVA, and \code{n.covariates > 0} for ANCOVA. Note that in each case, the effect size (partial) (\code{eta2} or \code{f2}) should be obtained from the relevant model.
 
 Formulas are validated using Monte Carlo simulation, G*Power, and tables in PASS documentation.
 }
@@ -20,20 +20,20 @@ pwrss.f.ancova(eta2 = 0.01, f2 = eta2 / (1 - eta2),
 }
 
 \arguments{
-  \item{eta2}{Expected Eta-squared}
-  \item{f2}{Cohen's f2 (an alternative to \code{eta2} specification). f2 = eta2 / (1 - eta2)}
+  \item{eta2}{expected Eta-squared}
+  \item{f2}{expected Cohen's f2 (an alternative to \code{eta2} specification). f2 = eta2 / (1 - eta2)}
   \item{n.way}{1 for one-way, 2 for two-way, 3 for three-way ANOVA or ANCOVA. The default takes its value from the length of \code{n.levels}}
-  \item{n.levels}{number of levels (groups) in each factor. For two factors each having two levels (groups) use e.g. c(2,2), for three factors each having two levels (groups) use e.g. c(2,2,2)}
+  \item{n.levels}{number of levels (groups) in each factor. For example, for two factors each having two levels (groups) use e.g. c(2,2), for three factors each having two levels (groups) use e.g. c(2,2,2)}
   \item{n.covariates}{number of covariates in the ANCOVA model}
   \item{n}{total sample size}
   \item{alpha}{probability of type I error}
   \item{power}{statistical power \eqn{(1-\beta)}}
-  \item{verbose}{if \code{FALSE} no output is printed on the console. Useful for simulation, plotting, and whatnot}
+  \item{verbose}{if \code{FALSE} no output is printed on the console}
 }
 
 \value{
   \item{parms}{list of parameters used in calculation}
-  \item{test}{type of the statistical test (z, t or F?)}
+  \item{test}{type of the statistical test (F test)}
   \item{df1}{numerator degrees of freedom}
   \item{df2}{denominator degrees of freedom}
   \item{ncp}{non-centrality parameter}
@@ -112,7 +112,7 @@ pwrss.f.ancova(eta2 = 0.02, n.levels = c(2,2), n.cov = 1,
 }
 
 \references{
-Bulus, M., & Polat, C. (2023). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Under review. \url{https://osf.io/ua5fc}
+Bulus, M., & Polat, C. (in press). pwrss R paketi ile istatistiksel guc analizi [Statistical power analysis with pwrss R package]. Ahi Evran Universitesi Kirsehir Egitim Fakultesi Dergisi. \url{https://osf.io/ua5fc/download/}
 
 Cohen, J. (1988). Statistical power analysis for the behavioral sciences (2nd ed.). Lawrence Erlbaum Associates.
 }

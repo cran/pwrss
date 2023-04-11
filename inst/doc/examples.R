@@ -15,11 +15,11 @@ power.z.test(ncp = 1.96, alpha = 0.05,
              alternative = "not equal", plot = TRUE)
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE----
-power.chisq.test(ncp = 2, df = 98,
+power.chisq.test(ncp = 15, df = 20,
                  alpha = 0.05, plot = TRUE)
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE----
-power.f.test(ncp = 2, df1 = 2, df2 = 98,
+power.f.test(ncp = 3, df1 = 2, df2 = 98,
              alpha = 0.05, plot = TRUE)
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE----
@@ -89,14 +89,14 @@ pwrss.t.2means(mu1 = 0.1883, paired = TRUE, paired.r = 0.50,
                alternative = "not equal")
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE----
-pwrss.np.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, kappa = 1, 
+pwrss.np.2groups(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, kappa = 1, 
                power = .80, alpha = 0.05,
                alternative = "not equal")
 
 
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE----
-pwrss.np.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
+pwrss.np.2groups(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
                paired = TRUE, paired.r = 0.50,
                power = .80, alpha = 0.05,
                alternative = "not equal")
@@ -118,17 +118,17 @@ pwrss.t.2means(mu1 = 30, mu2 = 30, sd1 = 12, sd2 = 8,
                alternative = "equivalent")
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE----
-pwrss.np.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
+pwrss.np.2groups(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
                margin = -1, power = 0.80,
                alternative = "non-inferior")
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE----
-pwrss.np.2means(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
+pwrss.np.2groups(mu1 = 30, mu2 = 28, sd1 = 12, sd2 = 8, 
                margin = 1, power = 0.80,
                alternative = "superior")
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE----
-pwrss.np.2means(mu1 = 30, mu2 = 30, sd1 = 12, sd2 = 8, 
+pwrss.np.2groups(mu1 = 30, mu2 = 30, sd1 = 12, sd2 = 8, 
                margin = 1, power = 0.80,
                alternative = "equivalent")
 
@@ -150,50 +150,138 @@ pwrss.t.reg(beta1 = 0.60, sdy = 12, sdx = 4, k = 3, r2 = 0.30,
 
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-pwrss.t.reg(beta1 = 0.20, k = 3, r2 = 0.30, sdx = sqrt(0.50*(1-0.50)),
+p <- 0.50
+pwrss.t.reg(beta1 = 0.20, k = 3, r2 = 0.30, sdx = sqrt(p*(1-p)),
             power = .80, alpha = 0.05, alternative = "not equal")
 
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+p <- 0.50
 pwrss.t.reg(beta1 = 0.20, beta0 = 0.10, margin = -0.05, 
-            k = 3, r2 = 0.30, sdx = sqrt(0.50*(1-0.50)),
+            k = 3, r2 = 0.30, sdx = sqrt(p*(1-p)),
             power = .80, alpha = 0.05, alternative = "non-inferior")
 
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+p <- 0.50
 pwrss.t.reg(beta1 = 0.20, beta0 = 0.10, margin = 0.05, 
-            k = 3, r2 = 0.30, sdx = sqrt(0.50*(1-0.50)),
+            k = 3, r2 = 0.30, sdx = sqrt(p*(1-p)),
             power = .80, alpha = 0.05, alternative = "superior")
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+p <- 0.50
 pwrss.t.reg(beta1 = 0.20, beta0 = 0.20, margin = 0.05, 
-            k = 3, r2 = 0.30, sdx = sqrt(0.50*(1-0.50)),
+            k = 3, r2 = 0.30, sdx = sqrt(p*(1-p)),
             power = .80, alpha = 0.05, alternative = "equivalent")
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-# X (cont.), M (cont.) , Y (cont.)
+pwrss.z.logreg(p0 = 0.15, p1 = 0.10, r2.other.x = 0.20,
+               power = 0.80, alpha = 0.05, 
+               dist = "normal")
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+pwrss.z.logreg(p0 = 0.15, odds.ratio = 0.6296, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = "normal")
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = "normal")
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+dist.x <- list(dist = "normal", mean = 25, sd = 8)
+
+pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = dist.x)
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = "bernoulli")
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+dist.x <- list(dist = "bernoulli", prob = 0.40)
+
+pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
+               alpha = 0.05, power = 0.80,
+               dist = dist.x)
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+pwrss.z.poisreg(beta0 = 0.50, beta1 = -0.10,
+                power = 0.80, alpha = 0.05, 
+                dist = "normal")
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+pwrss.z.poisreg(exp.beta0 = exp(0.50),
+                exp.beta1 = exp(-0.10),
+                power = 0.80, alpha = 0.05, 
+                dist = "normal")
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+dist.x <- list(dist = "normal", mean = 25, sd = 8)
+
+pwrss.z.poisreg(exp.beta0 = exp(0.50),
+                exp.beta1 = exp(-0.10),
+                alpha = 0.05, power = 0.80,
+                dist = dist.x)
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+pwrss.z.poisreg(beta0 = 0.50, beta1 = -0.10,
+                alpha = 0.05, power = 0.80,
+                dist = "bernoulli")
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+pwrss.z.poisreg(exp.beta0 = exp(0.50),
+                exp.beta1 = exp(-0.10),
+                alpha = 0.05, power = 0.80,
+                dist = "bernoulli")
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+dist.x <- list(dist = "bernoulli", prob = 0.40)
+
+pwrss.z.poisreg(exp.beta0 = exp(0.50),
+                exp.beta1 = exp(-0.10),
+                alpha = 0.05, power = 0.80,
+                dist = dist.x)
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+# mediation model with base R-squared values
 pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10,
             power = 0.80, alpha = 0.05)
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-# X (binary), M (cont.) , Y (cont.)
-p <- 0.50 # proportion of subjects in one group
+# base R-squared values are 0 (zero)
+# do not specify 'cp' 
+pwrss.z.med(a = 0.25, b = 0.25, 
+            r2m = 0, r2y = 0,
+            power = 0.80, alpha = 0.05)
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+p <- 0.50 # proportion of subjects in one of the groups
 pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10, 
             sdx = sqrt(p*(1-p)), 
             power = 0.80, alpha = 0.05)
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-# X (cont.), M (cont.) , Y (cont.)
+# binary X
+p <- 0.50 # proportion of subjects in one of the groups
+pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10, 
+            sdx = sqrt(p*(1-p)), 
+            n = 300, alpha = 0.05)
+
+## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
+# continuous X
 pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10,
-            r2m.x = 0.50, r2y.mx = 0.50, 
+            r2m = 0.50, r2y = 0.50, 
             power = 0.80, alpha = 0.05)
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-# X (binary), M (cont.) , Y (cont.)
-p <- 0.50 # proportion of subjects in one group
+# binary X
+p <- 0.50 # proportion of subjects in one of the groups
 pwrss.z.med(a = 0.25, b = 0.25, cp = 0.10,
-            sdx = sqrt(p*(1-p)), 
-            r2m.x = 0.50, r2y.mx = 0.50, 
+            sdx = sqrt(p*(1-p)), r2y = 0.50, 
             power = 0.80, alpha = 0.05)
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
@@ -247,7 +335,8 @@ pwrss.f.rmanova(eta2 = 0.01,  n.levels = 2, n.rm = 2,
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
 prob.mat <- c(0.28, 0.72) 
-pwrss.chisq.gofit(p1 = c(0.28, 0.72), p0 = c(0.50, 0.50),
+pwrss.chisq.gofit(p1 = c(0.28, 0.72), 
+                  p0 = c(0.50, 0.50),
                   alpha = 0.05, power = 0.80)
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
@@ -281,74 +370,6 @@ pwrss.chisq.gofit(p1 = prob.mat,
 pwrss.chisq.gofit(w = 0.03022008, df = 4,
                   alpha = 0.05, power = 0.80)
 
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-pwrss.z.logreg(p0 = 0.15, p1 = 0.10, r2.other.x = 0.20,
-               power = 0.80, alpha = 0.05, 
-               dist = "normal")
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-pwrss.z.logreg(p0 = 0.15, odds.ratio = 0.6296, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = "normal")
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = "normal")
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-dist.x <- list(dist = "normal", mean = 10, sd = 2)
-pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = dist.x)
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = "bernoulli")
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-dist.x <- list(dist = "bernoulli", prob = 0.40)
-pwrss.z.logreg(p0 = 0.15, beta1 = -0.4626, r2.other.x = 0.20,
-               alpha = 0.05, power = 0.80,
-               dist = dist.x)
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-pwrss.z.poisreg(beta0 = 0.50, beta1 = -0.10,
-                power = 0.80, alpha = 0.05, 
-                dist = "normal")
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-pwrss.z.poisreg(exp.beta0 = exp(0.50),
-                exp.beta1 = exp(-0.10),
-                power = 0.80, alpha = 0.05, 
-                dist = "normal")
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-dist.x <- list(dist = "normal", mean = 10, sd = 2)
-pwrss.z.poisreg(exp.beta0 = exp(0.50),
-                exp.beta1 = exp(-0.10),
-                alpha = 0.05, power = 0.80,
-                dist = dist.x)
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-pwrss.z.poisreg(beta0 = 0.50, beta1 = -0.10,
-                alpha = 0.05, power = 0.80,
-                dist = "bernoulli")
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-pwrss.z.poisreg(exp.beta0 = exp(0.50),
-                exp.beta1 = exp(-0.10),
-                alpha = 0.05, power = 0.80,
-                dist = "bernoulli")
-
-## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
-dist.x <- list(dist = "bernoulli", prob = 0.40)
-pwrss.z.poisreg(exp.beta0 = exp(0.50),
-                exp.beta1 = exp(-0.10),
-                alpha = 0.05, power = 0.80,
-                dist = dist.x)
 
 ## ---- message = FALSE, fig.width = 7, fig.height = 5, results = TRUE----------
 pwrss.z.corr(r = 0.20, r0 = 0.10,
