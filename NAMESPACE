@@ -1,23 +1,44 @@
-importFrom('stats', 'pnorm', 'qnorm', 'dnorm', 'rnorm',
-           'dpois', 'qpois', 'dunif', 'dlnorm', 'qlnorm', 'dexp', 'qexp', 'dbinom',
-           'quantile', 'pt', 'qt', "dt", 'pf', 'qf', 'df',
-           'pchisq', 'dchisq', 'qchisq',
-           'uniroot', 'integrate')
-importFrom("graphics", "plot", "abline", "points", "legend", "layout", "polygon", "title", "par",
-           "axis", "box", "lines", "plot.new", "plot.window", "segments", "text")
+importFrom('stats', 'pnorm', 'qnorm', 'dnorm', 'rnorm', 'dpois', 'qpois', 'dunif',
+           'dlnorm', 'qlnorm', 'dexp', 'qexp', 'dbinom', 'pbinom','qbinom', 'quantile',
+           'pt', 'qt', "dt", 'pf', 'qf', 'df', 'pchisq', 'dchisq', 'qchisq', 'dhyper',
+           'phyper', 'qhyper', 'dbeta', 'qtukey', 'uniroot', 'integrate', 'p.adjust',
+           'contr.treatment', 'contr.sum', 'contr.helmert','contr.poly', 'model.matrix')
+importFrom("graphics", "plot", "abline", "points", "legend", "layout", "polygon", "title",
+           "par", "axis", "box", "lines", "plot.new", "plot.window", "segments", "text")
 importFrom("grDevices", "adjustcolor", "dev.size")
+importFrom("utils", "tail")
 
 S3method(plot, pwrss)
-export(pwrss.z.prop)
-export(pwrss.z.2props)
-export(pwrss.z.mean)
-export(pwrss.t.mean)
-export(pwrss.z.2means)
-export(pwrss.t.2means)
+
+export(power.np.wilcox)
+export(power.np.wilcoxon)
+
 export(pwrss.np.2means)
 export(pwrss.np.2groups)
-export(pwrss.z.corr)
-export(pwrss.z.2corrs)
+
+export(power.exact.oneprop)
+export(power.exact.twoprops)
+export(power.exact.twoprop)
+export(power.exact.fisher)
+export(power.exact.mcnemar)
+export(power.exact.twoprops.fisher)
+export(power.exact.twoprops.mcnemar)
+
+export(power.z.med)
+export(power.z.mediation)
+export(power.z.logreg)
+export(power.z.logistic)
+export(power.z.poisreg)
+export(power.z.poisson)
+export(power.z.onecor)
+export(power.z.twocors)
+export(power.z.steiger)
+export(power.z.twocors.steiger)
+export(power.z.twocor)
+export(power.z.oneprop)
+export(power.z.twoprops)
+export(power.z.twoprop)
+
 export(pwrss.z.med)
 export(pwrss.z.mediation)
 export(pwrss.z.reg)
@@ -26,14 +47,62 @@ export(pwrss.z.logreg)
 export(pwrss.z.logistic)
 export(pwrss.z.poisreg)
 export(pwrss.z.poisson)
+export(pwrss.z.corr)
+export(pwrss.z.2corrs)
+export(pwrss.z.prop)
+export(pwrss.z.2props)
+export(pwrss.z.mean)
+export(pwrss.z.2means)
+
+export(power.t.student)
+export(power.t.welch)
+export(power.t.reg)
+export(power.t.regression)
+
+export(pwrss.t.2means)
+export(pwrss.t.mean)
 export(pwrss.t.reg)
 export(pwrss.t.regression)
+
+export(power.f.reg)
+export(power.f.regression)
+export(power.f.ancova)
+export(power.f.ancova.keppel)
+export(power.f.ancova.shieh)
+export(power.f.mixed.anova)
+
 export(pwrss.f.reg)
 export(pwrss.f.regression)
 export(pwrss.f.ancova)
 export(pwrss.f.rmanova)
+
+export(power.chisq.gof)
+
 export(pwrss.chisq.gofit)
+
 export(power.t.test)
 export(power.z.test)
 export(power.f.test)
 export(power.chisq.test)
+export(power.binom.test)
+
+export(power.t.contrast)
+export(power.t.contrasts)
+export(factorial.contrasts)
+
+export(joint.probs.2x2)
+export(marginal.probs.2x2)
+export(cor.to.z)
+export(cors.to.q)
+export(q.to.cors)
+export(f.to.etasq)
+export(etasq.to.f)
+export(f.to.rsq)
+export(rsq.to.f)
+export(probs.to.w)
+export(probs.to.h)
+export(d.to.cles)
+export(cles.to.d)
+export(means.to.d)
+
+export(inflate.sample)
