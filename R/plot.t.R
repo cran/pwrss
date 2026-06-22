@@ -8,39 +8,39 @@
                          type = 1, ticks = TRUE) {
 
 
-  plot.window.dim <- dev.size("cm")
+  plot.window.dim <- grDevices::dev.size("cm")
   cex.axis <- min(plot.window.dim[1] / 15, plot.window.dim[2] / 15)
 
   ifelse(type == 1,
-         color <- adjustcolor(2, alpha.f = 1),
-         color <- adjustcolor(4, alpha.f = 1))
+         color <- grDevices::adjustcolor(2, alpha.f = 1),
+         color <- grDevices::adjustcolor(4, alpha.f = 1))
 
   # non-central t function
   funt <- function(x) {
-    dt(x, df = df, ncp = ncp)
+    stats::dt(x, df = df, ncp = ncp)
   }
 
   # plot central t distribution
-  plot(funt, xlim = xlim, ylim = ylim,
-       xaxs = "i", yaxs = "i", bty = "l",
-       col = color, lwd = 2, lty = type,
-       xlab = "", ylab = "",
-       xaxt = "n", yaxt = "n",
-       cex.axis = cex.axis)
+  graphics::plot(funt, xlim = xlim, ylim = ylim,
+                 xaxs = "i", yaxs = "i", bty = "l",
+                 col = color, lwd = 2, lty = type,
+                 xlab = "", ylab = "",
+                 xaxt = "n", yaxt = "n",
+                 cex.axis = cex.axis)
 
   if (ticks) {
 
-    axis(side = 1,
-         #at = seq(0, size, 20),
-         #labels = seq(0, size, 20),
-         tick = TRUE,
-         col.ticks = "gray30", col.axis = "gray30")
+    graphics::axis(side = 1,
+                   #at = seq(0, size, 20),
+                   #labels = seq(0, size, 20),
+                   tick = TRUE,
+                   col.ticks = "gray30", col.axis = "gray30")
 
-    axis(side = 2,
-         #at = seq(0, ymax, 0.02),
-         #labels = seq(0, ymax, 0.02),
-         tick = TRUE,
-         col.ticks = "gray30", col.axis = "gray30")
+    graphics::axis(side = 2,
+                   #at = seq(0, ymax, 0.02),
+                   #labels = seq(0, ymax, 0.02),
+                   tick = TRUE,
+                   col.ticks = "gray30", col.axis = "gray30")
 
   } # ticks
 
@@ -50,13 +50,14 @@
 .paint.t.dist <- function(ncp = 0, df = Inf, xlim, type = 1) {
 
   color <- switch(type,
-                   `1` = adjustcolor(2, alpha.f = 0.3),
-                   `2` = adjustcolor(4, alpha.f = 0.3),
-                   `3` = adjustcolor(1, alpha.f = 0.3))
+                  `1` = grDevices::adjustcolor(2, alpha.f = 0.3),
+                  `2` = grDevices::adjustcolor(4, alpha.f = 0.3),
+                  `3` = grDevices::adjustcolor(1, alpha.f = 0.3),
+                  `s` = grDevices::adjustcolor(2, alpha.f = 0.6))
 
   # non-central t function
   funt <- function(x) {
-    dt(x, df = df, ncp = ncp)
+    stats::dt(x, df = df, ncp = ncp)
   }
 
   x <- seq(min(xlim), max(xlim), by = .001)
@@ -65,111 +66,81 @@
   ys <- c(y, rep(0, length(y)))
 
   if (type == 1 || type == 2) {
-    polygon(x = xs, y = ys, col = color, border = NA)
+    graphics::polygon(x = xs, y = ys, col = color, border = NA)
   } else if (type == 3) {
-    polygon(x = xs, y = ys, col = color, density = 25, angle = 45, border = NA)
+    graphics::polygon(x = xs, y = ys, col = color, density = 25, angle = 45, border = NA)
   }
 
-  prob <- pt(max(xlim), df = df, ncp = ncp, lower.tail = TRUE) -
-    pt(min(xlim), df = df, ncp = ncp, lower.tail = TRUE)
-
-  return(invisible(prob))
+  invisible(stats::pt(max(xlim), df = df, ncp = ncp, lower.tail = TRUE) -
+            stats::pt(min(xlim), df = df, ncp = ncp, lower.tail = TRUE))
 
 }
 
 .plot.t.t1t2 <- function(ncp, null.ncp = 0, df = Inf, alpha = 0.05,
                          alternative = c("one.sided", "two.sided", "two.one.sided"),
-                         plot.main = NULL, plot.sub = NULL) {
+                         plot.main = NULL, plot.sub = NULL, digits = 2) {
 
   alternative <- tolower(match.arg(alternative))
+
+  check.numeric(ncp)
+  null.ncp <- check.margins(null.ncp, check.numeric, alternative)
+  if (!is.numeric(df) || length(df) != 1 || df < 1)
+    stop("`df` must be numeric, have a value of at least 1 and have a length of 1.", call. = FALSE)
+  check.proportion(alpha)
 
   # critical t line segment coordinates
   if (alternative == "two.one.sided") {
 
-    ifelse(is.numeric(ncp) && length(ncp) == 1,
-           valid.ncp <- TRUE,
-           valid.ncp <- FALSE)
-
-    ifelse(is.numeric(null.ncp) && length(null.ncp) %in% c(1, 2),
-           valid.null.ncp <- TRUE,
-           valid.null.ncp <- FALSE)
-
-    if (isFALSE(valid.ncp)) stop("'ncp' must be numeric and of length one for equivalence tests.", call. = FALSE)
-    if (isFALSE(valid.null.ncp)) stop("'null.ncp' must be numeric and of length one (absolute value) or length two (with lower and upper bounds) for the equivalence test.", call. = FALSE)
-
-    if (length(null.ncp) == 1) null.ncp <- c(min(c(-null.ncp, null.ncp)), max(-null.ncp, null.ncp))
-
     # equivalence test
     if (ncp > min(null.ncp) && ncp < max(null.ncp)) {
 
-      t.alpha.upper <- qt(alpha, df = df, ncp = min(null.ncp), lower.tail = FALSE)
-      t.alpha.lower <- qt(alpha, df = df, ncp = max(null.ncp), lower.tail = TRUE)
+      t.alpha.upper <- stats::qt(alpha, df = df, ncp = min(null.ncp), lower.tail = FALSE)
+      t.alpha.lower <- stats::qt(alpha, df = df, ncp = max(null.ncp), lower.tail = TRUE)
       t.alpha <- c(t.alpha.lower, t.alpha.upper)
 
-      yt.alpha <- dt(rev(t.alpha), df = df, ncp = null.ncp)
+      yt.alpha <- stats::dt(rev(t.alpha), df = df, ncp = null.ncp)
 
     }
 
     # minimum effect test
     if (ncp < min(null.ncp) || ncp > max(null.ncp)) {
 
-      t.alpha.lower <- qt(alpha / 2, df = df, ncp = min(null.ncp), lower.tail = TRUE)
-      t.alpha.upper <- qt(alpha / 2, df = df, ncp = max(null.ncp), lower.tail = FALSE)
+      t.alpha.lower <- stats::qt(alpha / 2, df = df, ncp = min(null.ncp), lower.tail = TRUE)
+      t.alpha.upper <- stats::qt(alpha / 2, df = df, ncp = max(null.ncp), lower.tail = FALSE)
       t.alpha <- c(t.alpha.lower, t.alpha.upper)
 
-      yt.alpha <- dt(t.alpha, df = df, ncp = null.ncp)
+      yt.alpha <- stats::dt(t.alpha, df = df, ncp = null.ncp)
 
     }
 
   } else if (alternative == "two.sided") {
 
-    ifelse(is.numeric(ncp) && length(ncp) == 1,
-           valid.ncp <- TRUE,
-           valid.ncp <- FALSE)
+    t.alpha.upper <- stats::qt(alpha / 2, df = df, ncp = null.ncp, lower.tail = FALSE)
+    t.alpha.lower <- stats::qt(alpha / 2, df = df, ncp = null.ncp, lower.tail = TRUE)
+    t.alpha <- c(t.alpha.lower, t.alpha.upper)
 
-    ifelse(is.numeric(null.ncp) && length(null.ncp) == 1,
-           valid.null.ncp <- TRUE,
-           valid.null.ncp <- FALSE)
+    yt.alpha <- stats::dt(t.alpha, df = df, ncp = null.ncp)
 
-    if (isFALSE(valid.ncp) || isFALSE(valid.null.ncp)) stop("'ncp' or 'null.ncp' must be numeric, positive (absolute value), and of length one for the two-sided test.", call. = FALSE)
-    # if (ncp < null.ncp) stop("'ncp' must be equal or greater than 'null.ncp' for the two-sided test.", .call = FALSE)
-
-    t.alpha.upper <- qt(alpha / 2, df = df, ncp = null.ncp, lower.tail = FALSE)
-    t.alpha.lower <- qt(alpha / 2, df = df, ncp = null.ncp, lower.tail = TRUE)
-    t.alpha <- rbind(t.alpha.lower, t.alpha.upper)
-
-    yt.alpha <- dt(t.alpha, df = df, ncp = null.ncp)
-
-  } else {
-
-    ifelse(is.numeric(ncp) && length(ncp) == 1,
-           valid.ncp <- TRUE,
-           valid.ncp <- FALSE)
-
-    ifelse(is.numeric(null.ncp) && length(null.ncp) == 1,
-           valid.null.ncp <- TRUE,
-           valid.null.ncp <- FALSE)
-
-    if (isFALSE(valid.ncp) || isFALSE(valid.null.ncp)) stop("'ncp' or 'null.ncp' must be numeric and of length one for the one-sided test.", call. = FALSE)
+  } else if (alternative == "one.sided") {
 
     ifelse(ncp > null.ncp,
            lower.tail <- FALSE,
            lower.tail <- TRUE)
-    t.alpha <- qt(alpha, df = df, ncp = null.ncp, lower.tail = lower.tail) # if ncp > null.ncp
+    t.alpha <- stats::qt(alpha, df = df, ncp = null.ncp, lower.tail = lower.tail) # if ncp > null.ncp
 
-    yt.alpha <- dt(t.alpha, df = df, ncp = null.ncp)
+    yt.alpha <- stats::dt(t.alpha, df = df, ncp = null.ncp)
 
   } # alternative
 
   # x-axis limits
   ifelse(df < 20, prob.extreme <- 0.001, prob.extreme <- 0.0001)
-  lower <- min(min(qt(prob.extreme, df = df, ncp = ncp, lower.tail = TRUE)),
-               qt(prob.extreme, df = df, ncp = null.ncp, lower.tail = TRUE))
-  upper <- max(max(qt(1 - prob.extreme, df = df, ncp = ncp, lower.tail = TRUE)),
-               qt(1 - prob.extreme, df = df, ncp = null.ncp, lower.tail = TRUE))
+  lower <- min(min(stats::qt(prob.extreme,     df = df, ncp = ncp,      lower.tail = TRUE)),
+                   stats::qt(prob.extreme,     df = df, ncp = null.ncp, lower.tail = TRUE))
+  upper <- max(max(stats::qt(1 - prob.extreme, df = df, ncp = ncp,      lower.tail = TRUE)),
+                   stats::qt(1 - prob.extreme, df = df, ncp = null.ncp, lower.tail = TRUE))
   xlim <- c(lower, upper)
 
-  plot.window.dim <- dev.size("cm")
+  plot.window.dim <- grDevices::dev.size("cm")
   cex.legend <- min(plot.window.dim[1] / 18, plot.window.dim[2] / 15)
   cex.title <- min(plot.window.dim[1] / 11, plot.window.dim[2] / 11)
   cex.label <- min(plot.window.dim[1] / 12, plot.window.dim[2] / 12)
@@ -178,42 +149,42 @@
   if (alternative == "two.one.sided") {
 
     .plot.t.dist(ncp = null.ncp[1], df = df, xlim = xlim, type = 1, ticks = TRUE)
-    par(new = TRUE)
+    graphics::par(new = TRUE)
     .plot.t.dist(ncp = null.ncp[2], df = df, xlim = xlim, type = 1, ticks = FALSE)
-    par(new = TRUE)
+    graphics::par(new = TRUE)
     .plot.t.dist(ncp = ncp, df = df, xlim = xlim, type = 2, ticks = FALSE)
 
-    text(ncp, dt(ncp, df = df, ncp = ncp) + 0.05,
-         labels = expression(H[1]),
-         cex = cex.legend, col = adjustcolor(4, alpha.f = 1))
+    graphics::text(ncp, stats::dt(ncp, df = df, ncp = ncp) + 0.05,
+                   labels = expression(H[1]),
+                   cex = cex.legend, col = grDevices::adjustcolor(4, alpha.f = 1))
 
-    text(null.ncp[1], dt(null.ncp[1], df = df, ncp = null.ncp[1]) + 0.05,
-         labels = expression(H[0]),
-         cex = cex.legend, col = adjustcolor(2, alpha.f = 1))
+    graphics::text(null.ncp[1], stats::dt(null.ncp[1], df = df, ncp = null.ncp[1]) + 0.05,
+                   labels = expression(H[0]),
+                   cex = cex.legend, col = grDevices::adjustcolor(2, alpha.f = 1))
 
-    text(null.ncp[2], dt(null.ncp[2], df = df, ncp = null.ncp[2]) + 0.05,
-         labels = expression(H[0]),
-         cex = cex.legend, col = adjustcolor(2, alpha.f = 1))
+    graphics::text(null.ncp[2], stats::dt(null.ncp[2], df = df, ncp = null.ncp[2]) + 0.05,
+                   labels = expression(H[0]),
+                   cex = cex.legend, col = grDevices::adjustcolor(2, alpha.f = 1))
 
   } else {
 
     .plot.t.dist(ncp = ncp, df = df, xlim = xlim, type = 2, ticks = TRUE)
-    par(new = TRUE)
+    graphics::par(new = TRUE)
     .plot.t.dist(ncp = null.ncp, df = df, xlim = xlim, type = 1, ticks = FALSE)
 
-    text(ncp, dt(ncp, df = df, ncp = ncp) + 0.05,
-         labels = expression(H[1]),
-         cex = cex.legend, col = adjustcolor(4, alpha.f = 1))
+    graphics::text(ncp, stats::dt(ncp, df = df, ncp = ncp) + 0.05,
+                   labels = expression(H[1]),
+                   cex = cex.legend, col = grDevices::adjustcolor(4, alpha.f = 1))
 
-    text(null.ncp, dt(null.ncp, df = df, ncp = null.ncp) + 0.05,
-         labels = expression(H[0]),
-         cex = cex.legend, col = adjustcolor(2, alpha.f = 1))
+    graphics::text(null.ncp, stats::dt(null.ncp, df = df, ncp = null.ncp) + 0.05,
+                   labels = expression(H[0]),
+                   cex = cex.legend, col = grDevices::adjustcolor(2, alpha.f = 1))
 
   } # end of plots
 
   # draw vertical lines for critical region
-  segments(x0 = t.alpha, y0 = rep(0, length(t.alpha)),
-           x1 = t.alpha, y1 = yt.alpha, col = 2, lty = 2, lwd = 2)
+  graphics::segments(x0 = t.alpha, y0 = rep(0, length(t.alpha)),
+                     x1 = t.alpha, y1 = yt.alpha, col = 2, lty = 2, lwd = 2)
 
   # paint regions
   if (alternative == "two.one.sided") {
@@ -258,6 +229,31 @@
 
     .paint.t.dist(ncp = ncp, df = df, xlim = c(t.alpha[1], t.alpha[2]), type = 2)
 
+    # type S region
+    if (ncp > null.ncp) {
+      .paint.t.dist(ncp = ncp, df = df, xlim = c(min(t.alpha), min(xlim)), type = 1)
+    } else {
+      .paint.t.dist(ncp = ncp, df = df, xlim = c(max(t.alpha), max(xlim)), type = 1)
+    }
+
+    # type S
+    Phi.p <- stats::pt(q = max(t.alpha), df = df, ncp = ncp)
+    Phi.m <- stats::pt(q = min(t.alpha), df = df, ncp = ncp)
+    type.s <- min(Phi.m, 1 - Phi.p) / (Phi.m + 1 - Phi.p)
+    type.s <- round(type.s, digits)
+
+    # type M
+    type.m <- suppressWarnings({
+      bounds <- stats::qt(c(1e-10, 1 - 1e-10), df = df, ncp = ncp)
+      integrand <- function(t) abs(t) * stats::dt(t, df = df, ncp = ncp)
+      numerator <- stats::integrate(integrand, min(bounds), min(t.alpha))$value +
+                   stats::integrate(integrand, max(t.alpha), max(bounds))$value
+      denominator  <- abs(ncp) * (stats::pt(min(t.alpha), df = df, ncp = ncp, lower.tail = TRUE) +
+                                  stats::pt(max(t.alpha), df = df, ncp = ncp, lower.tail = FALSE))
+      numerator / denominator
+    })
+    type.m <- round(type.m, digits)
+
     power.left <- .paint.t.dist(ncp = ncp, df = df, xlim = c(t.alpha[1], min(xlim)), type = 3)
     power.right <- .paint.t.dist(ncp = ncp, df = df, xlim = c(t.alpha[2], max(xlim)), type = 3)
     power <- power.left + power.right
@@ -279,37 +275,60 @@
   } # end of paint regions
 
   # axes labels and subtitle
-  title(main = plot.main, line = 2, cex.main = cex.title)
-  title(sub = plot.sub, line = 3, cex.sub = cex.title)
-  title(ylab = "Probability Density", line = 2.2, cex.lab = cex.label,
-        col.lab = adjustcolor(1, alpha.f = 0.8))
+  graphics::title(main = plot.main, line = 2, cex.main = cex.title)
+  graphics::title(sub = plot.sub, line = 3, cex.sub = cex.title)
+  graphics::title(ylab = "Probability Density", line = 2.2, cex.lab = cex.label,
+                  col.lab = grDevices::adjustcolor(1, alpha.f = 0.8))
   if (is.finite(df)) {
-    title(xlab = paste0("T Value (df = ", round(df, digits = 2), ")"),
-          line = 2.2, cex.lab = cex.label,
-          col.lab = adjustcolor(1, alpha.f = 0.8))
+    graphics::title(xlab = paste0("T Value (df = ", round(df, digits = 2), ")"),
+                    line = 2.2, cex.lab = cex.label,
+                    col.lab = grDevices::adjustcolor(1, alpha.f = 0.8))
   } else {
-    title(xlab = "Z Value", line = 2.2, cex.lab = cex.label,
-          col.lab = adjustcolor(1, alpha.f = 0.8))
+    graphics::title(xlab = "Z Value", line = 2.2, cex.lab = cex.label,
+                    col.lab = grDevices::adjustcolor(1, alpha.f = 0.8))
   }
 
-  if (power < 0) power <- 0
-  alpha <- round(alpha, 2)
-  beta <- round(1 - power, 2)
-  power <- round(power, 2)
+  power[power < 0] <- 0
+  alpha <- round(alpha, digits)
+  beta <- round(1 - power, digits)
+  power <- round(power, digits)
 
-  legend("topright", cex = cex.legend,
-         c(as.expression(bquote(Power == .(power))),
-           as.expression(bquote(alpha == .(alpha))),
-           as.expression(bquote(beta == .(beta)))),
-         fill = c(adjustcolor(1, alpha.f = 0.3),
-                  adjustcolor(2, alpha.f = 0.3),
-                  adjustcolor(4, alpha.f = 0.3)),
-         border = c(adjustcolor(1, alpha.f = 0.15),
-                    adjustcolor(2, alpha.f = 0.15),
-                    adjustcolor(4, alpha.f = 0.15)),
-         bg = adjustcolor(1, alpha.f = 0.08),
-         box.col = adjustcolor(1, alpha.f = 0),
-         density = c(30, NA, NA),
-         angle = c(45, NA, NA))
+  if (alternative == "two.sided") {
+    graphics::legend("topright", cex = cex.legend,
+                     c(as.expression(bquote(Power == .(power))),
+                       as.expression(bquote(alpha == .(alpha))),
+                       as.expression(bquote(beta == .(beta))),
+                       as.expression(bquote(S == .(type.s))),
+                       as.expression(bquote(M == .(type.m)))),
+                     fill = c(grDevices::adjustcolor(1, alpha.f = 0.3),
+                              grDevices::adjustcolor(2, alpha.f = 0.3),
+                              grDevices::adjustcolor(4, alpha.f = 0.3),
+                              grDevices::adjustcolor(2, alpha.f = 0.6),
+                              grDevices::adjustcolor(1, alpha.f = 0)),
+                     border = c(grDevices::adjustcolor(1, alpha.f = 0.15),
+                                grDevices::adjustcolor(2, alpha.f = 0.15),
+                                grDevices::adjustcolor(4, alpha.f = 0.15),
+                                grDevices::adjustcolor(2, alpha.f = 0.30),
+                                grDevices::adjustcolor(1, alpha.f = 0)),
+                     bg = grDevices::adjustcolor(1, alpha.f = 0.08),
+                     box.col = grDevices::adjustcolor(1, alpha.f = 0),
+                     density = c(30, NA, NA, NA, NA),
+                     angle = c(45, NA, NA, NA, NA))
+  } else {
+    graphics::legend("topright", cex = cex.legend,
+                     c(as.expression(bquote(Power == .(power))),
+                       as.expression(bquote(alpha == .(alpha))),
+                       as.expression(bquote(beta == .(beta)))),
+                     fill = c(grDevices::adjustcolor(1, alpha.f = 0.3),
+                              grDevices::adjustcolor(2, alpha.f = 0.3),
+                              grDevices::adjustcolor(4, alpha.f = 0.3)),
+                     border = c(grDevices::adjustcolor(1, alpha.f = 0.15),
+                                grDevices::adjustcolor(2, alpha.f = 0.15),
+                                grDevices::adjustcolor(4, alpha.f = 0.15)),
+                     bg = grDevices::adjustcolor(1, alpha.f = 0.08),
+                     box.col = grDevices::adjustcolor(1, alpha.f = 0),
+                     density = c(30, NA, NA),
+                     angle = c(45, NA, NA))
+  }
 
 } # end of .plot.t.t1t2()

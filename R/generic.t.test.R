@@ -1,146 +1,236 @@
-# power for the generic t test with (optional) type I and type II error plots
-power.t.test <- function(ncp, null.ncp = 0,
-                         df, alpha = 0.05,
+#' Statistical Power for the Generic t-Test
+#'
+#' @description
+#' Determines the power, the non-centrality parameter, or the degrees of
+#' freedom for the generic t-Test with (optional) Type 1 and Type 2 error
+#' plots.
+#'
+#' @aliases power.t
+#'
+#'
+#' @param power       statistical power \eqn{(1 - \beta)}; either `power`,
+#'                    `ncp` or `df` needs to be NULL (and is then estimated).
+#' @param ncp         non-centrality parameter for the alternative; ; either
+#'                    `power`, `ncp` or `df` needs to be NULL (and is then
+#'                    estimated).
+#' @param null.ncp    non-centrality parameter for the null. When alternative =
+#'                    "two.one.sided", the function expects two values in the
+#'                    form `c(lower, upper)`. If a single value is provided, it
+#'                    is interpreted as the absolute bound and automatically
+#'                    expanded to `c(-value, +value)`.
+#' @param req.sign    whether `ncp` is expected to be greater '+1', less than
+#'                    '-1', or within '0' the `null.ncp` bounds; only relevant
+#'                    if `ncp` is to be estimated.
+#' @param df          degrees of freedom; either `power`, `ncp` or `df` needs
+#'                    to be NULL (and is then estimated).
+#' @param alpha       type 1 error rate, defined as the probability of
+#'                    incorrectly rejecting a true null hypothesis, denoted as
+#'                    \eqn{\alpha}.
+#' @param alternative character; the direction or type of the hypothesis test:
+#'                    "two.sided", "one.sided", or "two.one.sided".
+#'                    "two.one.sided" is used for equivalence and minimal
+#'                    effect testing.
+#' @param plot        logical; \code{FALSE} switches off Type 1 and Type 2
+#'                    error plot. \code{TRUE} by default.
+#' @param verbose     \code{1} by default (returns test, hypotheses, and
+#'                    results), if \code{2} a more detailed output is given
+#'                    (plus key parameters and definitions), if \code{0} no
+#'                    output is printed on the console.
+#' @param utf         logical; whether the output should show Unicode
+#'                    characters (if encoding allows for it). \code{FALSE} by
+#'                    default.
+#'
+#' @return
+#'   \item{power}{statistical power \eqn{(1-\beta)}.}
+#'   \item{ncp}{non-centrality parameter under alternative.}
+#'   \item{null.ncp}{non-centrality parameter under null.}
+#'   \item{df}{degrees of freedom.}
+#'   \item{alpha}{type 1 error rate (user-specified).}
+#'   \item{t.alpha}{critical value(s).}
+#'   \item{beta}{type 2 error rate.}
+#'   \item{type.s}{type S error rate (only for two-tailed test).}
+#'   \item{type.m}{type M error rate (only for two-tailed test).}
+#'
+#' @examples
+#' # two-sided
+#' # power defined as the probability of observing test statistics greater
+#' # than the positive critical value OR less than the negative critical value
+#' power.t.test(ncp = 1.96, df = 100, alpha = 0.05, alternative = "two.sided")
+#' power.t.test(power = 0.80, df = 100, alpha = 0.05, alternative = "two.sided")
+#'
+#' # one-sided
+#' # power is defined as the probability of observing a test statistic greater
+#' # than the critical value
+#' power.t.test(ncp = 1.96, df = 100, alpha = 0.05, alternative = "one.sided")
+#' power.t.test(power = 0.80, df = 100, alpha = 0.05, alternative = "one.sided")
+#'
+#' # equivalence
+#' # power is defined as the probability of observing a test statistic greater
+#' # than the upper critical value (for the lower bound) AND less than the
+#' # lower critical value (for the upper bound)
+#' power.t.test(ncp = 0, null.ncp = c(-2, 2), df = 100, alpha = 0.05,
+#'              alternative = "two.one.sided")
+#' power.t.test(power = 0.80, req.sign = "0", null.ncp = c(-2, 2),
+#'              df = 100, alpha = 0.05, alternative = "two.one.sided")
+#'
+#' # minimal effect testing
+#' # power is defined as the probability of observing a test statistic greater
+#' # than the upper critical value (for the upper bound) OR less than the lower
+#' # critical value (for the lower bound).
+#' power.t.test(ncp = 2, null.ncp = c(-1, 1), df = 100, alpha = 0.05,
+#'              alternative = "two.one.sided")
+#' power.t.test(power = 0.80, req.sign = "+", null.ncp = c(-1, 1),
+#'              df = 100, alpha = 0.05, alternative = "two.one.sided")
+#'
+#' @export power.t.test
+power.t.test <- function(power = NULL, ncp = NULL, req.sign = "+", null.ncp = 0,
+                         df = NULL, alpha = 0.05,
                          alternative = c("two.sided", "one.sided", "two.one.sided"),
-                         plot = TRUE, verbose = TRUE, pretty = FALSE) {
-
-  check.positive(df)
-  check.proportion(alpha)
+                         plot = TRUE, verbose = 1, utf = FALSE) {
 
   alternative <- tolower(match.arg(alternative))
+  if (!is.null(power)) check.power(power)
+  if (!is.null(ncp)) check.numeric(ncp)
+  null.ncp <- check.margins(null.ncp, check.numeric, alternative)
+  if (!is.null(df) && df != Inf) check.positive(df)
+  check.proportion(alpha)
+  check.logical(plot, utf)
+  verbose <- ensure.verbose(verbose)
+  requested <- get.requested(es = ncp, n = df, power = power)
+
+  if (!is.null(df) && df < 3)
+    stop("Degrees of freedom can not be smaller than 3.", call. = FALSE)
 
   # calculate statistical power
-  if (alternative == "two.sided") {
+  pwr <- function(ncp, null.ncp = 0, df, alpha = 0.05, alternative) {
 
-    ifelse(is.numeric(ncp) && length(ncp) == 1,
-           valid.ncp <- TRUE,
-           valid.ncp <- FALSE)
+    if (alternative == "two.sided") {
 
-    ifelse(is.numeric(null.ncp) && length(null.ncp) == 1,
-           valid.null.ncp <- TRUE,
-           valid.null.ncp <- FALSE)
+      t.alpha <- c(stats::qt(alpha / 2,  df = df, ncp = null.ncp,      lower.tail = TRUE),
+                   stats::qt(alpha / 2,  df = df, ncp = null.ncp,      lower.tail = FALSE))
+      power   <-   stats::pt(t.alpha[1], df = df, ncp = ncp,           lower.tail = TRUE) +
+                   stats::pt(t.alpha[2], df = df, ncp = ncp,           lower.tail = FALSE)
 
-    if (isFALSE(valid.ncp) || isFALSE(valid.null.ncp)) stop("'ncp' or 'null.ncp' must be numeric and of length one for the two-sided test.", call. = FALSE)
-    # if (ncp < null.ncp) stop("'ncp' must be equal or greater than 'null.ncp' for the two-sided test.", .call = FALSE)
+      Phi.p <- suppressWarnings(stats::pt(q = max(t.alpha), df = df, ncp = ncp))
+      Phi.m <-                  stats::pt(q = min(t.alpha), df = df, ncp = ncp)
+      type.s <- min(Phi.m, 1 - Phi.p) / (Phi.m + 1 - Phi.p)
 
-    t.alpha.upper <- qt(alpha / 2, df = df, ncp = null.ncp, lower.tail = FALSE)
-    t.alpha.lower <- qt(alpha / 2, df = df, ncp = null.ncp, lower.tail = TRUE)
-    t.alpha <- c(t.alpha.lower, t.alpha.upper)
-    power <-  pt(t.alpha.lower, df = df, ncp = ncp, lower.tail = TRUE) +
-      pt(t.alpha.upper, df = df, ncp = ncp, lower.tail = FALSE)
+      type.m <- try(suppressWarnings({
+        bounds <- stats::qt(c(1e-10, 1 - 1e-10), df = df, ncp = ncp)
+        integrand <- function(t) abs(t) * stats::dt(t, df = df, ncp = ncp)
+        numerator <- stats::integrate(integrand, min(bounds), min(t.alpha))$value +
+                     stats::integrate(integrand, max(t.alpha), max(bounds))$value
+        denominator  <- abs(ncp) * (stats::pt(min(t.alpha), df = df, ncp = ncp, lower.tail = TRUE) +
+                                    stats::pt(max(t.alpha), df = df, ncp = ncp, lower.tail = FALSE))
+        numerator / denominator
+      }), silent = TRUE)
+      if (inherits(type.m, "try-error")) type.m <- NA
 
-  } else if (alternative == "one.sided") {
+    } else if (alternative == "one.sided") {
 
-    ifelse(is.numeric(ncp) || length(ncp) == 1,
-           valid.ncp <- TRUE,
-           valid.ncp <- FALSE)
+      lower.tail <- ncp < null.ncp
+      t.alpha <- suppressWarnings(stats::qt(alpha,        df = df, ncp = null.ncp,      lower.tail = lower.tail))
+      power   <- suppressWarnings(stats::pt(t.alpha,      df = df, ncp = ncp,           lower.tail = lower.tail))
 
-    ifelse(is.numeric(null.ncp) || length(null.ncp) == 1,
-           valid.null.ncp <- TRUE,
-           valid.null.ncp <- FALSE)
+      type.s <- 0
+      type.m <- NA
 
-    if (isFALSE(valid.ncp) || isFALSE(valid.null.ncp)) stop("'ncp' or 'null.ncp' must be numeric and of length one for the one-sided test.", call. = FALSE)
-    # if (any(ncp < null.ncp) && alternative == "greater") stop("alternative = 'greater' but ncp < null.ncp.", call. = FALSE)
-    # if (any(ncp > null.ncp) && alternative == "less") stop("alternative = 'less' but ncp > null.ncp.", call. = FALSE)
+    } else if (alternative == "two.one.sided" && (ncp > min(null.ncp) && ncp < max(null.ncp))) {  # equivalence test
 
-    ifelse(ncp > null.ncp,
-           lower.tail <- FALSE,
-           lower.tail <- TRUE)
-    t.alpha <- qt(alpha, df = df, ncp = null.ncp, lower.tail = lower.tail) # if ncp > null.ncp
-    power <- pt(t.alpha, df = df, ncp = ncp, lower.tail = lower.tail) # if ncp > null.ncp
+      t.alpha <- suppressWarnings(c(stats::qt(alpha,      df = df, ncp = min(null.ncp), lower.tail = FALSE),
+                                    stats::qt(alpha,      df = df, ncp = max(null.ncp), lower.tail = TRUE)))
+      power   <-   stats::pt(t.alpha[2], df = df, ncp = ncp,           lower.tail = TRUE) +
+                   stats::pt(t.alpha[1], df = df, ncp = ncp,           lower.tail = FALSE) - 1
 
-  } else if (alternative == "two.one.sided") {
+      type.s <- NA
+      type.m <- NA
 
-    ifelse(is.numeric(ncp) && length(ncp) == 1,
-           valid.ncp <- TRUE,
-           valid.ncp <- FALSE)
+    } else if (alternative == "two.one.sided" && (ncp < min(null.ncp) || ncp > max(null.ncp))) {  # minimum effect test
 
-    ifelse(is.numeric(null.ncp) && length(null.ncp) %in% c(1, 2),
-           valid.null.ncp <- TRUE,
-           valid.null.ncp <- FALSE)
+      t.alpha <- suppressWarnings(c(stats::qt(alpha / 2,  df = df, ncp = min(null.ncp), lower.tail = TRUE),
+                                    stats::qt(alpha / 2,  df = df, ncp = max(null.ncp), lower.tail = FALSE)))
+      power   <-   suppressWarnings(stats::pt(t.alpha[1], df = df, ncp = ncp,           lower.tail = TRUE) +
+                                    stats::pt(t.alpha[2], df = df, ncp = ncp,           lower.tail = FALSE))
 
-    if (isFALSE(valid.ncp)) stop("'ncp' must be numeric and of length one for equivalence tests.", call. = FALSE)
-    if (isFALSE(valid.null.ncp)) stop("'null.ncp' must be numeric and of length one (absolute value) or length two (with lower and upper bounds) for the equivalence test.", call. = FALSE)
-
-    if (length(null.ncp) == 1) null.ncp <- c(min(c(-null.ncp, null.ncp)), max(-null.ncp, null.ncp))
-
-    # equivalence test
-    if (ncp > min(null.ncp) && ncp < max(null.ncp)) {
-
-      t.alpha.upper <- qt(alpha, df = df, ncp = min(null.ncp), lower.tail = FALSE)
-      t.alpha.lower <- qt(alpha, df = df, ncp = max(null.ncp), lower.tail = TRUE)
-      t.alpha <- c(t.alpha.upper, t.alpha.lower)
-
-      power <- pt(t.alpha.lower, df = df, ncp = ncp, lower.tail = TRUE) +
-        pt(t.alpha.upper, df = df, ncp = ncp, lower.tail = FALSE) - 1
-
-      power[power < 0] <- 0
+      type.s <- NA
+      type.m <- NA
 
     }
 
-    # minimum effect test
-    if (ncp < min(null.ncp) || ncp > max(null.ncp)) {
+    power[power < 0] <- 0
 
-      t.alpha.lower <- qt(alpha / 2, df = df, ncp = min(null.ncp), lower.tail = TRUE)
-      t.alpha.upper <- qt(alpha / 2, df = df, ncp = max(null.ncp), lower.tail = FALSE)
-      t.alpha <- c(t.alpha.lower, t.alpha.upper)
+    list(power = power, t.alpha = t.alpha, type.s = type.s, type.m = type.m)
 
-      power <- pt(t.alpha.lower, df = df, ncp = ncp, lower.tail = TRUE) +
-        pt(t.alpha.upper, df = df, ncp = ncp, lower.tail = FALSE)
+  } # pwr()
 
-    }
+  min.pwr <- function(ncp, df, power) {
 
-  } else {
+    power - pwr(ncp = ncp, null.ncp = null.ncp, df = df, alpha = alpha, alternative = alternative)$power
 
-    stop("Not a valid hypothesis type.", call. = FALSE)
+  } # min.pwr() (for uniroot and optimize)
 
-  }
+  if (requested == "es") {
 
-  if (plot) {
+    if (check.null_sign(req.sign, alternative)) {
 
-    suppressWarnings({
-      .plot.t.t1t2(ncp = ncp, null.ncp = null.ncp, df = df, alpha = alpha, alternative = alternative)
-    }) # supressWarnings
+      lower.int <- c(min(null.ncp), mean(null.ncp))
+      upper.int <- c(mean(null.ncp), max(null.ncp))
+      ncp.lower <- stats::optimize(f = function(ncp) min.pwr(ncp, df, power) ^ 2, interval = lower.int, tol = 1e-12)$minimum
+      ncp.upper <- stats::optimize(f = function(ncp) min.pwr(ncp, df, power) ^ 2, interval = upper.int, tol = 1e-12)$minimum
+      ncp <- mean(c(ncp.lower, ncp.upper))
 
-  }
+      warn.txt <- ifelse(max(abs(c(min.pwr(ncp.lower, df, power), min.pwr(ncp.upper, df, power)))) < 1e-6,
+                         sprintf("Target NCP ranges from %.4f to %.4f within the null bounds.", ncp.lower, ncp.upper),
+                         "The target power rate cannot be achieved within the null bounds.")
+      warning(warn.txt, call. = FALSE)
 
-  # verbose check
-  if (is.logical(verbose)) {
-    ifelse(isTRUE(verbose),
-           verbose <- 1,
-           verbose <- 0)
-  } else if (is.numeric(verbose)) {
-    if (length(verbose) == 1 && verbose %% 1 == 0) {
-      ifelse(verbose %in% c(0, 1, 2),
-             verbose <- verbose,
-             verbose <- 1)
-    }
-  } else {
-    verbose <- 1
-  } # verbose
-
-  if (verbose != 0) {
-
-    print.obj <- list(test = "Generic T-Test",
-                      requested = "power",
-                      alt = alternative,
-                      ncp.alternative = ncp,
-                      ncp.null = null.ncp,
-                      t.alpha = t.alpha,
-                      df = df, alpha = alpha,
-                      power = power)
-
-    if (pretty) {
-      .print.pwrss.t(print.obj, verbose = verbose)
     } else {
-      .print.ascii.pwrss.t(print.obj, verbose = verbose)
+
+      val.rng <- get.interval(null.ncp = null.ncp, distribution = "t", alpha = alpha, alternative = alternative,
+                              req.sign = req.sign, df = df)
+      ncp <- stats::optimize(f = function(ncp) min.pwr(ncp, df, power) ^ 2, interval = val.rng, tol = 1e-12)$minimum
+
     }
+
+  } else if (requested == "n") {
+
+    df <- stats::optimize(f = function(df) min.pwr(ncp, df, power) ^ 2, interval = c(1, 1e10))$minimum
+
+  }
+
+  pwr.obj <- pwr(ncp = ncp, null.ncp = null.ncp, df = df, alpha = alpha, alternative = alternative)
+
+  if (plot)
+    suppressWarnings(.plot.t.t1t2(ncp = ncp, null.ncp = null.ncp, df = df, alpha = alpha, alternative = alternative))
+
+  if (verbose > 0) {
+
+    print.obj <- list(test = "Generic t-Test",
+                      requested = requested,
+                      tgt.ncp = "lambda",
+                      lambda = ncp,
+                      null.lambda = null.ncp,
+                      df = df,
+                      alpha = alpha,
+                      alternative = alternative,
+                      t.alpha = pwr.obj$t.alpha,
+                      power = pwr.obj$power)
+
+    .print.pwrss.t(print.obj, verbose = verbose, utf = utf)
 
   } # verbose
 
-
-  return(invisible(list(alternative = alternative, ncp = ncp, null.ncp = null.ncp,
-                        df = df, alpha = alpha, t.alpha = t.alpha, power = power)))
+  invisible(structure(list(power = pwr.obj$power,
+                           ncp = ncp,
+                           null.ncp = null.ncp,
+                           df = df,
+                           alpha = alpha,
+                           alternative = alternative,
+                           t.alpha = pwr.obj$t.alpha,
+                           beta = 1 - pwr.obj$power,
+                           type.s = pwr.obj$type.s,
+                           type.m = pwr.obj$type.m),
+                      class = c("pwrss", "generic", "t")))
 
 } # end of power.t.test()
 

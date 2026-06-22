@@ -1,0 +1,15 @@
+div.tocify {
+  width: 30%;
+  max-width: 260px;
+  max-height: 100%;
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader, .tocify-item {
+  font-size: 0.90em;
+  padding-left: 70px;
+  text-indent: 0;
+}

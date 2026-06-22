@@ -1,183 +1,237 @@
-# exact power
-power.binom.test <- function(size,
-                             prob,
+#' Power Analysis for the Generic Binomial Test
+#'
+#' @description
+#' Calculates power or find Probability (Non-Centrality) for the generic
+#' binomial test with (optional) Type 1 and Type 2 error plots.
+#'
+#'
+#' @aliases power.binom
+#'
+#'
+#' @param power       statistical power \eqn{(1 - \beta)}; either `power`,
+#'                    `size`, or `prob` needs to be NULL (and is then
+#'                    estimated).
+#' @param size        number of trials (zero or more); either `power`, `size`,
+#'                    or `prob` needs to be NULL (and is then estimated).
+#' @param prob        probability of success on each trial under alternative;
+#'                    either `power`, `size` or `prob` needs to be NULL (and is
+#'                    then estimated).
+#' @param null.prob   probability of success on each trial under null.
+#' @param req.sign    whether 'prob' is expected to be greater '+1', less than
+#'                    '-1', or within '0' the null.prob' bounds.
+#' @param alpha       type 1 error rate, defined as the probability of
+#'                    incorrectly rejecting a true null hypothesis, denoted as
+#'                    \eqn{\alpha}.
+#' @param alternative character; the direction or type of the hypothesis test:
+#'                    "two.sided", "one.sided", or "two.one.sided". For
+#'                    non-inferiority or superiority tests, add or subtract the
+#'                    margin from the null hypothesis value and use alternative
+#'                    = "one.sided".
+#' @param plot        logical; \code{FALSE} switches off Type 1 and Type 2
+#'                    error plot. \code{TRUE} by default.
+#' @param verbose     \code{1} by default (returns test, hypotheses, and
+#'                    results), if \code{2} a more detailed output is given
+#'                    (plus key parameters and definitions), if \code{0} no
+#'                    output is printed on the console.
+#' @param utf         logical; whether the output should show Unicode
+#'                    characters (if encoding allows for it). \code{FALSE} by
+#'                    default.
+#'
+#' @return
+#'   \item{power}{statistical power \eqn{(1 - \beta)}.}
+#'   \item{size}{number of trials (zero or more).}
+#'   \item{prob}{probability of success on each trial under alternative.}
+#'   \item{null.prob}{probability of success on each trial under null.}
+#'   \item{alpha}{type 1 error rate.}
+#'   \item{alternative}{direction or type of the hypothesis test.}
+#'   \item{binom.alpha}{critical value(s).}
+#'
+#' @examples
+#' # one-sided
+#' power.binom.test(size = 200, prob = 0.6, null.prob = 0.5, alpha = 0.05,
+#'                  alternative = "one.sided")
+#' power.binom.test(power = 0.80, size = 200, req.sign = "+", null.prob = 0.5,
+#'                  alpha = 0.05, alternative = "one.sided")
+#'
+#' # two-sided
+#' power.binom.test(size = 200, prob = 0.4, null.prob = 0.5, alpha = 0.05,
+#'                  alternative = "two.sided")
+#' power.binom.test(power = 0.80, size = 200, req.sign = "+", null.prob = 0.5,
+#'                  alpha = 0.05, alternative = "two.sided")
+#'
+#' # equivalence
+#' power.binom.test(size = 200, prob = 0.5, null.prob = c(0.4, 0.6),
+#'                  alpha = 0.05, alternative = "two.one.sided")
+#' power.binom.test(power = 0.80, size = 200, req.sign = "0",
+#'                  null.prob = c(0.4, 0.6), alpha = 0.05,
+#'                  alternative = "two.one.sided")
+#'
+#' @export power.binom.test
+power.binom.test <- function(power = NULL,
+                             size = NULL,
+                             prob = NULL,
                              null.prob = 0.5,
+                             req.sign = "+",
                              alpha = 0.05,
                              alternative = c("two.sided", "one.sided", "two.one.sided"),
                              plot = TRUE,
-                             verbose = TRUE,
-                             pretty = FALSE) {
-
-  check.proportion(prob, alpha)
-  check.logical(plot)
+                             verbose = 1,
+                             utf = FALSE) {
 
   alternative <- tolower(match.arg(alternative))
+  if (!is.null(power)) check.power(power)
+  if (!is.null(size)) check.vector(size, check.size, 1)
+  if (!is.null(prob)) check.proportion(prob)
+  null.prob <- check.margins(null.prob, check.proportion, alternative)
+  check.proportion(alpha)
+  check.logical(plot, utf)
+  verbose <- ensure.verbose(verbose)
+  requested <- get.requested(es = prob, n = size, power = power)
 
-  if (any(!is.numeric(size)) || any(size < 0) || any(!(abs(size - round(size)) < .Machine$double.eps^0.5))) stop("Incorrect value for `size`.", call. = FALSE)
+  pwr <- function(size = NULL, prob = NULL, null.prob = 0.5, alpha = 0.05,
+                  alternative = c("two.sided", "one.sided", "two.one.sided")) {
 
-  if (alternative == "two.one.sided") {
-    if (isFALSE(all(is.numeric(null.prob))) || any(null.prob < 0) || any(null.prob > 1)) stop("Incorrect value for `null.prob`.", call. = FALSE)
-    if (length(null.prob) != 2) stop("Provide null margins in the form of null.prob = c(lower, upper)", call. = FALSE)
-  } else {
-    if (isFALSE(all(is.numeric(null.prob))) || length(null.prob) != 1 || any(null.prob < 0) || any(null.prob > 1)) stop("Incorrect value for `null.prob`.", call. = FALSE)
-  }
+    # initialize variables to prevent "not found" errors
+    approx.alpha <- NA
+    binom.alpha  <- NA
+    power        <- NA
 
-  if (alternative == "two.one.sided") {
+    alternative <- match.arg(alternative)
 
-    if (length(null.prob) != 2) stop("Null specification is not consistent with equivalence testing.", call. = FALSE)
-    if (null.prob[1] > null.prob[2]) stop("Lower margin is greater than the upper margin?", call. = FALSE)
+    if (alternative == "two.sided") {
 
-    if (prob > min(null.prob) && prob < max(null.prob)) {
-      # equivalence
-      q.low <- qbinom(alpha, size, prob = null.prob[1], lower.tail = FALSE)
-      q.high <- qbinom(alpha, size, prob = null.prob[2], lower.tail = TRUE)
-
-      prob.low <- pbinom(q.low, size, null.prob[1], lower.tail = FALSE)
-      prob.high <- pbinom(q.high, size, null.prob[2], lower.tail = TRUE)
-
-      q.low[prob.low > alpha] <- q.low[prob.low > alpha] + 1
-      q.high[prob.high > alpha] <- q.high[prob.high > alpha] - 1
-
-      prob.low <- pbinom(q.low, size, null.prob[1], lower.tail = FALSE)
-      prob.high <- pbinom(q.high, size, null.prob[2], lower.tail = TRUE)
-      approx.alpha <-  (prob.low + prob.high) / 2 ########## average ###########
-
-      binom.alpha <- c(q.low, q.high)
-
-      power <- pbinom(q.low, size, prob, lower.tail = FALSE) +
-        pbinom(q.high, size, prob, lower.tail = TRUE) - 1
-
-      if (power < 0) power <- 0
-
-    } else {
-      # minimal effect
-      q.low <- qbinom(alpha / 2, size, prob = null.prob[1], lower.tail = TRUE)
-      q.high <- qbinom(alpha / 2, size, prob = null.prob[2], lower.tail = FALSE)
-
-      prob.low <- pbinom(q.low, size, null.prob[1], lower.tail = TRUE)
-      prob.high <- pbinom(q.high, size, null.prob[2], lower.tail = FALSE)
-
-      q.low[prob.low > alpha / 2] <- q.low[prob.low > alpha / 2] - 1
+      q.low     <- stats::qbinom(alpha / 2, size, null.prob, lower.tail = TRUE)
+      q.high    <- stats::qbinom(alpha / 2, size, null.prob, lower.tail = FALSE)
+      prob.low  <- stats::pbinom(q.low,     size, null.prob, lower.tail = TRUE)
+      prob.high <- stats::pbinom(q.high,    size, null.prob, lower.tail = FALSE)
+      q.low[prob.low   > alpha / 2] <- q.low[prob.low   > alpha / 2] - 1
       q.high[prob.high > alpha / 2] <- q.high[prob.high > alpha / 2] + 1
-
-      prob.low <- pbinom(q.low, size, null.prob[1], lower.tail = TRUE)
-      prob.high <- pbinom(q.high, size, null.prob[2], lower.tail = FALSE)
-      approx.alpha <- prob.low + prob.high
-
+      prob.low <- stats::pbinom(q.low, size, null.prob, lower.tail = TRUE)
+      prob.high <- stats::pbinom(q.high, size, null.prob, lower.tail = FALSE)
+      approx.alpha <-  prob.low + prob.high
       binom.alpha <- c(q.low, q.high)
 
-      power <- pbinom(q.low, size, prob, lower.tail = TRUE) +
-        pbinom(q.high, size, prob, lower.tail = FALSE)
+      power <- stats::pbinom(q.low,  size, prob, lower.tail = TRUE) +
+               stats::pbinom(q.high, size, prob, lower.tail = FALSE)
+
+    } else if (alternative == "one.sided") {
+
+      lower.tail <- prob < null.prob
+
+      q          <- stats::qbinom(alpha, size, null.prob, lower.tail = lower.tail)
+      prob.alpha <- stats::pbinom(q,     size, null.prob, lower.tail = lower.tail)
+      q[prob.alpha > alpha] <- q[prob.alpha > alpha] + ifelse(lower.tail, -1, 1)
+      approx.alpha <- stats::pbinom(q, size, null.prob, lower.tail = lower.tail)
+      binom.alpha <- q
+
+      power <- stats::pbinom(q, size, prob, lower.tail = lower.tail)
+
+    } else if (alternative == "two.one.sided" && (prob > min(null.prob) && prob < max(null.prob))) {  # equivalence
+
+      q.low     <- stats::qbinom(alpha,  size, prob = null.prob[1], lower.tail = FALSE)
+      q.high    <- stats::qbinom(alpha,  size, prob = null.prob[2], lower.tail = TRUE)
+      prob.low  <- stats::pbinom(q.low,  size, prob = null.prob[1], lower.tail = FALSE)
+      prob.high <- stats::pbinom(q.high, size, prob = null.prob[2], lower.tail = TRUE)
+      q.low[prob.low   > alpha] <- q.low[prob.low   > alpha] + 1
+      q.high[prob.high > alpha] <- q.high[prob.high > alpha] - 1
+      prob.low  <- stats::pbinom(q.low,  size, prob = null.prob[1], lower.tail = FALSE)
+      prob.high <- stats::pbinom(q.high, size, prob = null.prob[2], lower.tail = TRUE)
+      approx.alpha <-  (prob.low + prob.high) / 2 # average
+      binom.alpha  <- c(q.low, q.high)
+
+      power <- stats::pbinom(q.low, size, prob, lower.tail = FALSE) +
+               stats::pbinom(q.high, size, prob, lower.tail = TRUE) - 1
+
+    } else if (alternative == "two.one.sided" && (prob < min(null.prob) || prob > max(null.prob))) {  # minimal effect
+
+      q.low     <- stats::qbinom(alpha / 2, size, prob = null.prob[1], lower.tail = TRUE)
+      q.high    <- stats::qbinom(alpha / 2, size, prob = null.prob[2], lower.tail = FALSE)
+      prob.low  <- stats::pbinom(q.low,     size, prob = null.prob[1], lower.tail = TRUE)
+      prob.high <- stats::pbinom(q.high,    size, prob = null.prob[2], lower.tail = FALSE)
+      q.low[prob.low   > alpha / 2] <- q.low[prob.low   > alpha / 2] - 1
+      q.high[prob.high > alpha / 2] <- q.high[prob.high > alpha / 2] + 1
+      prob.low  <- stats::pbinom(q.low,     size, prob = null.prob[1], lower.tail = TRUE)
+      prob.high <- stats::pbinom(q.high,    size, prob = null.prob[2], lower.tail = FALSE)
+      approx.alpha <- prob.low + prob.high
+      binom.alpha  <- c(q.low, q.high)
+
+      power <- stats::pbinom(q.low,  size, prob = prob, lower.tail = TRUE) +
+               stats::pbinom(q.high, size, prob = prob, lower.tail = FALSE)
 
     }
 
-  } else if (alternative == "two.sided") {
+    power[power < 0] <- 0
 
-    q.low <- qbinom(alpha / 2, size, null.prob, lower.tail = TRUE)
-    q.high <- qbinom(alpha / 2, size, null.prob, lower.tail = FALSE)
+    list(power = power, approx.alpha = approx.alpha, binom.alpha = binom.alpha)
 
-    prob.low <- pbinom(q.low, size, null.prob, lower.tail = TRUE)
-    prob.high <- pbinom(q.high, size, null.prob, lower.tail = FALSE)
+  } # pwr()
 
-    q.low[prob.low > alpha / 2] <- q.low[prob.low > alpha / 2] - 1
-    q.high[prob.high > alpha / 2] <- q.high[prob.high > alpha / 2] + 1
+  min.pwr <- function(prob = NULL, size = NULL, power = NULL) {
 
-    prob.low <- pbinom(q.low, size, null.prob, lower.tail = TRUE)
-    prob.high <- pbinom(q.high, size, null.prob, lower.tail = FALSE)
-    approx.alpha <-  prob.low + prob.high
+    power - pwr(size = size, prob = prob, null.prob = null.prob, alpha = alpha, alternative = alternative)$power
 
-    binom.alpha <- c(q.low, q.high)
+  } # min.pwr() (for uniroot and optimize)
 
-    power <- pbinom(q.low, size, prob, lower.tail = TRUE) +
-      pbinom(q.high, size, prob, lower.tail = FALSE)
+  if (requested == "n") {
 
-  } else if (alternative == "one.sided") {
+    size <- round(stats::uniroot(f = function(size) min.pwr(prob, round(size), power), interval = c(1, 1e10))$root)
 
-    if (prob < null.prob) {
-      # less
-      q <- qbinom(alpha, size, null.prob, lower.tail = TRUE)
-      prob.alpha <- pbinom(q, size, null.prob, lower.tail = TRUE)
-      q[prob.alpha > alpha] <- q[prob.alpha > alpha] - 1
-      approx.alpha <- pbinom(q, size, null.prob, lower.tail = TRUE)
+  } else if (requested == "es") {
 
-      binom.alpha <- q
+    if (check.null_sign(req.sign, alternative)) {
 
-      power <- pbinom(q, size, prob, lower.tail = TRUE)
+      int.lower <- c(min(null.prob) + 1e-6, mean(null.prob))
+      int.upper <- c(mean(null.prob), max(null.prob) - 1e-6)
+      prob.lower <- stats::optimize(f = function(prob) min.pwr(prob, size, power) ^ 2, interval = int.lower, tol = 1e-12)$minimum
+      prob.upper <- stats::optimize(f = function(prob) min.pwr(prob, size, power) ^ 2, interval = int.upper, tol = 1e-12)$minimum
+      prob <- mean(c(prob.lower, prob.upper))
+
+      warn.txt <- ifelse(max(abs(c(min.pwr(prob.lower, size, power), min.pwr(prob.upper, size, power)))) < 1e-6,
+                         sprintf("Target NCP ranges from %.4f to %.4f within the null bounds.", prob.lower, prob.upper),
+                         "The target power rate cannot be achieved within the null bounds.")
+      warning(warn.txt, call. = FALSE)
 
     } else {
-      # greater
-      q <- qbinom(alpha, size, null.prob, lower.tail = FALSE)
-      prob.alpha <- pbinom(q, size, null.prob, lower.tail = FALSE)
-      q[prob.alpha > alpha] <- q[prob.alpha > alpha] + 1
-      approx.alpha <- pbinom(q, size, null.prob, lower.tail = FALSE)
 
-      binom.alpha <- q
-
-      power <- pbinom(q, size, prob, lower.tail = FALSE)
+      val.rng <- get.interval(null.ncp = null.prob, distribution = "binom", alternative = alternative, req.sign = req.sign)
+      prob <- stats::optimize(f = function(prob) min.pwr(prob, size, power) ^ 2, interval = val.rng, tol = 1e-12)$minimum
 
     }
 
-  } else {
-
-    stop("Incorrect `alternative` specification.", call. = FALSE)
-
   }
 
+  # calculate power (if requested == "power") or update it (if requested == "n" or "es")
+  pwr.obj <- pwr(size = size, prob = prob, null.prob = null.prob, alpha = alpha, alternative = alternative)
 
-  if (plot) {
+  if (plot)
+    suppressWarnings(.plot.binom.t1t2(size = size, prob = prob, null.prob = null.prob, alpha = pwr.obj$approx.alpha,
+                                      alternative = alternative))
 
-    if (length(size) > 1 || length(prob) > 1 || length(null.prob) > 2 || length(alpha) > 1)
-      stop("Plotting is not available for multiple values", call. = FALSE)
-
-    suppressWarnings({
-      .plot.binom.t1t2(size = size, prob = prob, null.prob = null.prob,
-                       alpha = approx.alpha, alternative = alternative)
-    }) # supressWarnings
-
-  }
-
-  # verbose check
-  if (is.logical(verbose)) {
-    ifelse(isTRUE(verbose),
-           verbose <- 1,
-           verbose <- 0)
-  } else if (is.numeric(verbose)) {
-    if (length(verbose) == 1 && verbose %% 1 == 0) {
-      ifelse(verbose %in% c(0, 1, 2),
-             verbose <- verbose,
-             verbose <- 1)
-    }
-  } else {
-    verbose <- 1
-  } # verbose
-
-  if (verbose != 0) {
+  if (verbose > 0) {
 
     print.obj <- list(test = "Generic Binomial Test",
-                      requested = "power",
+                      requested = requested,
+                      tgt.ncp = "prob",
                       size = size,
-                      alpha = approx.alpha,
-                      alt = alternative,
-                      prob.alternative = prob,
-                      prob.null = null.prob,
-                      binom.alpha = binom.alpha,
-                      power = power)
+                      prob = prob,
+                      null.prob = null.prob,
+                      alpha = pwr.obj$approx.alpha,
+                      alternative = alternative,
+                      binom.alpha = pwr.obj$binom.alpha,
+                      power = pwr.obj$power)
 
-    if (pretty) {
-      .print.pwrss.binom(print.obj, verbose = verbose)
-    } else {
-      .print.ascii.pwrss.binom(print.obj, verbose = verbose)
-    }
+    .print.pwrss.binom(print.obj, verbose = verbose, utf = utf)
 
   } # end of verbose
 
-  return(invisible(list(size = size,
-                        alpha = approx.alpha,
-                        alternative = alternative,
-                        prob = prob,
-                        null.prob = null.prob,
-                        binom.alpha = binom.alpha,
-                        power = power)))
+  invisible(structure(list(power = pwr.obj$power,
+                           size = size,
+                           prob = prob,
+                           null.prob = null.prob,
+                           alpha = pwr.obj$approx.alpha,
+                           alternative = alternative,
+                           binom.alpha = pwr.obj$binom.alpha),
+                      class = c("pwrss", "generic", "binom")))
 
 } # power.binom.test()
 

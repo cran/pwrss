@@ -1,27 +1,29 @@
 Package: pwrss
-Version: 1.0.0
+Version: 1.2.0
 Type: Package
-Title: Statistical Power and Sample Size Calculation Tools
-Authors@R: c(person(given = "Metin",     family = "Bulus",     email = "bulusmetin@gmail.com",       role = c("aut", "cre")),
-             person(given = "Sebastian", family = "Jentschke", email = "sebastian.jentschke@uib.no", role = c("ctb")))
-Date: 2025-09-13
-Description: 
-  The 'pwrss' R package provides flexible and comprehensive functions for
-  statistical power and minimum required sample size calculations across a wide
-  range of commonly used hypothesis tests in psychological, biomedical, and
-  social sciences.
-Suggests: knitr, rmarkdown
-VignetteBuilder: knitr
-ByteCompile: yes
-LazyLoad: yes
-License: GPL (>= 3)
+Title: Statistical Power, Sample Size, and Detectable Effect
+        Calculations
+Authors@R: c(person(given = "Metin",     family = "Bulus",     email = "bulusmetin@gmail.com",       role = c("aut", "cre", "cph")),
+             person(given = "Sebastian", family = "Jentschke", email = "sebastian.jentschke@uib.no", role = c("aut", "cph")))
 Maintainer: Metin Bulus <bulusmetin@gmail.com>
-RoxygenNote: 7.3.3
-Encoding: UTF-8
+Description: 
+  Flexible and comprehensive functions for statistical power, minimum required 
+  sample size, and minimum detectable effect calculations across a wide range of
+  commonly used hypothesis tests in psychological, biomedical, and social sciences.
+License: GPL (>= 3)
 Language: en-US
+Encoding: UTF-8
+VignetteBuilder: knitr
+URL: https://metinbulus.github.io/pwrss/
+BugReports: https://github.com/metinbulus/pwrss/issues
+Depends: R (>= 3.5.0)
+Suggests: knitr, sadists, rmarkdown, testthat (>= 3.0.0)
+Config/testthat/edition: 3
+ByteCompile: yes
+Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2025-09-16 05:21:54 UTC; LENOVO
-Author: Metin Bulus [aut, cre],
-  Sebastian Jentschke [ctb]
+Packaged: 2026-06-22 22:11:36 UTC; metin
+Author: Metin Bulus [aut, cre, cph],
+  Sebastian Jentschke [aut, cph]
 Repository: CRAN
-Date/Publication: 2025-09-16 05:40:02 UTC
+Date/Publication: 2026-06-22 23:30:02 UTC

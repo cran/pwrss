@@ -1,3 +1,14 @@
+## Changes in pwrss v1.2.0
+  - Added unit tests for all procedures
+  - Added minimum detectable effects
+  - Added exact correlation (one sample)
+  - Added type S and M errors for two-sided tests, available through `plot()` function
+  - Added `clean.parms`, unifying how the input parameters in the results list are returned
+  - Added further input checks so that all input parameters are checked
+  - Simplified code in `power.z.logistic` and `power.z.poisson`
+  - Corrected formula for Hsieh et al. (1998) in `power.z.logistic`
+  - Added `target.effect` to determine effect of interest in `power.f.ancova`
+
 ## Changes in pwrss v1.0.0
   - Addition 1: ANCOVA procedures with means and contrasts (Shieh)
   - Addition 2: Exact tests for proportions (Fisher & McNemar)

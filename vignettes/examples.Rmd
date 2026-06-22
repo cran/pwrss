@@ -1,93 +1,68 @@
 ---
 title: "Practical Power Analysis in R"
+author: Metin Bulus & Sebastian Jentschke
 date: "`r Sys.Date()`"
-author: Metin Bulus
+vignette: >
+  %\VignetteIndexEntry{Practical Power Analysis in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 output:
   rmarkdown::html_document:
     # theme: cerulean  # or united, cosmo, readable, lumen, etc.
+    css: examples.css
     toc: true
     number_sections: true
     toc_float: true
     toc_depth: 3
-vignette: >
-  %\VignetteIndexEntry{Practical Power Analysis in R}
-  %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
-
 ---
 
-<head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-047X5R7P7R"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-047X5R7P7R');
-</script>
-</head>
-
-<style type="text/css">
-
-div.tocify {
-  width: 30%;
-  max-width: 260px;
-  max-height: 100%;
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 35px;
-  text-indent: 0;
-}
-
-.tocify-subheader .tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 70px;
-  text-indent: 0;
-}
-
-
-</style>
+```{r, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      comment = "#>",
+                      collapse = TRUE,
+                      message = FALSE,
+                      warning = FALSE,
+                      fig.height = 5,
+                      fig.width = 7,
+                      fig.align = "center",
+                      out.width = "100%")
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(pwrss)
 ```
 
+<div style="background-color:rgb(255, 165, 90); padding: 20px 20px 1px; border-radius:5px;">
+<p>The original tutorial was published on CRAN and can be accessed at: 
+<a href="https://cran.r-project.org/package=pwrss/vignettes/examples.html">https://cran.r-project.org/package=pwrss/vignettes/examples.html</a></p>
+</div>
+<br>
+
 Install and load pwrss R package:
 ```{r,  message = FALSE, eval = FALSE, warning = FALSE}
 install.packages("pwrss")
 library(pwrss)
 ```
-<br>
-![](hex.png){width=150}
-
 
 If you find the package and related material useful please cite as:
 
-<div style = "background-color:rgb(245, 245, 245); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-
-Bulus, M., & Jentschke, S. (2025). pwrss: Statistical Power and Sample Size Calculation Tools. R package version 1.0.0. [https://doi.org/10.32614/CRAN.package.pwrss](https://doi.org/10.32614/CRAN.package.pwrss)
-
+<div style = "background-color:rgb(245, 245, 245); padding: 20px 20px 1px; border-radius:5px;">
+<p>Bulus, M., & Jentschke, S. (2026). pwrss: Statistical Power, Sample Size, and Detectable Effect Calculations. R package version 1.2.0. [https://doi.org/10.32614/CRAN.package.pwrss](https://doi.org/10.32614/CRAN.package.pwrss)</p>
 </div>
 
 **Acknowledgments**
 
-This open-source project has benefited from users who have taken the time to report typos and identify bugs. I would like to acknowledge those who have helped improve the accuracy and quality of the project by reporting these issues. If I have missed anyone who has provided similar feedback, please let me know.
+This open-source project has benefited from users who have taken the time to report typos and identify bugs. We would like to acknowledge those who have helped improve the accuracy and quality of the project by reporting these issues. If we have missed anyone who has provided similar feedback, please let me know.
 
 Error reports from (alphabetic order): <br>
 Adrian Olszewski (bug report);
 Catherine (Kate) Crespi (bug report);
-dpnichols811 (GitHub profile) (bug report);
+dpnichols811 (GitHub profile, bug report);
 Fred Oswald (typo report);
 Jarrod Hadfield (bug report);
 Leszek Gawarecki (typo report);
+liegepr (GitHub profile, bug report);
 Roland Thijs (typo report)
 
 Please send any bug reports, feedback, or questions to [bulusmetin [at] gmail.com](mailto:bulusmetin@gmail.com)
@@ -95,11 +70,9 @@ Please send any bug reports, feedback, or questions to [bulusmetin [at] gmail.co
 <br>
 
 # Generic
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
-These generic functions compute and return statistical power with the option to generate Type I and Type II error plots when test statistics and degrees of freedom are available. Users can input test statistics manually, valuable for custom designs outside the {pwrss} package's scope, or extract them from statistical software output. This flexibility proves particularly advantageous since test statistics and degrees of freedom are typically accessible from programs like jamovi, JASP, SAS, SPSS, or Stata.
-
-Power calculations can be performed by entering the test statistic through the ncp or mean arguments. Post-hoc power estimates derived this way provide a sensitivity analysis, revealing the evidential strength of a study's sample size relative to the observed effect size. This approach offers valuable insights for large samples, where effect estimates demonstrate greater stability. However, for small samples, where effect size estimates exhibit higher variability, post-hoc power requires cautious interpretation.
+These generic functions compute and return statistical power with the option to generate Type I and Type II error plots when test statistics and degrees of freedom are available. Users can input test statistics manually, valuable for custom designs outside the {pwrss} package's scope, or extract them from statistical software output. 
 
 ## T-Test
 
@@ -120,14 +93,25 @@ model <- lm(mpg ~ hp + wt, data = mtcars)
 summary(model)
 
 power.t.test(ncp = -3.519, # t-value for hp variable
-             df = 29, # residual degrees of freedom
+             df = 29,      # residual degrees of freedom
              alpha = 0.05, # type 1 error rate
              alternative = "two.sided",
              plot = TRUE)
 ```
 
-**Report**: The post-hoc power analysis showed that a sample of 32 cars had a 0.925 chance of detecting the observed relationship between horsepower and miles per gallon, if such a relationship exists. The analysis was conducted using an $\alpha$ level of 0.05.
+**Report**: The post-hoc power analysis showed that a sample of 32 cars had a 0.925 chance of detecting the observed relationship between horsepower and miles per gallon, if such a relationship exists. The analysis was conducted using an $\alpha$ level of 0.05. 
 
+However, post-hoc power has limited practical value. Given such a sample size, minimum detectable test statistics (MDTS) is -2.899. The estimated value of -3.519 is much larger than the MDTS in absolute value. The Type M error of 1.16 for the MDTS suggests that the estimated effect is subject to only modest magnitude inflation and is therefore unlikely to be explained primarily by effect-size exaggeration.
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
+power.t.test(ncp = NULL,     # calculate this
+             req.sign = "-", # direction of the test statistics
+             df = 29,        # residual degrees of freedom
+             alpha = 0.05,   # type 1 error rate
+             power = 0.80,
+             alternative = "two.sided",
+             plot = TRUE)
+```
 
 ### User-Defined Design
 
@@ -154,14 +138,14 @@ Assume there are two classrooms in each school, each classroom has 30 students, 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 # define parameters
-d <- 0.50 # effect size under alternative
-null.d <- 0 # effect size under null
-margin <- 0.10 # smallest meaningful diff between d and null.d
+d <- 0.50           # effect size under alternative
+null.d <- 0         # effect size under null
+margin <- 0.10      # smallest meaningful diff between d and null.d
 
-p <- 0.50 # proportion of subjects in the intervention school
-n <- 120 # total sample size
-g <- 1 # number of covariates
-r.squared <- 0.50 # explanatory power of covariates
+p <- 0.50           # proportion of subjects in the intervention school
+n <- 120            # total sample size
+g <- 1              # number of covariates
+r.squared <- 0.50   # explanatory power of covariates
 rtx.squared <- 0.10 # squared point-biserial cor between trt dummy and outcome
 
 # calculate the standard error
@@ -202,12 +186,22 @@ model <- glm(breaks ~ wool + tension, data = warpbreaks,
 summary(model)
 
 power.z.test(mean = -3.994, # z-value for wool B
-             alpha = 0.05, # type 1 error rate
+             alpha = 0.05,  # type 1 error rate
              alternative = "two.sided",
              plot = TRUE)
 ```
 
 **Report**: The post-hoc power analysis showed that a sample of 54 trials had a 0.979 chance of detecting the observed relationship between Wool B and number of warp breaks, if such a relationship exists. The analysis was conducted using an $\alpha$ level of 0.05.
+
+Given such a sample size, minimum detectable test statistics (MDTS) is -2.802. The estimated value of -3.994 is much larger than the MDTS in absolute value. The Type M error of 1.12 for the MDTS suggests that the estimated effect is subject to only modest magnitude inflation and is therefore unlikely to be explained primarily by effect-size exaggeration.
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
+power.z.test(mean = NULL,   # calculate this
+             alpha = 0.05,  # type 1 error rate
+             power = 0.80,
+             alternative = "two.sided",
+             plot = TRUE)
+```
 
 ### User Defined Design
 
@@ -224,9 +218,9 @@ Researchers hypothesize that students with higher class ranks (i.e., lower rank 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 # define parameters
-rs <- 0.30 # spearman rho rank cor under alternative
+rs <- 0.30   # spearman rho rank cor under alternative
 null.rs <- 0 # spearman rho rank cor under null
-n <- 100 # sample size
+n <- 100     # sample size
 
 # apply Fisher's Z transformation
 z.rs <- cor.to.z(rs)$z
@@ -239,7 +233,7 @@ z.std.error <- sqrt(1.06 / (n - 3))
 ncp <- (z.rs - z.null.rs) / z.std.error
 
 # calculate power
-power.z.test(ncp = ncp,
+power.z.test(mean = ncp,
              alpha = 0.05,
              alternative = "two.sided",
              plot = TRUE)
@@ -265,14 +259,26 @@ data(trees)
 model <- lm(Girth ~ Height, data = trees)
 summary(model)
 
-power.f.test(ncp = 10.71, # non-centrality under alternative
-             df1 = 1, # numerator degrees of freedom
-             df2 = 29, # denominator degrees of freedom
+power.f.test(ncp = 10.71,  # non-centrality under alternative
+             df1 = 1,      # numerator degrees of freedom
+             df2 = 29,     # denominator degrees of freedom
              alpha = 0.05, # type 1 error rate
              plot = FALSE)
 ```
 
 **Report**: The post-hoc power analysis showed that a sample of 31 trees had a 0.885 chance of detecting the observed relationship between tree height and girth, if such a relationship exists in the population. The analysis was conducted using an $\alpha$ level of 0.05.
+
+Given such a sample size and research design, minimum detectable test statistics (MDTS) is 8.403. The estimated value of 10.71 is much larger than the MDTS. 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
+power.f.test(ncp = NULL,   # calculate this
+             df1 = 1,      # numerator degrees of freedom
+             df2 = 29,     # denominator degrees of freedom
+             power = 0.80,
+             alpha = 0.05, # type 1 error rate
+             plot = FALSE)
+```
+
 
 ## Chi-square Test
 
@@ -294,12 +300,22 @@ print(table)
 chisq.test(table)
 
 power.chisq.test(ncp = 138.29, # X-squared
-                 df = 9, # degrees of freedom
+                 df = 9,       # degrees of freedom
                  alpha = 0.05, # type 1 error rate
                  plot = FALSE)
 ```
 
 **Report**: The post-hoc power analysis showed that a sample of 592 individuals had a 1.00 chance of detecting the observed relationship between hair and eye color, if such a relationship exists in the population. The analysis was conducted using an $\alpha$ level of 0.05.
+
+Given such a sample size and research design, minimum detectable test statistics (MDTS) is 15.65. The estimated value of 138.29 is much larger than the MDTS. 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
+power.chisq.test(ncp = NULL,    # calculate this
+                 df = 9,        # degrees of freedom
+                 power = 0.80,
+                 alpha = 0.05,  # type 1 error rate
+                 plot = FALSE)
+```
 
 ### Post-Hoc 2
 
@@ -334,6 +350,16 @@ power.chisq.test(ncp = 18.463,
 
 **Report**: The post-hoc power analysis indicated that a sample of 248 women provided a 0.99 probability of detecting the unique contribution of the number of induced abortions to infertility status, while controlling for other variables, assuming such a relationship exists in the population. The analysis was conducted using an $\alpha$ level of 0.05.
 
+Given such a sample size and research design, minimum detectable test statistics (MDTS) is 7.849. The estimated value of 18.463 is much larger than the MDTS. 
+
+```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
+power.chisq.test(ncp = NULL,    # calculate this
+                 df = 1,        # degrees of freedom
+                 power = 0.80,
+                 alpha = 0.05,  # type 1 error rate
+                 plot = FALSE)
+```
+
 ## Binomial Test
 
 ### Post-Hoc
@@ -354,9 +380,9 @@ n.total <- nrow(faithful)
 
 binom.test(n.success, n.total, p = 0.50)
 
-power.binom.test(size = n.total, # number of eruptions
+power.binom.test(size = n.total,             # number of eruptions
                  prob = n.success / n.total, # prob. of occurrence under alt.
-                 null.prob = 0.50, # prob. of occurrence under null
+                 null.prob = 0.50,           # prob. of occurrence under null
                  alpha = 0.05,
                  alternative = "one.sided",
                  plot = TRUE)
@@ -364,30 +390,21 @@ power.binom.test(size = n.total, # number of eruptions
 
 **Report**: The post-hoc power analysis indicated that a sample of 272 eruptions provided a 0.999 probability of detecting whether eruptions lasting more than 3 minutes occur more than 50% of the time, if it exists in the underlying eruption pattern. The analysis was based on a one-sided test procedure with $\alpha$  = 0.05.
 
-
 ### User-Defined Designs
 
 **Example 1**: Find number of coin toss to test whether a coin is fair.
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-# find the approximate solution
-power.z.oneprop(prob = 0.50, # prob. of head under alt.
-                null.prob = c(0.495, 0.505), # equivalence margins
-                power = 0.80,
-                alpha = 0.05, # type 1 error rate
-                alternative = "two.one.sided",
-                verbose = FALSE)$n
-
-# iterate to find the exact solution
-power.binom.test(size = 85632, # number of tosses needed
-                 prob = 0.50, # prob. of head under alt.
+power.binom.test(size = NULL,                 # number of tosses needed
+                 prob = 0.50,                 # prob. of head under alt.
                  null.prob = c(0.495, 0.505), # equivalence margins
-                 alpha = 0.05, # type 1 error rate
+                 power = 0.80,
+                 alpha = 0.05,                # type 1 error rate
                  alternative = "two.one.sided",
                  plot = FALSE)
 ```
 
-**Report 1**: Power analysis indicated that at least 85,632 coin tosses are required to determine whether a coin is fair. The analysis assumes a fair coin has a 0.50 probability of landing heads, with equivalence margins set at 0.495 and 0.505, using a two one-sided test procedure with $\alpha$ = 0.05.
+**Report 1**: Power analysis indicated that at least 85,826 coin tosses are required to determine whether a coin is fair. The analysis assumes a fair coin has a 0.50 probability of landing heads, with equivalence margins set at 0.495 and 0.505, using a two one-sided test procedure with $\alpha$ = 0.05.
 
 
 **Example 2**: Find optimal number of replications in a Monte Carlo simulation.
@@ -395,17 +412,10 @@ power.binom.test(size = 85632, # number of tosses needed
 To reliably detect a type 1 error rate of 0.05:
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-# find the approximate solution
-power.z.oneprop(prob = 0.05, # prob. of head under alt.
-                null.prob = c(0.045, 0.055), # equivalence margins
-                power = 0.80,
-                alpha = 0.05, # type 1 error rate
-                alternative = "two.one.sided", verbose = FALSE)$n
-
-# iterate to find the exact solution
-power.binom.test(size = 16424, # number of replications needed
-                 prob = 0.05, # prob. of falsely rejecting null
+power.binom.test(size = NULL,                 # number of replications needed
+                 prob = 0.05,                 # prob. of falsely rejecting null
                  null.prob = c(0.045, 0.055), # equivalence margins
+                 power = 0.80,
                  alpha = 0.05,
                  alternative = "two.one.sided",
                  plot = FALSE)
@@ -415,29 +425,22 @@ power.binom.test(size = 16424, # number of replications needed
 To reliably detect a power rate of 0.80:
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
-# find the approximate solution
-power.z.oneprop(prob = 0.80, # prob. of correctly rejecting null
-                null.prob = c(0.795, 0.805), # equivalence margins
-                power = 0.80,
-                alpha = 0.05, # type 1 error rate
-                alternative = "two.one.sided", verbose = FALSE)$n
-
-# iterate to find the exact solution
-power.binom.test(size = 55011, # number of replications needed
-                 prob = 0.80, # prob. of correctly rejecting null
+power.binom.test(size = NULL,                 # number of replications needed
+                 prob = 0.80,                 # prob. of correctly rejecting null
                  null.prob = c(0.795, 0.805), # equivalence margins
+                 power = 0.80,
                  alpha = 0.05,
                  alternative = "two.one.sided",
                  plot = FALSE)
 ```
 
 
-**Report 2**: Power analysis indicated that at least 16,424 replications are required to estimate the Type 1 error rate at $\alpha$ = 0.05. This analysis used a two one-sided test procedure with equivalence margins set at 0.045 and 0.055. In contrast, at least 55,011 replications are needed to estimate statistical power at 0.80, assuming equivalence margins of 0.795 and 0.805, also using the two one-sided test procedure with $\alpha$ = 0.05.
+**Report 2**: Power analysis indicated that at least 16,387 replications are required to estimate the Type 1 error rate at $\alpha$ = 0.05. This analysis used a two one-sided test procedure with equivalence margins set at 0.045 and 0.055. In contrast, at least 55,030 replications are needed to estimate statistical power at 0.80, assuming equivalence margins of 0.795 and 0.805, also using the two one-sided test procedure with $\alpha$ = 0.05.
 
 
 ## Error Plots
 
-`plot()` function (S3 method) is a wrapper around the generic functions above. It creates a visual representation of both null and alternative distributions, with shaded areas indicating Type 1 error (false positive) and Type 2 error (false negative) regions.
+`plot()` function (S3 method) is a wrapper around the generic functions above. It creates a visual representation of both null and alternative distributions, with shaded areas indicating Type 1 error (false positive) and Type 2 error (false negative) regions. Two-sided tests also report Type S and Type M errors.
 
 Assign results of any `pwrss` function to an R object and pass it to the `plot()` function.
 
@@ -452,8 +455,7 @@ NOTE: In earlier versions of the {pwrss} package, the `plot()` function generate
 <br>
 
 # Means (T-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 ## Independent Samples T-Test
 
@@ -471,7 +473,7 @@ power.t.student(d = -0.20,
                 design = "independent")
 
 # account for attrition
-inflate.sample(n = 310, rate = 0) # control
+inflate.sample(n = 310, rate = 0)    # control
 inflate.sample(n = 310, rate = 0.05) # treatment
 ```
 
@@ -515,9 +517,9 @@ inflate.sample(n = 412, rate = 0.05) # treatment
 
 A non-inferiority trial, which may evaluate the effectiveness of a new program, drug, or product, tests whether the mean outcome in the treatment group is not unacceptably worse than that in the conventional-treatment or placebo group, based on a pre-specified non-inferiority margin. For instance, a `d - null.d` difference as small as `margin = -0.05` may still support a conclusion of non-inferiority. What is the minimum required sample size to detect an effect size of d = 0.20 under this criterion?
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
 When higher values of an outcome is better the margin usually takes NEGATIVE values; whereas when lower values of the outcome is better margin usually takes POSITIVE values.
-</div>
+</div><br>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 # parametric (an example report is provided below)
@@ -556,9 +558,8 @@ power.np.wilcoxon(d = 0.20,
 
 A superiority trial evaluates whether a new program, drug, or product leads to a meaningfully better mean outcome in the treatment group compared to a conventional treatment or placebo group, based on a pre-specified superiority margin. For example, a `d - null.d` difference as small as `margin = 0.05` may be considered sufficient to claim superiority. What is the minimum required sample size to detect an effect size of d = 0.20 under this criterion?
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-When higher values of an outcome is better margin usually takes POSITIVE values; whereas when lower values of the outcome is better margin usually takes NEGATIVE values.
-</div>
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+When higher values of an outcome is better margin usually takes POSITIVE values; whereas when lower values of the outcome is better margin usually takes NEGATIVE values.</div><br>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 # parametric (an example report is provided below)
@@ -708,9 +709,8 @@ inflate.sample(n = 208, rate = 0.05)
 
 Consider the <a href="#paired-t-parametric">earlier example</a>, but now with a focus on a different outcome: perceived group cohesion. To evaluate whether the new format preserves the perceived group cohesion, researchers plan to conduct a non-inferiority test to assess whether perceived group cohesion ratings in the online group is not meaningfully worse than that of the matched in-person group. The researcher expects no change (`d = 0`). The `d - null.d` difference can be as small as `margin = -0.10` but the online format will still be considered as non-inferior. What is the minimum required sample size under this criterion?
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-When higher values of an outcome is better the margin usually takes NEGATIVE values; whereas when lower values of the outcome is better margin usually takes POSITIVE values.
-</div>
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+When higher values of an outcome is better the margin usually takes NEGATIVE values; whereas when lower values of the outcome is better margin usually takes POSITIVE values.</div><br>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 # parametric (an example report is provided below)
@@ -742,9 +742,8 @@ Consider the <a href="#paired-t-parametric">earlier example</a>, but now with a 
 
 A superiority test is conducted to assess whether psychological safety ratings are meaningfully higher in the online group compared to the matched in-person group. The researcher is interested in a modest change (`d = 0.20`), and `d - null.d` difference can be as small as `margin = 0.10` but the online format will still be considered as superior. What is the minimum required sample size under this criterion?
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-When higher values of an outcome is better margin usually takes POSITIVE values; whereas when lower values of the outcome is better margin usually takes NEGATIVE values.
-</div>
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+When higher values of an outcome is better margin usually takes POSITIVE values; whereas when lower values of the outcome is better margin usually takes NEGATIVE values.</div><br>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE, warning = FALSE}
 # parametric (an example report is provided below)
@@ -946,8 +945,7 @@ power.np.wilcoxon(d = d,
 <br>
 
 # Proportions  (Z-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 ## One-Sample
 
@@ -1031,11 +1029,10 @@ power.exact.oneprop(prob = 0.002, # probability of success under alternative
 
 An independent samples proportion test compares the proportion of "successes" between two distinct groups (groups are not related, paired, or matched) to determine whether a statistically significant difference exists. Group may exist naturally (females - males, urban - rural, etc.) or formed by the researcher (new - standard drug, intervention - control, etc.).
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-Cohen's h is a standard effect size metric for power analyses with proportions; it is calculated on arcsine-transformed success probabilities. Although h plays the same role for proportions that Cohen's d plays for means, the practical gap between a z-test for proportions and an independent-samples t-test for continuous data is usually negligible - sample size estimates rarely vary by more than one or two units. Consequently, applying the familiar t-test framework yields power calculations that are acceptably accurate.
-</div>
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+Cohen's h is a standard effect size metric for power analyses with proportions; it is calculated on arcsine-transformed success probabilities. Although h plays the same role for proportions that Cohen's d plays for means, the practical gap between a z-test for proportions and an independent-samples t-test for continuous data is usually negligible - sample size estimates rarely vary by more than one or two units. Consequently, applying the familiar t-test framework yields power calculations that are acceptably accurate.</div><br>
 
-Here is an example that compares the two approach:
+Here is an example that compares the two approaches:
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 # z-test approach
@@ -1053,9 +1050,8 @@ power.t.student(d = 0.2013579, power = 0.80)
 
 **Example**: A pharmaceutical company is investigating a new medication intended to treat generalized anxiety disorder. While its anti-anxiety efficacy is being evaluated elsewhere, early case reports suggest that daytime sleepiness - recorded as a binary outcome (present vs. absent) - may occur more frequently in women than in men. To verify this potential gender-specific side effect, researchers will enroll equal numbers of male and female patients, administer the drug for four weeks, and document whether each participant experiences clinically significant daytime sleepiness. A five percent difference is considered clinically meaningful which warrants attention. The research division plan a one-sided test with a significance level of 0.05 and 0.80 power. What is the minimum required sample size under this criterion?
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-A key difficulty in planning studies of proportion differences is that a fixed absolute gap translates to different Cohen's h values depending on where it falls on the 0 - 1 scale. A change from 50% to 55% (near the midpoint) yields a very small h and thus demands extremely large samples, whereas the same 5% increase from 1% to 6% produces a much larger h and requires far fewer participants. For that reason, it is essential to anchor the power analysis to a realistic baseline proportion, ideally drawn from administrative or historical data. For planning purposes, we will assume that roughly 10% of patients taking the current standard medication experience daytime sleepiness. We will use this 10% figure as the reference rate when estimating the sample size needed to detect any gender-specific increase with the new drug. In many cases, researchers lack prior information about the event probabilities. Using 50% as the reference point for one group - against which an increase or decrease is of interest - is a conservative approach in power analysis. The actual probability may not be anywhere near 50% and that is fine.
-</div>
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+A key difficulty in planning studies of proportion differences is that a fixed absolute gap translates to different Cohen's h values depending on where it falls on the 0 - 1 scale. A change from 50% to 55% (near the midpoint) yields a very small h and thus demands extremely large samples, whereas the same 5% increase from 1% to 6% produces a much larger h and requires far fewer participants. For that reason, it is essential to anchor the power analysis to a realistic baseline proportion, ideally drawn from administrative or historical data. For planning purposes, we will assume that roughly 10% of patients taking the current standard medication experience daytime sleepiness. We will use this 10% figure as the reference rate when estimating the sample size needed to detect any gender-specific increase with the new drug. In many cases, researchers lack prior information about the event probabilities. Using 50% as the reference point for one group - against which an increase or decrease is of interest - is a conservative approach in power analysis. The actual probability may not be anywhere near 50% and that is fine.</div><br>
 
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
@@ -1225,8 +1221,7 @@ power.exact.twoprops(prob1 = 0.50,
 ```
 
 # Correlations (Z-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 ## One-Sample
 
@@ -1246,11 +1241,10 @@ power.z.onecor(rho = 0.20,
 
 ## Independent Samples
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-Cohen's q is a standard effect size metric for power analyses with correlations; it is calculated on Fisher's z-transformed correlations. Although q plays the same role for correlations that Cohen's d plays for means, the practical gap between a z-test for correlations and an independent-samples t-test is usually negligible - sample size estimates rarely vary by more than one or two units. Consequently, applying the familiar t-test framework yields sample size calculations that are acceptably accurate.
-</div>
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+Cohen's q is a standard effect size metric for power analyses with correlations; it is calculated on Fisher's z-transformed correlations. Although q plays the same role for correlations that Cohen's d plays for means, the practical gap between a z-test for correlations and an independent-samples t-test is usually negligible - sample size estimates rarely vary by more than one or two units. Consequently, applying the familiar t-test framework yields sample size calculations that are acceptably accurate.</div><br>
 
-Here is an example that compares the two approach:
+Here is an example that compares the two approaches:
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 # z-test approach
@@ -1263,10 +1257,8 @@ cors.to.q(rho1 = 0.20, rho2 = 0.10)
 power.t.student(d = 0.1023972, power = 0.80)
 ```
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-A key difficulty in planning studies of correlation differences is that a fixed absolute gap translates to different Cohen's q values depending on where it falls on the -1 to 1 scale. A change from 10% to 20% yields a small q and thus demands a larger samples, whereas the same 10% increase from 50% to 60% produces a larger q which requires fewer participants. For that reason, it is essential to anchor the power analysis to a realistic baseline correlation, ideally drawn from administrative or historical data. In many cases, researchers lack prior information about the population correlations. Using 0 correlation as the reference point for one group - against which an increase or decrease is of interest - is a conservative approach in power analysis. The actual correlation may not be anywhere near 0 and that is fine.
-</div>
-
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+A key difficulty in planning studies of correlation differences is that a fixed absolute gap translates to different Cohen's q values depending on where it falls on the -1 to 1 scale. A change from 10% to 20% yields a small q and thus demands a larger samples, whereas the same 10% increase from 50% to 60% produces a larger q which requires fewer participants. For that reason, it is essential to anchor the power analysis to a realistic baseline correlation, ideally drawn from administrative or historical data. In many cases, researchers lack prior information about the population correlations. Using 0 correlation as the reference point for one group - against which an increase or decrease is of interest - is a conservative approach in power analysis. The actual correlation may not be anywhere near 0 and that is fine.</div><br>
 
 **Example**: A research team is examining whether the association between parental support and academic achievement is stronger in low socio-economic status (SES) schools compared to high-SES schools. If confirmed, they intend to recommend targeted interventions to enhance parental involvement specifically in low-SES settings. To determine the required sample size, the researchers anticipate a small but meaningful difference between the two correlations. They consider a minimum meaningful difference of 0.10 - representing the difference between a correlation of 0 and 0.10 in the worst-case scenario - which corresponds to a small effect size (Cohen's q = 0.10). Researchers plan to use a one-sided test with $\alpha$ = 0.05 and 0.80 power. What is the minimum required sample size under these criteria?
 
@@ -1381,8 +1373,7 @@ inflate.sample(n = 317, rate = 0.05)
 <br>
 
 # Regression: Linear (F- and T-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 ## Omnibus F-Test
 
@@ -1392,9 +1383,7 @@ The omnibus F-test in multiple linear regression is used to evaluate whether the
 
 **Example**: Assume that we want to predict a continuous variable $Y$ using $X_{1}$, $X_{2}$, and $X_{2}$ variables (can be a combination of binary or continuous).
 
-$$\begin{eqnarray}
-  Y & = & \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3} + r, \quad r \thicksim N(0, \sigma^2) \newline
-  \end{eqnarray}$$
+$$Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3} + r, \quad r \sim N(0, \sigma ^ 2)$$
 
 We are interested in a minimum $R^2$ = 0.10. What is the minimum required sample size?
 
@@ -1428,9 +1417,9 @@ power.f.regression(r.squared = 0.10,
 
 **Example**: Assume that we want to test the incremental contribution of two additional predictors ($X_{4}$ and $X_{5}$) to an existing regression model. That is, we are testing whether adding these two predictors (k.tested = 2) results in a significant increase in explained variance. The full model includes five predictors in total (k.total = 5). We are interested in detecting a meaningful increase in explained variance of $\Delta R^2 = 0.10$. What is the minimum required sample size under these criteria?
 
-$$\begin{eqnarray}
-  Y & = & \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3} + \beta_{4}X_{4} + \beta_{5}X_{5} + r, \quad r \thicksim N(0,\sigma^2) \newline
-  \end{eqnarray}$$
+$$
+Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3} + \beta_{4}X_{4} + \beta_{5}X_{5} + r, \quad r \sim N(0, \sigma ^ 2)
+$$
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 power.f.regression(r.squared.change = 0.10,
@@ -1466,9 +1455,9 @@ power.f.regression(r.squared.change = 0.10,
 
 In the earlier example, assume that we want to predict a continuous variable $Y$ using a continuous predictor $X_{1}$ but control for $X_{2}$, and $X_{2}$ variables (can be a combination of binary or continuous). We are mainly interested in the effect of $X_{1}$ and expect a standardized regression coefficient of $\beta_{1} = 0.20$.
 
-$$\begin{eqnarray}
-  Y & = & \beta_{0} + \color{red} {\beta_{1} X_{1}} + \beta_{2}X_{2} + \beta_{3}X_{3} + r, \quad r \thicksim N(0, \sigma ^ 2) \newline
-  \end{eqnarray}$$
+$$
+Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3} + r, \quad r \sim N(0, \sigma ^ 2)
+$$
 
 Again, we are expecting that these three variables explain 30% of the variance in the outcome  ($R^2 = 0.30$). What is the minimum required sample size? It is sufficient to provide standardized regression coefficient for `beta` because `sd.predictor = 1` and `sd.outcome = 1` by default.
 
@@ -1517,9 +1506,8 @@ power.t.regression(beta = 0.20,
 
 The intervention is expected to be non-inferior to some earlier or other interventions. Assume that the effect of an earlier or some other intervention is `beta = 0.10`. The `beta - null.beta` is expected to be positive and should be at least -0.05 (`margin = -0.05`). What is the minimum required sample size?
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-This is the case when higher values of an outcome is better. When lower values of an outcome is better the `beta - null.beta` difference is expected to be NEGATIVE and the `margin` takes POSITIVE values.
-</div>
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+This is the case when higher values of an outcome is better. When lower values of an outcome is better the `beta - null.beta` difference is expected to be NEGATIVE and the `margin` takes POSITIVE values.</div><br>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 p <- 0.50
@@ -1540,9 +1528,8 @@ power.t.regression(beta = 0.20,
 
 The intervention is expected to be superior to some earlier or other interventions. Assume that the effect of an earlier or some other intervention is `beta = 0.10`. The `beta - null.beta` is expected to be positive and should be at least 0.05 (`margin = 0.05`). What is the minimum required sample size?
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px; border-radius:5px;">
-This is the case when higher values of an outcome is better. When lower values of an outcome is better `beta - null.beta` difference is expected to be NEGATIVE and the `margin` takes NEGATIVE values.
-</div>
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+This is the case when higher values of an outcome is better. When lower values of an outcome is better `beta - null.beta` difference is expected to be NEGATIVE and the `margin` takes NEGATIVE values.</div><br>
 
 ```{r, message = FALSE, fig.width = 7, fig.height = 5, results = TRUE}
 p <- 0.50
@@ -1602,14 +1589,11 @@ power.t.regression(beta = 0.20,
 <br>
 
 # Regression: Logistic (Wald's Z-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 In logistic regression a binary outcome variable (0 / 1: failure / success, dead / alive, absent / present) is modeled by predicting probability of being in group 1 ($P_1$) via logit transformation (natural logarithm of odds). The base probability $P_0$ is the overall probability of being in group 1 without influence of predictors in the model (null). Under alternative hypothesis, the probability of being in group 1 ($P_1$) deviate from $P_0$ depending on the value of the predictor; whereas under null it is same as the $P_0$. A model with one main predictor ($X_1$) and two other covariates ($X_2$ and $X_3$) can be constructed as
 
-$$\begin{eqnarray}
-  ln(\frac{P_1}{1 - P_1}) & = & \beta_{0} + \color{red} {\beta_{1} X_{1}} + \beta_{2}X_{2} + \beta_{3}X_{3} \newline
-  \end{eqnarray}$$
+$$ln(\frac{P_1}{1 - P_1}) = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3}$$
 
 where <br>
 $$\beta_0 = ln(\frac{P_0}{1 - P_0})$$ <br>
@@ -1718,14 +1702,13 @@ power.z.logistic(beta1 = -0.4626,
 <br>
 
 # Regression: Poisson (Wald's Z-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 In Poisson regression a count outcome variable (e.g. number of hospital / store / website visits, number of absence / dead / purchase in a day / week / month) is modeled by predicting incidence rate ($\lambda$) via logarithmic transformation (natural logarithm of rates). A model with one main predictor ($X_1$) and two other covariates ($X_2$ and $X_3$) can be constructed as
 
-$$\begin{eqnarray}
-  ln(\lambda) & = & \beta_{0} + \color{red} {\beta_{1} X_{1}} + \beta_{2}X_{2} + \beta_{3}X_{3} \newline
-  \end{eqnarray}$$
+$$
+ln(\lambda) = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3}
+$$
 
 where $exp(\beta_0)$ is the base incidence rate. <br>
 $$\beta_1 = ln(\frac{\lambda(X_1=1)}{\lambda(X_1=0)})$$ <br>
@@ -1805,19 +1788,20 @@ power.z.poisson(base.rate = exp(0.50),
 <br>
 
 # Regression: Mediation (Z-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 A simple mediation model can be constructed as in the figure.
 
-![**Simple Mediation Model**](med.png)
+![Simple Mediation Model](./figures/med.png)
 
 Regression models take the form of
 
-$$\begin{eqnarray}
-  M & = & \beta_{0M} + \color{red} {\beta_a} X + e\newline
-  Y & = & \beta_{0Y} + \color{red} {\beta_b} M + \color{red}{\beta_{cp}} X + \epsilon \newline
-  \end{eqnarray}$$
+\[
+\begin{eqnarray}
+M & = & \beta_{0M} + \beta_{a} X + e \\
+Y & = & \beta_{0Y} + \beta_{b} M + \beta_{cp} X + \epsilon
+\end{eqnarray}
+\]
 
 *Y* is the outcome, *M* is the mediator, and *X* is the main predictor. The indirect effect is the product of $\beta_a$ and $\beta_b$ path coefficients. $\beta_{cp}$ is the path coefficient for the direct effect. Path coefficients can be standardized or unstandardized. They are presumed to be standardized by default because the main predictor, mediator, and outcome all have standard deviations of `sd.predictor = 1`,  `sd.mediator = 1`, and `sd.outcome = 1` in the function. Standard deviations should be specified for unstandardized path coefficients (you can find these values in descriptive tables in reports / publications).
 
@@ -1873,6 +1857,9 @@ Joint and Monte Carlo tests are only available when power is requested.
 p <- 0.50 # proportion of subjects in one of the groups
 sd.predictor <- sqrt(p * (1 - p))
 
+# set seed to ensure the same results throughout different runs of examples.Rmd
+set.seed(1)
+
 power.z.mediation(beta.a = 0.25,
                   beta.b = 0.25,
                   sd.predictor = sd.predictor,
@@ -1923,8 +1910,7 @@ power.z.mediation(beta.a = 0.25,
 <br>
 
 # ANOVA (F-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 In a one-way ANOVA, a researcher might be interested in comparing the means of several groups (levels of a factor) with respect to a continuous variable. In a one-way ANCOVA, they may want to adjust means for covariates. Furthermore, they may want to inspect interaction between two or three factors (two-way or three-way ANOVA), or adjust interaction for covariates (two-way or three-way ANCOVA). The following examples illustrate how to determine minimum required sample size for such designs.
 
@@ -1994,8 +1980,7 @@ NOTE: Keppel procedure allows only one-way ANOVA.
 <br>
 
 # ANOVA: Mixed-Effects (F-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 **The group (between) effect**: A researcher might be interested in comparing the means of several groups (levels of a factor) with respect to an outcome variable (continuous) after controlling for the effect of time. The time effect can be thought as the improvement / grow / loss / deterioration in the outcome variable that happens naturally or due to unknown causes.
 
@@ -2101,8 +2086,7 @@ power.f.mixed.anova(eta.squared = 0.05,
 <br>
 
 # ANCOVA (F-Test)
-
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 ## Effect Size as Input
 
@@ -2118,9 +2102,8 @@ power.f.ancova(eta.squared = 0.048,
                alpha = 0.05)
 ```
 
-<div style = "background-color:rgb(188, 224, 247); padding:2px 10px 2px 10px; margin:2px 0px 10px 0px;">
-`k.covariates` argument has trivial effect on the results. The difference between ANOVA and ANCOVA procedure depends on whether the effect (`eta.squared`) is unadjusted or covariate-adjusted.
-</div>
+<div style = "background-color:rgb(188, 224, 247); padding: 20px 20px 1px; border-radius:5px;">
+`k.covariates` argument has trivial effect on the results. The difference between ANOVA and ANCOVA procedure depends on whether the effect (`eta.squared`) is unadjusted or covariate-adjusted.</div>
 
 ### Two-way
 
@@ -2210,6 +2193,7 @@ power.f.ancova.shieh(mu.vector = c(0.30, 0.09, 0.05, 0.245), # vector of adjuste
 ```
 
 # Planned Contrasts (T-Test)
+<hr>
 
 ## Dummy Coding
 
@@ -2309,7 +2293,7 @@ power.t.contrasts(design)
 <br>
 
 # Independence (Chi-square Test)
-<div style = "background-color:rgb(247, 247, 247); box-shadow: 4px 4px 4px rgb(220, 220, 220); padding:3px 3px 3px 3px; margin-top:0px; margin-bottom:10px;"></div>
+<hr>
 
 ## Vector of k Cells
 
@@ -2337,7 +2321,7 @@ power.chisq.gof(w = 0.44,
 **Effect size: Phi Coefficient (or Cramer's V or Cohen's W) for independence test (2 x 2 contingency table).**
 
 How many subjects are needed to claim that girls are under-diagnosed with ADHD?
-Check the original article at [https://time.com/growing-up-with-adhd/](https://time.com/growing-up-with-adhd/)
+Check the original article published in [TIME](https://web.archive.org/web/20250601054306/https://time.com/growing-up-with-adhd/)
 
 5.6% of girls and 13.2% of boys are diagnosed with ADHD (from the article).
 
@@ -2380,22 +2364,8 @@ power.chisq.gof(w = 0.03022008,
                 power = 0.80)
 ```
 
-<br>
-<br>
+<br><br>
 
-<div style = "background-color:rgb(245, 245, 245); padding:5px 5px 5px 5px; margin:2px 0px 10px 0px;">
+<div style = "background-color:rgb(245, 245, 245); padding: 20px 20px 1px; border-radius:5px;">
 Please send any bug reports, feedback or questions to [bulusmetin [at] gmail.com](mailto:bulusmetin@gmail.com).
 </div>
-
---o-- <br>
-
-This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"> Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License </a>.
-
-[![License](license.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-
-
-
-
-
-
-
