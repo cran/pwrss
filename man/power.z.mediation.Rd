@@ -30,6 +30,29 @@ power.z.mediation(
   verbose = 1,
   utf = FALSE
 )
+
+power.z.med(
+  beta.a = NULL,
+  beta.b = NULL,
+  ab.ratio = 1,
+  req.sign = "+",
+  beta.cp = 0,
+  sd.predictor = 1,
+  sd.mediator = 1,
+  sd.outcome = 1,
+  r.squared.mediator = NULL,
+  r.squared.outcome = NULL,
+  n = NULL,
+  power = NULL,
+  alpha = 0.05,
+  alternative = c("two.sided", "one.sided"),
+  method = c("sobel", "aroian", "goodman", "joint", "monte.carlo"),
+  n.simulation = 1000,
+  n.draws = 1000,
+  ceil.n = TRUE,
+  verbose = 1,
+  utf = FALSE
+)
 }
 \arguments{
 \item{beta.a}{regression coefficient for X -> M path. One can

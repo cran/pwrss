@@ -42,8 +42,8 @@
 #' @param beta1               the natural logarithm of the relative increase
 #'                            in the mean event rate for one unit increase in
 #'                            the predictor.
-#' @param req.sign            sign of the beta1 coefficient (when minimum
-#'                            detectable effect or beta1 is of interest).
+#' @param req.sign            sign of the `beta1` coefficient (when minimum
+#'                            detectable effect or `beta1` is of interest).
 #' @param mean.exposure       the mean exposure time (should be > 0), usually
 #'                            it is 1.
 #' @param n                   integer; sample size.
@@ -152,8 +152,8 @@ power.z.poisson <- function(base.rate = NULL, rate.ratio = NULL, beta0 = NULL, b
                             method = c("demidenko(vc)", "demidenko", "signorini"),
                             distribution = "normal", ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
-  method <- tolower(match.arg(method))
+  alternative <- match.arg(alternative)
+  method <- match.arg(method)
   func.parms <- as.list(environment())
 
   if (!is.null(n)) check.sample.size(n)
@@ -183,8 +183,8 @@ power.z.poisson <- function(base.rate = NULL, rate.ratio = NULL, beta0 = NULL, b
     rate.ratio <- beta1 <- NULL
     beta0 <- log(base.rate)
   } else {
-    stop(paste("Specify `base.rate` & `rate.ratio`\n  or `beta0` & `beta1`\n  or `base.rate` & `n` & `power`",
-               "(the latter calculates `rate.ratio` as effect size)."), call. = FALSE)
+    stop("Specify `base.rate` & `rate.ratio`\n  or `beta0` & `beta1`\n  or `base.rate` & `n` & `power` ",
+         "(the latter calculates `rate.ratio` as effect size).", call. = FALSE)
   }
 
   if (!is.null(beta1) && beta0 == beta1)
@@ -205,14 +205,14 @@ power.z.poisson <- function(base.rate = NULL, rate.ratio = NULL, beta0 = NULL, b
     if (length(distribution) > 3) stop("Unknown input type for `distribution` argument", call. = FALSE)
     dist.list.names <- names(distribution)
     dist.attrib <- c(dist.list.names, tolower(distribution$dist))
-    dist.invalid <- c(any(is.na(match(dist.attrib, c("dist", "normal", "mean", "sd")))),
-                      any(is.na(match(dist.attrib, c("dist", "lognormal", "meanlog", "sdlog")))),
-                      any(is.na(match(dist.attrib, c("dist", "uniform", "min", "max")))),
-                      any(is.na(match(dist.attrib, c("dist", "exponential", "rate")))),
-                      any(is.na(match(dist.attrib, c("dist", "poisson", "lambda")))),
-                      any(is.na(match(dist.attrib, c("dist", "binomial", "size", "prob")))),
-                      any(is.na(match(dist.attrib, c("dist", "bernoulli", "prob")))))
-    if (all(dist.invalid == TRUE)) stop("Unknown input type for `distribution` argument", call. = FALSE)
+    dist.invalid <- c(anyNA(match(dist.attrib, c("dist", "normal", "mean", "sd"))),
+                      anyNA(match(dist.attrib, c("dist", "lognormal", "meanlog", "sdlog"))),
+                      anyNA(match(dist.attrib, c("dist", "uniform", "min", "max"))),
+                      anyNA(match(dist.attrib, c("dist", "exponential", "rate"))),
+                      anyNA(match(dist.attrib, c("dist", "poisson", "lambda"))),
+                      anyNA(match(dist.attrib, c("dist", "binomial", "size", "prob"))),
+                      anyNA(match(dist.attrib, c("dist", "bernoulli", "prob"))))
+    if (all(dist.invalid)) stop("Unknown input type for `distribution` argument", call. = FALSE)
   } else {
     stop("Unknown input type for `distribution`.", call. = FALSE)
   }
@@ -222,8 +222,8 @@ power.z.poisson <- function(base.rate = NULL, rate.ratio = NULL, beta0 = NULL, b
 
     if (tolower(distribution$dist) == "normal") {
 
-      min.thresh <- stats::qnorm(.0000001, mean = distribution$mean, sd = distribution$sd)
-      max.thresh <- stats::qnorm(.9999999, mean = distribution$mean, sd = distribution$sd)
+      min.thresh <- stats::qnorm(0.0000001, mean = distribution$mean, sd = distribution$sd)
+      max.thresh <- stats::qnorm(0.9999999, mean = distribution$mean, sd = distribution$sd)
 
       # define the distribution function and use integration (calcInt == FALSE)
       dist.func <- function(x) stats::dnorm(x, mean = distribution$mean, sd = distribution$sd)
@@ -232,7 +232,7 @@ power.z.poisson <- function(base.rate = NULL, rate.ratio = NULL, beta0 = NULL, b
     } else if (tolower(distribution$dist) == "poisson") {
 
       min.thresh <- 0
-      max.thresh <- stats::qpois(.999999999, lambda = distribution$lambda)
+      max.thresh <- stats::qpois(0.999999999, lambda = distribution$lambda)
 
       # define the distribution function and use summation (calcInt == TRUE)
       dist.func <- function(x) stats::dpois(x, lambda = distribution$lambda)
@@ -250,7 +250,7 @@ power.z.poisson <- function(base.rate = NULL, rate.ratio = NULL, beta0 = NULL, b
     } else if (tolower(distribution$dist) == "exponential") {
 
       min.thresh <- 0
-      max.thresh <- stats::qexp(.9999999, rate = distribution$rate)
+      max.thresh <- stats::qexp(0.9999999, rate = distribution$rate)
 
       # define the distribution function and use integration (calcInt == FALSE)
       dist.func <- function(x) stats::dexp(x, rate = distribution$rate)
@@ -267,8 +267,8 @@ power.z.poisson <- function(base.rate = NULL, rate.ratio = NULL, beta0 = NULL, b
 
     } else if (tolower(distribution$dist) == "lognormal") {
 
-      min.thresh <- stats::qlnorm(.0000001, meanlog = distribution$meanlog, sdlog = distribution$sdlog)
-      max.thresh <- stats::qlnorm(.9999999, meanlog = distribution$meanlog, sdlog = distribution$sdlog)
+      min.thresh <- stats::qlnorm(0.0000001, meanlog = distribution$meanlog, sdlog = distribution$sdlog)
+      max.thresh <- stats::qlnorm(0.9999999, meanlog = distribution$meanlog, sdlog = distribution$sdlog)
 
       # define the distribution function and use integration (calcInt == FALSE)
       dist.func <- function(x) stats::dlnorm(x, meanlog = distribution$meanlog, sdlog = distribution$sdlog)
@@ -460,6 +460,7 @@ power.z.poisson <- function(base.rate = NULL, rate.ratio = NULL, beta0 = NULL, b
                       class = c("pwrss", "z", "poisson")))
 } # power.z.poisson()
 
+#' @rdname power.z.poisson
 #' @export power.z.poisreg
 power.z.poisreg <- power.z.poisson
 
@@ -472,8 +473,8 @@ pwrss.z.poisson <- function(exp.beta0 = 1.10, exp.beta1 = 1.16,
                             method = c("demidenko(vc)", "demidenko", "signorini"),
                             distribution = "normal", verbose = TRUE) {
 
-  alternative <- tolower(match.arg(alternative))
-  method <- tolower(match.arg(method))
+  alternative <- match.arg(alternative)
+  method <- match.arg(method)
   verbose <- ensure.verbose(verbose)
 
   if (alternative %in% c("less", "greater")) alternative <- "one.sided"

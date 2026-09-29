@@ -78,7 +78,7 @@ power.binom.test <- function(power = NULL,
                              verbose = 1,
                              utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   if (!is.null(power)) check.power(power)
   if (!is.null(size)) check.vector(size, check.size, 1)
   if (!is.null(prob)) check.proportion(prob)
@@ -88,15 +88,12 @@ power.binom.test <- function(power = NULL,
   verbose <- ensure.verbose(verbose)
   requested <- get.requested(es = prob, n = size, power = power)
 
-  pwr <- function(size = NULL, prob = NULL, null.prob = 0.5, alpha = 0.05,
-                  alternative = c("two.sided", "one.sided", "two.one.sided")) {
+  pwr <- function(size = NULL, prob = NULL, null.prob = 0.5, alpha = 0.05, alternative) {
 
     # initialize variables to prevent "not found" errors
     approx.alpha <- NA
     binom.alpha  <- NA
     power        <- NA
-
-    alternative <- match.arg(alternative)
 
     if (alternative == "two.sided") {
 

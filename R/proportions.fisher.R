@@ -102,8 +102,8 @@ power.exact.fisher <- function(prob1 = NULL, prob2 = NULL, req.sign = "+",
                                method = c("exact", "approximate"),
                                ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
-  method <- tolower(match.arg(method))
+  alternative <- match.arg(alternative)
+  method <- match.arg(method)
   func.parms <- as.list(environment())
 
   if (!is.null(prob1)) check.proportion(prob1)
@@ -196,12 +196,8 @@ power.exact.fisher <- function(prob1 = NULL, prob2 = NULL, req.sign = "+",
 
       if (alternative == "one.sided") {
 
-        ifelse(prob1 < prob2,
-               one.sided.less <- TRUE,
-               one.sided.less <- FALSE)
-
         joint.probs <- stats::dbinom(x1.seq, n1, prob1) * stats::dbinom(x2.seq, n2, prob2)
-        p.values <- stats::phyper(x1.seq - ifelse(one.sided.less, 0, 1), m, n.total - m, k, lower.tail = one.sided.less)
+        p.values <- stats::phyper(x1.seq - as.integer(prob1 >= prob2), m, n.total - m, k, lower.tail = prob1 < prob2)
         reject <- !is.na(p.values) & p.values <= alpha
         power <- sum(joint.probs[reject])
 
@@ -251,7 +247,7 @@ power.exact.fisher <- function(prob1 = NULL, prob2 = NULL, req.sign = "+",
 
     if (n2 > 500) {
       n.total <- 500 + ceiling(n.ratio * 500)
-      stop(paste(" Consider `method` = 'approximate' for total sample size >", n.total), call. = FALSE)
+      stop("Consider `method` = 'approximate' for total sample size > ", n.total, call. = FALSE)
     }
 
     # power is approached in successively smaller steps (pwr.exact is time-consuming to calculate):
@@ -415,5 +411,6 @@ power.exact.fisher <- function(prob1 = NULL, prob2 = NULL, req.sign = "+",
 
 } # power.exact.fisher()
 
+#' @rdname power.exact.fisher
 #' @export power.exact.twoprops.fisher
 power.exact.twoprops.fisher <- power.exact.fisher

@@ -38,8 +38,8 @@ test_that("generic.t.test.R works", {
 
     expect_equal(power.t.test(power = 0.80, df = 100, alpha = 0.05, alternative = "two.sided", plot = FALSE, verbose = 0),
                  structure(list(power = 0.8, ncp = 2.8288472, null.ncp = 0, df = 100, alpha = 0.05,
-                                alternative = "two.sided", t.alpha = 1.98397152 * c(-1, 1), beta = 0.199999997,
-                                type.s = 0.00000119776682, type.m = 1.1334521),
+                                alternative = "two.sided", t.alpha = 1.98397152 * c(-1, 1), beta = 0.200000001,
+                                type.s = 0.00000119776692, type.m = 1.1334521),
                            class = c("pwrss", "generic", "t")))
     expect_equal(power.t.test(power = 0.80, df = 100, alpha = 0.05, alternative = "one.sided", plot = FALSE, verbose = 0),
                  structure(list(power = 0.8, ncp = 2.50347, null.ncp = 0, df = 100, alpha = 0.05, alternative = "one.sided",

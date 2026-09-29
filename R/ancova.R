@@ -212,14 +212,14 @@ power.f.ancova <- function(eta.squared = NULL,
   if (is.null(target.effect)) {
     df1 <- prod(factor.levels - 1)
   } else {
-    if (all(strsplit(target.effect, ":")[[1]] %in% fac.letters)) {
-      fac.select <- fac.letters %in% strsplit(target.effect, ":")[[1]]
+    if (all(strsplit(target.effect, ":", fixed = TRUE)[[1]] %in% fac.letters)) {
+      fac.select <- fac.letters %in% strsplit(target.effect, ":", fixed = TRUE)[[1]]
       df1 <- prod(factor.levels[fac.select] - 1)
       effect <- paste(target.effect, "from", effect)
     } else {
-      stop(paste("Invalid specification of `target.effect`. It must be either a single letter \"A\", \"B\" or \"C\"",
-                 "(depending on the length of `factor.levels`), assessing a main effect, or a combination of these",
-                 "letters separated by \":\", e.g., \"A:B\", assessing an interaction."), call. = FALSE)
+      stop("Invalid specification of `target.effect`. It must be either a single letter \"A\", \"B\" or \"C\" ",
+           "(depending on the length of `factor.levels`), assessing a main effect, or a combination of these ",
+           "letters separated by \":\", e.g., \"A:B\", assessing an interaction.", call. = FALSE)
     }
   }
 
@@ -512,7 +512,7 @@ power.f.ancova.keppel <- function(mu.vector,
 
   n.total <- sum(n.vector)
   eta.squared <- pwr.obj$f.squared / (1 + pwr.obj$f.squared)
-  effect <- paste0(c("A"), "(", factor.levels, ")")
+  effect <- paste0("A", "(", factor.levels, ")")
   n.way <- length(factor.levels)
 
   check_var.ratio(sd.vector, n.vector)
@@ -723,7 +723,7 @@ factorial.contrasts <- function(factor.levels = c(3, 2),
 
     } else {
 
-      stop(sprintf("Contrast type \"%s\" not supported at the moment.", coding.scheme[i]), call. = FALSE)
+      stop("Contrast type \"", coding.scheme[i], "\" not supported at the moment.", call. = FALSE)
 
     }
 
@@ -1628,7 +1628,7 @@ power.t.contrasts <- function(x = NULL,
 
   if (!is.null(x)) {
 
-    if (all(c("pwrss", "f", "ancova", "shieh") %in% class(x))) {
+    if (inherits(x, c("pwrss", "f", "ancova", "shieh"))) {
 
       # transfer pwrss.f.ancova.shieh object into the input parameters and remove the object
       mu.vector <- x$parms$mu.vector
@@ -1643,7 +1643,7 @@ power.t.contrasts <- function(x = NULL,
 
     } else {
 
-      stop("This function only works with an object of type `pwrss`, `ancova`, and `shieh`.", call. = FALSE)
+      stop("This function only works with an object of type `pwrss`, `f`, `ancova`, and `shieh`.", call. = FALSE)
 
     }
 
@@ -1663,7 +1663,7 @@ power.t.contrasts <- function(x = NULL,
   } # if data is null
 
   rm(x)
-  adjust.alpha <- tolower(match.arg(adjust.alpha))
+  adjust.alpha <- match.arg(adjust.alpha)
   func.parms <- as.list(environment())
   verbose <- ensure.verbose(verbose)
   requested <- get.requested(es = NA, n = n.vector, power = power) # calculation of effect size not possible
@@ -1672,7 +1672,7 @@ power.t.contrasts <- function(x = NULL,
     contrast.matrix <- t(as.matrix(contrast.matrix))
   levels <- colnames(contrast.matrix)
 
-  if (tolower(adjust.alpha == "tukey")) {
+  if (adjust.alpha == "tukey") {
 
     tukey.kramer <- TRUE
 
@@ -1690,13 +1690,13 @@ power.t.contrasts <- function(x = NULL,
   for (i in seq_len(nrow(contrast.matrix))) {
 
     contrast.vector <- contrast.matrix[i, ]
-    contrast.sign <- sign(contrast.vector)
 
-    idx.poz <- which(contrast.sign == 1)
-    idx.neg <- which(contrast.sign == -1)
-
-    comparison.i <- sprintf("%s <=> %s", paste(levels[idx.poz], collapse = " "), paste(levels[idx.neg], collapse = " "))
-    comparison <- c(comparison, comparison.i)
+    # on some machines, contr.poly() is not working as expected (it may contain very small values in places that should
+    # be 0) - thus, the code below checks at which position the contrast vector contains positive or negative value
+    # above / below neg.eps / -.neg.eps (OBS: neg.obs is slightly smaller than .eps and thus used in this comparison)
+    comparison <- c(comparison, sprintf("%s <=> %s",
+                                        paste(levels[which(contrast.vector >=  .Machine$double.neg.eps)], collapse = " "),
+                                        paste(levels[which(contrast.vector <= -.Machine$double.neg.eps)], collapse = " ")))
 
     pwr.t.contr.obj <- power.t.contrast(mu.vector = mu.vector,
                                         sd.vector = sd.vector,

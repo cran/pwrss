@@ -26,6 +26,24 @@ power.t.regression(
   verbose = 1,
   utf = FALSE
 )
+
+power.t.reg(
+  beta = NULL,
+  null.beta = 0,
+  margin = 0,
+  req.sign = "+",
+  sd.predictor = 1,
+  sd.outcome = 1,
+  r.squared = NULL,
+  k.total = 1,
+  n = NULL,
+  power = NULL,
+  alpha = 0.05,
+  alternative = c("two.sided", "one.sided", "two.one.sided"),
+  ceil.n = TRUE,
+  verbose = 1,
+  utf = FALSE
+)
 }
 \arguments{
 \item{beta}{regression coefficient. One can use standardized
@@ -42,8 +60,8 @@ default specifications.}
 \item{margin}{margin - ignorable \code{beta} - \code{null.beta}
 difference.}
 
-\item{req.sign}{whether estimated beta is smaller or larger than the margin
-(when minimum detectable beta is of interest).}
+\item{req.sign}{sign of the regression coefficient \code{beta} (when minimum
+detectable effect or \code{beta} is of interest).}
 
 \item{sd.predictor}{standard deviation of the predictor. For a binary
 predictor, \code{sd.predictor = sqrt(p * (1 - p))} where

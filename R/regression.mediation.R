@@ -194,8 +194,8 @@ power.z.mediation  <- function(beta.a = NULL, beta.b = NULL, ab.ratio = 1, req.s
                                n.simulation = 1000, n.draws = 1000,
                                ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
-  method <- tolower(match.arg(method))
+  alternative <- match.arg(alternative)
+  method <- match.arg(method)
   func.parms <- as.list(environment())
 
   if (!is.null(beta.a)) check.numeric(beta.a)
@@ -410,9 +410,9 @@ power.z.mediation  <- function(beta.a = NULL, beta.b = NULL, ab.ratio = 1, req.s
 
 } # end of power.z.mediation()
 
+#' @rdname power.z.mediation
 #' @export power.z.med
 power.z.med <- power.z.mediation
-
 
 #' @export pwrss.z.mediation
 pwrss.z.mediation  <- function(a, b, cp = 0,
@@ -423,7 +423,7 @@ pwrss.z.mediation  <- function(a, b, cp = 0,
                                alpha = 0.05, alternative = c("not equal", "less", "greater"),
                                mc = TRUE, nsims = 1000, ndraws = 1000, verbose = TRUE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   if (alternative %in% c("less", "greater")) alternative <- "one.sided"
   if (alternative == "not equal") alternative <- "two.sided"
   func.parms <- as.list(environment())

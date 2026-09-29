@@ -1,6 +1,6 @@
 # determine a valid range to search for correlations (when using optimize())
 get.cor.rng <- function(rho0 = 0, req.sign = "+") {
-  sort(c(rho0, ifelse(check.pos_sign(req.sign), ifelse(rho0 < 0, 0, 1), ifelse(rho0 > 0, 0, -1)))) + c(1e-8, -1e-8)
+  sort(c(rho0, ifelse(check.pos_sign(req.sign), 1 * (rho0 >= 0), -1 * (rho0 < 0)))) + c(1e-8, -1e-8)
 }
 
 #######################################################################
@@ -60,7 +60,7 @@ rho.limits <- function(rho12 = NULL, rho13 = NULL, rho23 = NULL,
   min.eig <- function(rho) min(eigen(fill.mat(rho), symmetric = TRUE, only.values = TRUE)$values)
 
   grid <- seq(-1 + tol, 1 - tol, length.out = n.grid)
-  eigs <- sapply(grid, min.eig)
+  eigs <- vapply(grid, min.eig, numeric(1))
 
   feasible <- grid[eigs >= -tol]
 
@@ -219,7 +219,7 @@ power.z.twocors.steiger <- function(rho12 = NULL, rho13 = NULL, rho23 = NULL,
                             pooled = TRUE, common.index = FALSE,
                             ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   func.parms <- as.list(environment())
 
   if (!is.null(n)) check.sample.size(n)
@@ -233,13 +233,13 @@ power.z.twocors.steiger <- function(rho12 = NULL, rho13 = NULL, rho23 = NULL,
     requested <- get.requested(es = list(rho12, rho34), n = n, power = power)
   }
 
-  if (requested != "es" && common.index == TRUE && alternative == "two.sided" && rho12 == rho13)
+  if (requested != "es" &&  common.index && alternative == "two.sided" && rho12 == rho13)
     stop("`common.index` is TRUE and `alternative` is \"two.sided\" but `rho12` = `rho13`.", call. = FALSE)
 
-  if (requested != "es" && common.index == FALSE && alternative == "two.sided" && rho12 == rho34)
+  if (requested != "es" && !common.index && alternative == "two.sided" && rho12 == rho34)
     stop("`common.index` is FALSE and `alternative` = \"two.sided\" but `rho12` = `rho34`.", call. = FALSE)
 
-  if (common.index == TRUE && any(check.not_null(rho14, rho24, rho34)))
+  if (common.index && any(check.not_null(rho14, rho24, rho34)))
     warning("Ignoring `rho14` `rho24`, or `rho34` because `common.index` is TRUE.", call. = FALSE)
 
 
@@ -412,10 +412,10 @@ power.z.twocors.steiger <- function(rho12 = NULL, rho13 = NULL, rho23 = NULL,
     if (is.null(rho12)) {
       rho12 <- stats::optimize(function(rho12) min.pwr(rho12, rho13, rho34, n) ^ 2,
                                interval = val.rng, tol = 1e-12)$minimum
-    } else if (common.index == TRUE  && is.null(rho13)) {
+    } else if (common.index  && is.null(rho13)) {
       rho13 <- stats::optimize(function(rho13) min.pwr(rho12, rho13, rho34, n) ^ 2,
                                interval = val.rng, tol = 1e-12)$minimum
-    } else if (common.index == FALSE && is.null(rho34)) {
+    } else if (!common.index && is.null(rho34)) {
       rho34 <- stats::optimize(function(rho34) min.pwr(rho12, rho13, rho34, n) ^ 2,
                                interval = val.rng, tol = 1e-12)$minimum
     }
@@ -476,6 +476,7 @@ power.z.twocors.steiger <- function(rho12 = NULL, rho13 = NULL, rho23 = NULL,
 
 } # power.z.twocors.steiger()
 
+#' @rdname power.z.twocors.steiger
 #' @export power.z.steiger
 power.z.steiger <- power.z.twocors.steiger
 
@@ -561,7 +562,7 @@ power.z.twocors <- function(rho1 = NULL, rho2 = NULL, req.sign = "+",
                             alternative = c("two.sided", "one.sided"),
                             ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   func.parms <- as.list(environment())
 
   if (!is.null(rho1)) check.correlation(rho1)
@@ -692,9 +693,9 @@ power.z.twocors <- function(rho1 = NULL, rho2 = NULL, req.sign = "+",
 
 } # power.z.twocors
 
+#' @rdname power.z.twocors
 #' @export power.z.twocor
 power.z.twocor <- power.z.twocors
-
 
 #' @export pwrss.z.2corrs
 pwrss.z.2corrs <- function(r1 = 0.50, r2 = 0.30,
@@ -702,7 +703,7 @@ pwrss.z.2corrs <- function(r1 = 0.50, r2 = 0.30,
                            alternative = c("not equal", "greater", "less"),
                            n2 = NULL, power = NULL, verbose = TRUE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   verbose <- ensure.verbose(verbose)
 
   check.correlation(r1, r2)
@@ -807,7 +808,7 @@ power.z.onecor <- function(rho = NULL, req.sign = "+", null.rho = 0,
                            alternative = c("two.sided", "one.sided"),
                            ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   func.parms <- as.list(environment())
 
   if (!is.null(rho)) check.correlation(rho)
@@ -918,13 +919,12 @@ power.z.onecor <- function(rho = NULL, req.sign = "+", null.rho = 0,
 
 } # power.z.onecor()
 
-
 #' @export pwrss.z.corr
 pwrss.z.corr <- function(r = 0.50, r0 = 0, alpha = 0.05,
                          alternative = c("not equal", "greater", "less"),
                          n = NULL, power = NULL, verbose = TRUE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   verbose <- ensure.verbose(verbose)
 
   check.correlation(r, r0)
@@ -1017,7 +1017,7 @@ power.exact.onecor <- function(rho = NULL, req.sign = "+", null.rho = 0, n = NUL
                                power = NULL, alpha = 0.05, alternative = c("two.sided", "one.sided"),
                                verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   func.parms <- as.list(environment())
 
   if (!is.null(rho)) check.correlation(rho)

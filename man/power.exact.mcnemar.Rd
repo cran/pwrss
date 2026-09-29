@@ -18,6 +18,20 @@ power.exact.mcnemar(
   verbose = 1,
   utf = FALSE
 )
+
+power.exact.twoprops.mcnemar(
+  prob10 = NULL,
+  prob01 = NULL,
+  req.sign = "+",
+  n.paired = NULL,
+  power = NULL,
+  alpha = 0.05,
+  alternative = c("two.sided", "one.sided"),
+  method = c("exact", "approximate"),
+  ceil.n = TRUE,
+  verbose = 1,
+  utf = FALSE
+)
 }
 \arguments{
 \item{prob10}{(joint) probability of success in case (or after) but

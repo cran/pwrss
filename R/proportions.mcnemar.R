@@ -145,8 +145,8 @@ power.exact.mcnemar <- function(prob10 = NULL, prob01 = NULL,
                                 method = c("exact", "approximate"),
                                 ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
-  method <- tolower(match.arg(method))
+  alternative <- match.arg(alternative)
+  method <- match.arg(method)
   func.parms <- as.list(environment())
 
   if (!is.null(prob10)) check.proportion(prob10)
@@ -163,7 +163,7 @@ power.exact.mcnemar <- function(prob10 = NULL, prob01 = NULL,
     OR <- prob10 / prob01
     OR2prob <- c(1 / (1 + OR), OR / (1 + OR))
 
-    prob <- ifelse(alternative == "two.sided", OR2prob[1], ifelse(prob10 < prob01, min(OR2prob), max(OR2prob)))
+    prob <- if (alternative == "two.sided") OR2prob[1] else if (prob10 < prob01) min(OR2prob) else max(OR2prob)
 
     prod1 <- stats::dbinom(x = seq(0, ceiling(n.paired)), size = ceiling(n.paired), prob = prob01 + prob10)
     prod2 <- power.binom.test(prob = prob, null.prob = 0.50, size = seq(0, ceiling(n.paired)), alpha = alpha,
@@ -424,5 +424,6 @@ power.exact.mcnemar <- function(prob10 = NULL, prob01 = NULL,
 
 } # power.exact.mcnemar()
 
+#' @rdname power.exact.mcnemar
 #' @export power.exact.twoprops.mcnemar
 power.exact.twoprops.mcnemar <- power.exact.mcnemar

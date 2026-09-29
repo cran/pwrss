@@ -6,6 +6,8 @@
 \title{Conversion from Cohen's d to Common Language Effect Size}
 \usage{
 d.to.cles(d, design = c("independent", "paired", "one.sample"), verbose = 1)
+
+cles.to.d(cles, design = c("independent", "paired", "one.sample"), verbose = 1)
 }
 \arguments{
 \item{d}{Cohen's d}

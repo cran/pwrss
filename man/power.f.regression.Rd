@@ -19,6 +19,19 @@ power.f.regression(
   verbose = 1,
   utf = FALSE
 )
+
+power.f.reg(
+  r.squared.change = NULL,
+  margin = 0,
+  k.total,
+  k.tested = k.total,
+  n = NULL,
+  power = NULL,
+  alpha = 0.05,
+  ceil.n = TRUE,
+  verbose = 1,
+  utf = FALSE
+)
 }
 \arguments{
 \item{r.squared.change}{R-squared (or R-squared change).}

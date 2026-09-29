@@ -134,3 +134,63 @@ test_that("get.requested works", {
     power <- NA
     expect_equal(get.requested(es = d, n = n, power = power), "n")
 })
+
+# get.interval ---------------------------------------------------------------------------------------------------------
+test_that("get.interval works", {
+    # when using the distribution values with rather large values (e.g., 8331.498), MacOS and Windows need lower
+    # tolerances when comparing to the values determined on Linux; on MacOS or with ARM processors, this already occurs
+    # for the t-distribution functions that are part of base R
+    isARM <- (Sys.info()["sysname"] == "Darwin" || Sys.info()[["machine"]] %in% c("arm64", "aarch64"))
+    isWin <- (Sys.info()["sysname"] == "Windows")
+    expect_equal(get.interval(null.ncp = 0, req.sign = "+", distribution = "z", alternative = "two.sided", sd = 1), c(0, +8.32130487))
+    expect_equal(get.interval(null.ncp = 0, req.sign = "-", distribution = "z", alternative = "two.sided", sd = 1), c(-8.32130487, 0))
+    expect_equal(get.interval(null.ncp = 0, req.sign = "+", distribution = "t", alternative = "two.sided", df = 3),
+                 c(0, +8331.4980), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "-", distribution = "t", alternative = "two.sided", df = 3),
+                 c(-8331.4993, 0), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "+", distribution = "t", alternative = "two.sided", df = 3e4),
+                 c(0, +8.32545167), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "-", distribution = "t", alternative = "two.sided", df = 3e4),
+                 c(-8.32545167, 0), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "+", distribution = "lp", alternative = "two.sided", df = 3e4),
+                 c(0, +8.32167150), tolerance = if (isARM) 1e-2 else if (isWin) 1e-4 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "-", distribution = "lp", alternative = "two.sided", df = 3e4),
+                 c(-8.32167055, 0), tolerance = if (isARM) 1e-2 else if (isWin) 1e-4 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0.5, req.sign = "+", distribution = "binom", alternative = "two.sided"), c(0.5, 0.9999))
+    expect_equal(get.interval(null.ncp = 0.5, req.sign = "-", distribution = "binom", alternative = "two.sided"), c(0.0001, 0.5))
+
+    expect_equal(get.interval(null.ncp = 0, req.sign = "+", distribution = "z", alternative = "one.sided", sd = 1), c(0, +8.00619452))
+    expect_equal(get.interval(null.ncp = 0, req.sign = "-", distribution = "z", alternative = "one.sided", sd = 1), c(-8.00619452, 0))
+    expect_equal(get.interval(null.ncp = 0, req.sign = "+", distribution = "t", alternative = "one.sided", df = 3),
+                 c(0, +6529.29741), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "-", distribution = "t", alternative = "one.sided", df = 3),
+                 c(-6529.29700, 0), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "+", distribution = "t", alternative = "one.sided", df = 3e4),
+                 c(0, +8.00984221), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "-", distribution = "t", alternative = "one.sided", df = 3e4),
+                 c(-8.00984221, 0), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "+", distribution = "lp", alternative = "one.sided", df = 3e4),
+                 c(0, +8.0088033), tolerance = if (isARM) 1e-2 else if (isWin) 1e-3 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0, req.sign = "-", distribution = "lp", alternative = "one.sided", df = 3e4),
+                 c(-8.0088029, 0), tolerance = if (isARM) 1e-2 else if (isWin) 1e-3 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = 0.5, req.sign = "+", distribution = "binom", alternative = "one.sided"), c(0.5, 0.9999))
+    expect_equal(get.interval(null.ncp = 0.5, req.sign = "-", distribution = "binom", alternative = "one.sided"), c(0.0001, 0.5))
+
+    expect_equal(get.interval(null.ncp = c(1, -1), req.sign = "0", distribution = "binom", alternative = "two.one.sided"), c(-1, 1))
+    expect_equal(get.interval(null.ncp = c(2, -2), req.sign = "0", distribution = "z", alternative = "two.one.sided", sd = 1), c(-2, 2))
+    expect_equal(get.interval(null.ncp = c(2, -2), req.sign = "0", distribution = "t", alternative = "two.one.sided", df = 2), c(-2, 2))
+    expect_equal(get.interval(null.ncp = c(-2, 2), req.sign = "+", distribution = "z", alternative = "two.one.sided", sd = 1), c(2, 10.0061945))
+    expect_equal(get.interval(null.ncp = c(-2, 2), req.sign = "-", distribution = "z", alternative = "two.one.sided", sd = 1), c(-10.0061945, -2))
+    expect_equal(get.interval(null.ncp = c(-2, 2), req.sign = "+", distribution = "t", alternative = "two.one.sided", df = 3),
+                 c(2, 16810.1936),  tolerance = if (isARM) 2e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = c(-2, 2), req.sign = "-", distribution = "t", alternative = "two.one.sided", df = 3),
+                 c(-16810.206, -2), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = c(-2, 2), req.sign = "+", distribution = "t", alternative = "two.one.sided", df = 3e4),
+                 c(2, 10.0120826), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = c(-2, 2), req.sign = "-", distribution = "t", alternative = "two.one.sided", df = 3e4),
+                 c(-10.01208226, -2), tolerance = if (isARM) 1e-6 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = c(-2, 2), req.sign = "+", distribution = "lp", alternative = "two.one.sided", df = 3e4),
+                 c(2, 10.00847078), tolerance = if (isARM) 1e-2 else if (isWin) 1e-4 else testthat_tolerance())
+    expect_equal(get.interval(null.ncp = c(-2, 2), req.sign = "-", distribution = "lp", alternative = "two.one.sided", df = 3e4),
+                 c(-10.0084683, -2), tolerance = if (isARM) 1e-2 else if (isWin) 1e-4 else testthat_tolerance())
+})

@@ -8,17 +8,10 @@
   plot.window.dim <- grDevices::dev.size("cm")
   cex.axis <- min(plot.window.dim[1] / 15, plot.window.dim[2] / 15)
 
-  ifelse(type == 1,
-         color <- grDevices::adjustcolor(2, alpha.f = 1),
-         color <- grDevices::adjustcolor(4, alpha.f = 1))
-
-  # binom density function
-  fun.binom <- function(x) {
-    stats::dbinom(x, size = size, prob = prob)
-  }
+  color <- grDevices::adjustcolor(ifelse(type == 1, 2, 4), alpha.f = 1)
 
   xseq <- seq(xlim[1], xlim[2])
-  yseq <- fun.binom(xseq)
+  yseq <- stats::dbinom(xseq, size = size, prob = prob)
 
   graphics::plot(xseq - 0.50, yseq, type = "s", # x-values are nudged by -0.50 unit to match the bars later
                  xlim = xlim, ylim = ylim,
@@ -50,18 +43,10 @@
 # type = 1 for light red shade, 2 for light blue shade, 3 for light black stripes
 .paint.binom.dist <- function(size, prob = 0.50, xlim = c(0, size), type = 1) {
 
-  color <- switch(type,
-                  `1` = grDevices::adjustcolor(2, alpha.f = 0.3),
-                  `2` = grDevices::adjustcolor(4, alpha.f = 0.3),
-                  `3` = grDevices::adjustcolor(1, alpha.f = 0.3))
-
-  # binom density function
-  fun.binom <- function(x) {
-    stats::dbinom(x, size = size, prob = prob)
-  }
+  color <- grDevices::adjustcolor(switch(type, `1` = 2, `2` = 4, `3` = 1), alpha.f = 0.3)
 
   x <- seq(min(xlim), max(xlim), by = 1)
-  y <- fun.binom(x)
+  y <- stats::dbinom(x, size = size, prob = prob)
   xs <- c(x, rev(x))
   ys <- c(y, rep(0, length(y)))
 
@@ -85,7 +70,7 @@
 
     bar.width <- 0.8
     for (i in seq_along(xs)) {
-      ifelse(x[i] %% 2 == 0, angle <- 45, angle <- 135)
+      angle <- ifelse(x[i] %% 2 == 0, 45, 135)
       x.left <- x[i] - bar.width / 2
       x.right <- x[i] + bar.width / 2
       graphics::polygon(x = c(x.left, x.left, x.right, x.right),
@@ -111,7 +96,7 @@
                              alternative = c("two.sided", "one.sided", "two.one.sided"),
                              plot.main = NULL, plot.sub = NULL) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
 
   check.size(size)
   check.proportion(prob)
@@ -194,9 +179,9 @@
   # x-axis limits
   prob.extreme <- 0.00001
   lower <- min(min(stats::qbinom(prob.extreme, size = size, prob = prob, lower.tail = TRUE)),
-               stats::qbinom(prob.extreme, size = size, prob = null.prob, lower.tail = TRUE))
+                   stats::qbinom(prob.extreme, size = size, prob = null.prob, lower.tail = TRUE))
   upper <- max(max(stats::qbinom(1 - prob.extreme, size = size, prob = prob, lower.tail = TRUE)),
-               stats::qbinom(1 - prob.extreme, size = size, prob = null.prob, lower.tail = TRUE))
+                   stats::qbinom(1 - prob.extreme, size = size, prob = null.prob, lower.tail = TRUE))
   xlim <- c(max(0, lower - 1), upper + 1)
 
 
@@ -261,9 +246,9 @@
       .paint.binom.dist(prob = prob, size = size, xlim = c(q.binom.alpha[1] - 1, min(xlim)), type = 2)
       .paint.binom.dist(prob = prob, size = size, xlim = c(q.binom.alpha[2] + 1, max(xlim)), type = 2)
 
-      ifelse(q.binom.alpha[2] > q.binom.alpha[1],
-             power <- .paint.binom.dist(prob = prob, size = size, xlim = q.binom.alpha, type = 3),
-             power <- 0)
+      power <- ifelse(q.binom.alpha[2] > q.binom.alpha[1],
+                      .paint.binom.dist(prob = prob, size = size, xlim = q.binom.alpha, type = 3),
+                      0)
 
     } else {
       # minimal effect
@@ -295,17 +280,19 @@
 
   } else {
 
-    ifelse(prob < null.prob,
-           .paint.binom.dist(prob = null.prob, size = size, xlim = c(q.binom.alpha, min(xlim)), type = 1),
-           .paint.binom.dist(prob = null.prob, size = size, xlim = c(q.binom.alpha, max(xlim)), type = 1))
+    if (prob < null.prob) {
 
-    ifelse(prob < null.prob,
-           .paint.binom.dist(prob = prob, size = size, xlim = c(q.binom.alpha + 1, max(xlim)), type = 2),
-           .paint.binom.dist(prob = prob, size = size, xlim = c(q.binom.alpha - 1, min(xlim)), type = 2))
+               .paint.binom.dist(prob = null.prob, size = size, xlim = c(q.binom.alpha,     min(xlim)), type = 1)
+               .paint.binom.dist(prob = prob,      size = size, xlim = c(q.binom.alpha + 1, max(xlim)), type = 2)
+      power <- .paint.binom.dist(prob = prob,      size = size, xlim = c(min(xlim),     q.binom.alpha), type = 3)
 
-    ifelse(prob < null.prob,
-           power <- .paint.binom.dist(prob = prob, size = size, xlim = c(min(xlim), q.binom.alpha), type = 3),
-           power <- .paint.binom.dist(prob = prob, size = size, xlim = c(q.binom.alpha, max(xlim)), type = 3))
+    } else {
+
+               .paint.binom.dist(prob = null.prob, size = size, xlim = c(q.binom.alpha,     max(xlim)), type = 1)
+               .paint.binom.dist(prob = prob,      size = size, xlim = c(q.binom.alpha - 1, min(xlim)), type = 2)
+      power <- .paint.binom.dist(prob = prob,      size = size, xlim = c(q.binom.alpha,     max(xlim)), type = 3)
+
+    }
 
   } # end of paint regions
 

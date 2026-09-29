@@ -70,7 +70,7 @@ power.exact.oneprop <- function(prob = NULL, req.sign = "+", null.prob = 0.50,
                                 alternative = c("two.sided", "one.sided", "two.one.sided"),
                                 verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   func.parms <- as.list(environment())
 
   if (!is.null(prob)) check.proportion(prob)
@@ -249,8 +249,8 @@ power.z.oneprop <- function(prob = NULL, req.sign = "+", null.prob = 0.50,
                             arcsine = FALSE, correct = FALSE,
                             ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
-  std.error <- tolower(match.arg(std.error))
+  alternative <- match.arg(alternative)
+  std.error <- match.arg(std.error)
   func.parms <- as.list(environment())
 
   if (!is.null(prob)) check.proportion(prob)
@@ -284,16 +284,11 @@ power.z.oneprop <- function(prob = NULL, req.sign = "+", null.prob = 0.50,
 
       var.num <- prob * (1 - prob)
 
-      ifelse(alternative == "two.one.sided",
-             k <- c(0, 0),
-             k <- 0)
+      k <- c(0, 0)[c(TRUE, alternative == "two.one.sided")]
 
       if (correct) {
-        ifelse(alternative == "one.sided" && prob > null.prob,
-               one.sided.sign <- -1,
-               one.sided.sign <- 1)
         k <- switch(alternative,
-                    `one.sided` = one.sided.sign / (2 * n),
+                    `one.sided` = ifelse(alternative == "one.sided" && prob > null.prob, -1, 1) / (2 * n),
                     `two.sided` = -1 / (2 * n),
                     `two.one.sided` =  c(-1 / (2 * n), 1 / (2 * n)))
       }
@@ -512,14 +507,13 @@ power.z.oneprop <- function(prob = NULL, req.sign = "+", null.prob = 0.50,
                       class = c("pwrss", "z", "oneprop")))
 } # power.z.oneprop
 
-
 #' @export pwrss.z.prop
 pwrss.z.prop <- function(p, p0 = 0.50, margin = 0, arcsin.trans = FALSE, alpha = 0.05,
                           alternative = c("not equal", "greater", "less",
                                           "equivalent", "non-inferior", "superior"),
                           n = NULL, power = NULL, verbose = TRUE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   verbose <- ensure.verbose(verbose)
 
   if (alternative %in% c("less", "greater", "non-inferior", "superior")) alternative <- "one.sided"
@@ -551,7 +545,7 @@ pwrss.z.prop <- function(p, p0 = 0.50, margin = 0, arcsin.trans = FALSE, alpha =
 # two proportions exact test #
 ##############################
 
-#' Power Analysis for Testing Difference Between Two Proportions (Exact Method)
+#' Power Analysis for Testing the Difference Between Two Proportions (Exact Method)
 #'
 #' @description
 #' Calculates power or sample size (only one can be NULL at a time) for two
@@ -648,8 +642,8 @@ power.exact.twoprops <- function(prob1 = NULL, prob2 = NULL, req.sign = "+", n.r
                                  paired = FALSE, rho.paired = 0.50, method = c("exact", "approximate"),
                                  ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
-  method <- tolower(match.arg(method))
+  alternative <- match.arg(alternative)
+  method <- match.arg(method)
 
   check.positive(n.ratio)
   if (!is.null(prob1)) check.proportion(prob1)
@@ -707,6 +701,7 @@ power.exact.twoprops <- function(prob1 = NULL, prob2 = NULL, req.sign = "+", n.r
 
 } # power.exact.twoprops()
 
+#' @rdname power.exact.twoprops
 #' @export power.exact.twoprop
 power.exact.twoprop <- power.exact.twoprops
 
@@ -715,7 +710,7 @@ power.exact.twoprop <- power.exact.twoprops
 # two proportions test #
 ########################
 
-#' Power Analysis for Testing Difference Between Two Proportions (Normal
+#' Power Analysis for Testing the Difference Between Two Proportions (Normal
 #' Approximation Method)
 #'
 #' @description
@@ -809,8 +804,8 @@ power.z.twoprops <- function(prob1 = NULL, prob2 = NULL, req.sign = "+", margin 
                              std.error = c("pooled", "unpooled"),
                              ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
-  std.error <- tolower(match.arg(std.error))
+  alternative <- match.arg(alternative)
+  std.error <- match.arg(std.error)
   func.parms <- as.list(environment())
 
   if (!is.null(prob1)) check.proportion(prob1)
@@ -978,48 +973,26 @@ power.z.twoprops <- function(prob1 = NULL, prob2 = NULL, req.sign = "+", margin 
 
   } # ss.no.correction()
 
-  ss <- function(prob1, prob2, margin,
-                 n.ratio, alpha, power, alternative,
-                 arcsine, std.error, correct) {
+  ss <- function(prob1, prob2, margin, n.ratio, alpha, power, alternative, arcsine, std.error, correct) {
 
-    n2.init <- ss.nocorrection.unpooled(prob1 = prob1, prob2 = prob2, margin = margin,
-                                        power = power, n.ratio = n.ratio, alpha = alpha,
-                                        arcsine = arcsine, alternative = alternative)$n2
+    n2 <- floor(ss.nocorrection.unpooled(prob1 = prob1, prob2 = prob2, margin = margin, power = power, n.ratio = n.ratio,
+                                         alpha = alpha, arcsine = arcsine, alternative = alternative)$n2)
 
-    n2.init <- floor(n2.init)
-
-    stop <- FALSE
-    sign.previous <- 0
     sign.switch <- 0
-    while (isFALSE(stop)) {
+    sign.previous <- 0
+    while (sign.switch < 2) {
 
-      pwr.est <- pwr(prob1 = prob1, prob2 = prob2, margin = margin,
-                     n2 = n2.init, n.ratio = n.ratio, arcsine = arcsine,
-                     std.error = std.error, correct = correct,
-                     alpha = alpha, alternative = alternative)$power
+      pwr.est <- pwr(prob1 = prob1, prob2 = prob2, margin = margin, n2 = n2, n.ratio = n.ratio, arcsine = arcsine,
+                     std.error = std.error, correct = correct, alpha = alpha, alternative = alternative)$power
 
       sign.current <- sign(pwr.est - power)
-
-      if (sign.current != 0 &&
-         sign.previous != 0 &&
-         sign.previous != sign.current) {
-        sign.switch <-  sign.switch + 1
-      }
-
-      ifelse(sign.current > 0,
-             n2.init <- n2.init - 1,
-             n2.init <- n2.init + 1)
-
+      sign.switch <- sign.switch + as.integer(sign.current != 0 && sign.previous != 0 && sign.previous != sign.current)
       sign.previous <- sign.current
-
-      if (sign.switch >= 2) {
-        if (sign.current > 0) n2.init <- n2.init + 1
-        stop <- TRUE
-      }
+      n2 <- n2 + ifelse(sign.current > 0, -1, 1)
 
     } # while
 
-    n2.init
+    n2 + as.integer(sign.current > 0)
 
   } # ss()
 
@@ -1028,8 +1001,7 @@ power.z.twoprops <- function(prob1 = NULL, prob2 = NULL, req.sign = "+", margin 
 
     if (requested == "es") {
 
-      pwr.exact <- function(prob1, prob2, n.ratio, n2, power, alpha,
-                            alternative, paired, rho.paired, method) {
+      pwr.exact <- function(prob1, prob2, n.ratio, n2, power, alpha, alternative, paired, rho.paired, method) {
 
         jp <- joint.probs.2x2(prob1 = prob1, prob2 = prob2, rho = rho.paired, verbose = 0)
 
@@ -1038,13 +1010,9 @@ power.z.twoprops <- function(prob1 = NULL, prob2 = NULL, req.sign = "+", margin 
                             alternative = alternative, method =  "approx",
                             ceil.n = FALSE, verbose = 0, utf = FALSE)$power
 
-      } # power
+      } # power.exact()
 
-      if (check.pos_sign(req.sign)) {
-        val.rng <- c(ifelse(is.null(prob1), prob2, prob1), 0.9999)
-      } else {
-        val.rng <- c(0.0001, ifelse(is.null(prob1), prob2, prob1))
-      }
+      val.rng <- c(0.0001, ifelse(is.null(prob1), prob2, prob1), 0.9999)[ifelse(check.pos_sign(req.sign), -1, -3)]
 
       prob.lim.obj <- prob.limits.paired(prob1 = prob1, prob2 = prob2, rho = rho.paired)
 
@@ -1207,6 +1175,7 @@ power.z.twoprops <- function(prob1 = NULL, prob2 = NULL, req.sign = "+", margin 
 
 } # power.z.twoprops()
 
+#' @rdname power.z.twoprops
 #' @export power.z.twoprop
 power.z.twoprop <- power.z.twoprops
 
@@ -1217,7 +1186,7 @@ pwrss.z.2props <- function(p1, p2, margin = 0, arcsin.trans = FALSE,
                                            "equivalent", "non-inferior", "superior"),
                            n2 = NULL, power = NULL, verbose = TRUE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   verbose <- ensure.verbose(verbose)
 
   check.proportion(p1, p2, alpha)

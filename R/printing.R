@@ -71,34 +71,36 @@
 .fmt_adsc <- function(f, utf = FALSE) {
   f <- gsub("^std.", "Std. ", gsub("odds.ratio", "Odds Ratio", gsub("rate.ratio", "Rate Ratio", f)))
   if (utf) {
-    .fmt_utf(gsub("mean", "\u03BC", gsub("lambda", "\u03BB", gsub(".squared|.squared.change", "\u00b2", gsub("^r\\.", "R.", f)))))
+    .fmt_utf(gsub("mean", "\u03BC", gsub("lambda", "\u03BB", gsub(".squared|.squared.change", "\u00b2",
+               gsub("^r\\.", "R.", f)), fixed = TRUE), fixed = TRUE))
   } else {
     gsub(".squared|.squared.change", "-squared", gsub("^r\\.", "R.", f))
   }
 }
 
-.nspacer <- function(x) floor(length(gregexpr("\u2009", x)[[1]]) / 2)
+.nspacer <- function(x) floor(length(gregexpr("\u2009", x, fixed = TRUE)[[1]]) / 2)
 
 .pad <- function(dsc, maxlen) strrep(" ", maxlen + .nspacer(dsc) - nchar(dsc))
 
 .a_pad <- function(n, utf) {
-  if (any(grepl("^tgt.effect$",   n))) {
-    if (any(grepl("^rho\\d{2}",   n)) || any(grepl("^prob\\d{1}$", n))) return(ifelse(utf, 2, 1))
-    if (any(grepl("^prob\\d{2}$", n)))                                  return(ifelse(utf, 2, 2))
-    if (any(grepl("^std.beta$",   n)))                                  return(ifelse(utf, 5, 5))
-    ifelse(utf, 1, 0)
-  } else if (any(grepl("^df$",     n)) && !any(grepl("^n.total$", n))) {
-    ifelse(utf, 1, 0)
+  if (any(grepl("^tgt.effect$", n))) {
+    if (any(grepl("^rho\\d{2}",   n))) return(as.integer(utf) + 1)
+    if (any(grepl("^prob\\d{1}$", n))) return(as.integer(utf) + 1)
+    if (any(grepl("^prob\\d{2}$", n))) return(2)
+    if (any(grepl("^std.beta$",   n))) return(5)
+    as.integer(utf)
+  } else if (any(grepl("^df$", n)) && !any(grepl("^n.total$", n))) {
+    as.integer(utf)
   } else if (any(grepl("^n.pres$", n))) {
-    ifelse(utf, 1, 0)
+    as.integer(utf)
   } else if (any(grepl("^eta.squared", n))) {
-    ifelse(utf, 0, 5)
-  } else if (any(grepl("^rate.ratio",  n))) {
-    ifelse(utf, 7, 4)
-  } else if (any(grepl("^odds.ratio",  n)) && !any(grepl("^tgt.effect",  n))) {
-    ifelse(utf, 7, 4)
-  } else if (any(grepl("^r.squared",   n))) {
-    ifelse(utf, 0, 3)
+    as.integer(!utf) * 5
+  } else if (any(grepl("^rate.ratio", n))) {
+    as.integer(utf) * 3 + 4
+  } else if (any(grepl("^odds.ratio", n)) && !any(grepl("^tgt.effect",  n))) {
+    as.integer(utf) * 3 + 4
+  } else if (any(grepl("^r.squared", n))) {
+    as.integer(!utf) * 3
   } else {
     0
   }
@@ -131,13 +133,13 @@
 .h0_sign <- function(alt = c("two.sided", "one.sided"), less = FALSE, utf = FALSE) {
   alt <- match.arg(alt)
 
-  ifelse(alt == "two.sided", .eq(utf), ifelse(less, .ge(utf), .le(utf)))
+  if (alt == "two.sided") .eq(utf) else if (alt == "one.sided" && less) .ge(utf) else if (alt == "one.sided" && !less) .le(utf)
 }
 
 .h1_sign <- function(alt = c("two.sided", "one.sided"), less = FALSE, utf = FALSE) {
   alt <- match.arg(alt)
 
-  ifelse(alt == "two.sided", .ne(utf), ifelse(less, .ls(utf), .gt(utf)))
+  if (alt == "two.sided") .ne(utf) else if (alt == "one.sided" && less) .ls(utf) else if (alt == "one.sided" && !less) .gt(utf)
 }
 
 .h0_twoone <- function(tgt, mrg, utf, alt = "two.sided", val.alt = NA, val.null = NA, val.mrg = NULL) {
@@ -220,13 +222,13 @@
       es_val  <- sprintf("%s (vs. %s = %s)", es_val, es_ndsc, .fmt_val(x[[paste0("null.", es_fld)]], digits))
     } else if (es_fld %in% c("prob1", "prob2", "prob10", "prob01", "rho1", "rho2", "rho12", "rho13", "rho34")) {
       if (es_fld %in% c("prob1", "prob2")) {
-        es_nfld <- ifelse(es_fld == "prob1", "prob2", "prob1")
+        es_nfld <- setdiff(c("prob1", "prob2"), es_fld)
       } else if (es_fld %in% c("prob10", "prob01")) {
-        es_nfld <- ifelse(es_fld == "prob10", "prob01", "prob10")
+        es_nfld <- setdiff(c("prob10", "prob01"), es_fld)
       } else if (es_fld %in% c("rho1", "rho2")) {
-        es_nfld <- ifelse(es_fld == "rho1", "rho2", "rho1")
+        es_nfld <- setdiff(c("rho1", "rho2"), es_fld)
       } else if (es_fld %in% c("rho12", "rho13", "rho34")) {
-        es_nfld <- ifelse(es_fld != "rho12", "rho12", ifelse(x$common, "rho13", "rho34"))
+        es_nfld <- if (es_fld != "rho12") "rho12" else if (x$common) "rho13" else "rho34"
       }
       es_val  <- sprintf("%s (vs. %s = %s)", es_val, ifelse(utf, .fmt_utf(es_nfld), es_nfld), .fmt_val(x[[es_nfld]], digits))
     }
@@ -1030,10 +1032,10 @@
 
   tgt <- ifelse(utf, "P",       "prob")
   mrg <- ifelse(utf, "P\u2080", "null.prob")
-  if (x$method == "exact") val.alt  <- x$prob      else val.alt  <- x$mean
-  if (x$method == "exact") val.null <- x$null.prob else val.null <- x$null.mean
-  h0_text <- .h0_twoone(tgt, mrg, utf, alt = x$alternative, val.alt = x$prob, val.null = x$null.prob)
-  h1_text <- .h1_twoone(tgt, mrg, utf, alt = x$alternative, val.alt = x$prob, val.null = x$null.prob)
+  val.alt  <- ifelse(x$method == "exact", x$prob,      x$mean)
+  val.null <- ifelse(x$method == "exact", x$null.prob, x$null.mean)
+  h0_text <- .h0_twoone(tgt, mrg, utf, alt = x$alternative, val.alt = val.alt, val.null = val.null)
+  h1_text <- .h1_twoone(tgt, mrg, utf, alt = x$alternative, val.alt = val.alt, val.null = val.null)
   cat(.hypotheses(h0_text, h1_text, utf))
 
   if (verbose == 2) {
@@ -1091,7 +1093,7 @@
   cat(.header(x$requested, FALSE, utf))
   cat(x$test, "\n\n", sep = "")
 
-  rsq <- ifelse(x$k.tested < x$k.total, ifelse(utf, "\u0394R\u00B2", "Change in R-squared"), ifelse(utf, "R\u00B2", "R-squared"))
+  rsq <- if (x$k.tested < x$k.total) ifelse(utf, "\u0394R\u00B2", "Change in R-squared") else ifelse(utf, "R\u00B2", "R-squared")
   h0_text <- ifelse(x$margin == 0, sprintf("%s = 0", rsq), sprintf("0 %s %s %s margin", .le(utf), rsq, .le(utf)))
   h1_text <- ifelse(x$margin == 0, sprintf("%s > 0", rsq), sprintf("%s > margin",                    rsq))
   cat(.hypotheses(h0_text, h1_text, utf))
@@ -1113,7 +1115,7 @@
   cat(.results(x, utf, digits))
 
   if (verbose == 2) {
-    mrg_def_ascii <- sprintf("Margin : Smallest %s that matters", gsub("Change", "change", rsq))
+    mrg_def_ascii <- sprintf("Margin : Smallest %s that matters", gsub("Change", "change", rsq, fixed = TRUE))
     #                     | ascii       |  utf
     defs_mtx <- t(matrix(c(mrg_def_ascii, "\u03B4\u2009 : Margin - ignorable R\u00B2 or \u0394R\u00B2",
                            "",            "\u03BB\u2009 : Non-centrality parameter under alternative",

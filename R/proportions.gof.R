@@ -226,7 +226,7 @@ pwrss.chisq.gofit <- function(p1 = NULL, p0 = NULL,
     } else if (is.matrix(p1)) {
       if (!is.null(p0) && !identical(dim(p1), dim(p0)))
         stop("Dimensions of `p1` and `p0` do not match up.", call. = FALSE)
-      if (!all(apply(p1, 2, sum) == 1) || (!is.null(p0) && !all(apply(p0, 2, sum) == 1)))
+      if (!all(colSums(p1) == 1) || (!is.null(p0) && !all(colSums(p0) == 1)))
         stop("Cell probabilities (per column) in `p1` (and `p0` if given) should sum to 1.", call. = FALSE)
     } else {
       stop("`p1` needs to be either a vector or a matrix.", call. = FALSE)

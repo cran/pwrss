@@ -9,14 +9,10 @@
   plot.window.dim <- grDevices::dev.size("cm")
   cex.axis <- min(plot.window.dim[1] / 15, plot.window.dim[2] / 15)
 
-  ifelse(type == 1,
-         color <- grDevices::adjustcolor(2, alpha.f = 1),
-         color <- grDevices::adjustcolor(4, alpha.f = 1))
+  color <- grDevices::adjustcolor(ifelse(type == 1, 2, 4), alpha.f = 1)
 
   # non-central f function
-  funf <- function(x) {
-    stats::df(x, df1 = df1, df2 = df2, ncp = ncp)
-  }
+  funf <- function(x) stats::df(x, df1 = df1, df2 = df2, ncp = ncp)
 
   # mod of f dist
   x.seq <- seq(xlim[1], xlim[2], length.out = 50)
@@ -55,18 +51,10 @@
 # type = 1 for light red shade, 2 for light blue shade, 3 for light black stripes
 .paint.f.dist <- function(ncp = 0, df1, df2, xlim, type = 1) {
 
-  color <- switch(type,
-                   `1` = grDevices::adjustcolor(2, alpha.f = 0.3),
-                   `2` = grDevices::adjustcolor(4, alpha.f = 0.3),
-                   `3` = grDevices::adjustcolor(1, alpha.f = 0.3))
+  color <- grDevices::adjustcolor(switch(type, `1` = 2, `2` = 4, `3` = 1), alpha.f = 0.3)
 
-  # f denisty function
-  funf <- function(x) {
-    stats::df(x, df1 = df1, df2 = df2, ncp = ncp)
-  }
-
-  x <- seq(min(xlim), max(xlim), by = .001)
-  y <- funf(x)
+  x <- seq(min(xlim), max(xlim), by = 0.001)
+  y <- stats::df(x, df1 = df1, df2 = df2, ncp = ncp)
   xs <- c(x, rev(x))
   ys <- c(y, rep(0, length(y)))
 
@@ -96,8 +84,7 @@
   yf.alpha <- stats::df(f.alpha, df1 = df1, df2 = df2, ncp = null.ncp)
 
   # x-axis limits
-  ifelse(df1 < 2, prob.lower <- 0.30, prob.lower <- 0.001)
-  lower <- stats::qf(prob.lower, df1 = df1, df2 = df2, ncp = null.ncp)
+  lower <- stats::qf(ifelse(df1 < 2, 0.30, 0.001), df1 = df1, df2 = df2, ncp = null.ncp)
   upper <- stats::qf(0.999, df1 = df1, df2 = df2,  ncp = ncp)
   xlim <- c(lower, upper)
 

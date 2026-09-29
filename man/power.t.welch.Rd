@@ -24,12 +24,12 @@ power.t.welch(
 \arguments{
 \item{d}{Cohen's d or Hedges' g.}
 
-\item{null.d}{Cohen's d or Hedges' g under null, typically 0(zero).}
+\item{null.d}{Cohen's d or Hedges' g under null, typically 0 (zero).}
 
 \item{margin}{margin - ignorable \code{d} - \code{null.d} difference.}
 
-\item{req.sign}{whether estimated d - null.d is smaller or larger than the margin
-(when minimum detectable d is of interest).}
+\item{req.sign}{whether \code{d} is smaller or larger than \code{null.d} (when
+minimum detectable prob is of interest).}
 
 \item{var.ratio}{variance ratio in the form of sd1 ^ 2 / sd2 ^ 2.}
 

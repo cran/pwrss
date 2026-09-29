@@ -2,8 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{joint.probs.2x2}
 \alias{joint.probs.2x2}
-\title{Helper function to converts joint probabilities to marginal probabilities
-for the McNemar test applied to paired binary data.}
+\title{Conversion from joint probabilities to marginal probabilities for the
+McNemar test applied to paired binary data.}
 \usage{
 joint.probs.2x2(prob1, prob2, rho = 0.5, verbose = 1)
 }
@@ -35,8 +35,8 @@ are known as discordant probs.}
 'prob00' are known as concordant probs.}
 }
 \description{
-Helper function to converts joint probabilities to marginal probabilities
-for the McNemar test applied to paired binary data.
+Conversion from joint probabilities to marginal probabilities for the
+McNemar test applied to paired binary data.
 }
 \examples{
 # example data for a matched case-control design

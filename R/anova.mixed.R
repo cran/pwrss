@@ -156,7 +156,7 @@ power.f.mixed.anova <- function(eta.squared = NULL,
                                 effect = c("between", "within", "interaction"),
                                 ceil.n = TRUE, verbose = 1, utf = FALSE) {
 
-  effect <- tolower(match.arg(effect))
+  effect <- match.arg(effect)
   func.parms <- as.list(environment())
 
   if (!is.null(eta.squared)) check.nonnegative(eta.squared)
@@ -169,9 +169,9 @@ power.f.mixed.anova <- function(eta.squared = NULL,
   requested <- get.requested(es = eta.squared, n = n.total, power = power)
 
   if (!all(c("between", "within") %in% factor.type))
-    stop(paste("The `factor.type` argument must be specified as either c('between', 'within') or c('within', 'between'),",
-               "indicating the order in which the corresponding values in `factor.levels` are interpreted - specifically,",
-               "which factor is treated as between-subjects and which as within-subjects."), call. = FALSE)
+    stop("The `factor.type` argument must be specified as either c('between', 'within') or c('within', 'between'), ",
+         "indicating the order in which the corresponding values in `factor.levels` are interpreted - specifically, ",
+         "which factor is treated as between-subjects and which as within-subjects.", call. = FALSE)
   if (length(factor.levels) != 2 || length(factor.type) != 2)
     stop("Exactly two factors are allowed in this procedure.", call. = FALSE)
 
@@ -276,7 +276,6 @@ power.f.mixed.anova <- function(eta.squared = NULL,
 
 } # power.f.anova.mixed
 
-
 #' @export pwrss.f.rmanova
 pwrss.f.rmanova <- function(eta2 = NULL, f2 = NULL,
                             corr.rm = 0.50, n.levels = 2, n.rm = 2,
@@ -284,7 +283,7 @@ pwrss.f.rmanova <- function(eta2 = NULL, f2 = NULL,
                             type = c("between", "within", "interaction"),
                             n = NULL, power = NULL, verbose = TRUE) {
 
-  type <- tolower(match.arg(type))
+  type <- match.arg(type)
   verbose <- ensure.verbose(verbose)
 
   if (all(check.not_null(f2, eta2))) {
@@ -307,7 +306,8 @@ pwrss.f.rmanova <- function(eta2 = NULL, f2 = NULL,
 } # pwrss.f.rmanova()
 
 fmt_test_anovamxd <- function(n.levels.between, n.levels.within) {
-  paste0(ifelse(n.levels.within > 1, ifelse(n.levels.between > 1, "Mixed-Effects ", "Repeated Measures "), ""),
+  paste0(rep("Mixed-Effects ",     n.levels.between >  1 && n.levels.within > 1),
+         rep("Repeated Measures ", n.levels.between == 1 && n.levels.within > 1),
          "Analysis of Variance (F-Test)")
 }
 

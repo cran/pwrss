@@ -195,8 +195,8 @@ power.z.logistic <- function(prob = NULL, base.prob = NULL, odds.ratio = NULL,
                              distribution = "normal", ceil.n = TRUE,
                              verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
-  method <- tolower(match.arg(method))
+  alternative <- match.arg(alternative)
+  method <- match.arg(method)
   func.parms <- as.list(environment())
 
   check.proportion(r.squared.predictor)
@@ -245,8 +245,8 @@ power.z.logistic <- function(prob = NULL, base.prob = NULL, odds.ratio = NULL,
     prob <- odds.ratio <- beta1 <- NULL
     beta0 <- log(base.prob / (1 - base.prob))
   } else {
-    stop(paste("Specify `base.prob` & `prob`\n  or `base.prob` & `odds.ratio`\n  or `base.prob` & `beta1`\n  or",
-               "`beta0` & `beta1`\n  or `base.prob` & `n` & `power` (the latter calculates `odds.ratio` as effect size)."), call. = FALSE)
+    stop("Specify `base.prob` & `prob`\n  or `base.prob` & `odds.ratio`\n  or `base.prob` & `beta1`\n  or `beta0` & `beta1`\n",
+         "  or `base.prob` & `n` & `power` (the latter calculates `odds.ratio` as effect size).", call. = FALSE)
   }
 
   requested <- get.requested(es = list(base.prob, odds.ratio), n = n, power = power)
@@ -265,14 +265,14 @@ power.z.logistic <- function(prob = NULL, base.prob = NULL, odds.ratio = NULL,
     if (length(distribution) > 3) stop("Unknown input type for `distribution`.", call. = FALSE)
     dist.list.names <- names(distribution)
     dist.attrib <- c(dist.list.names, tolower(distribution$dist))
-    dist.invalid <- c(any(is.na(match(dist.attrib, c("dist", "normal", "mean", "sd")))),
-                      any(is.na(match(dist.attrib, c("dist", "poisson", "lambda")))),
-                      any(is.na(match(dist.attrib, c("dist", "uniform", "min", "max")))),
-                      any(is.na(match(dist.attrib, c("dist", "exponential", "rate")))),
-                      any(is.na(match(dist.attrib, c("dist", "binomial", "size", "prob")))),
-                      any(is.na(match(dist.attrib, c("dist", "bernoulli", "prob")))),
-                      any(is.na(match(dist.attrib, c("dist", "lognormal", "meanlog", "sdlog")))))
-    if (all(dist.invalid == TRUE)) stop("Unknown input type for `distribution`.", call. = FALSE)
+    dist.invalid <- c(anyNA(match(dist.attrib, c("dist", "normal", "mean", "sd"))),
+                      anyNA(match(dist.attrib, c("dist", "poisson", "lambda"))),
+                      anyNA(match(dist.attrib, c("dist", "uniform", "min", "max"))),
+                      anyNA(match(dist.attrib, c("dist", "exponential", "rate"))),
+                      anyNA(match(dist.attrib, c("dist", "binomial", "size", "prob"))),
+                      anyNA(match(dist.attrib, c("dist", "bernoulli", "prob"))),
+                      anyNA(match(dist.attrib, c("dist", "lognormal", "meanlog", "sdlog"))))
+    if (all(dist.invalid)) stop("Unknown input type for `distribution`.", call. = FALSE)
   } else {
     stop("Unknown input type for `distribution`.", call. = FALSE)
   }
@@ -452,8 +452,8 @@ power.z.logistic <- function(prob = NULL, base.prob = NULL, odds.ratio = NULL,
 
     } else {
 
-      stop(paste("Hsieh et al. (1998) is valid only for a binary covariate or",
-                 "a continuous covariate following normal distribution."), call. = FALSE)
+      stop("Hsieh et al. (1998) is valid only for a binary covariate or ",
+           "a continuous covariate following normal distribution.", call. = FALSE)
 
     }
 
@@ -594,6 +594,7 @@ power.z.logistic <- function(prob = NULL, base.prob = NULL, odds.ratio = NULL,
                       class = c("pwrss", "z", "logistic")))
 } # end of power.z.logistic()
 
+#' @rdname power.z.logistic
 #' @export power.z.logreg
 power.z.logreg <- power.z.logistic
 
@@ -606,8 +607,8 @@ pwrss.z.logistic <- function(p1 = NULL, p0 = NULL, odds.ratio  = NULL,
                              method = c("demidenko(vc)", "demidenko", "hsieh"),
                              distribution = "normal", verbose = TRUE) {
 
-  method <- tolower(match.arg(method))
-  alternative <- tolower(match.arg(alternative))
+  method <- match.arg(method)
+  alternative <- match.arg(alternative)
   verbose <- ensure.verbose(verbose)
 
   if (alternative %in% c("less", "greater")) alternative <- "one.sided"

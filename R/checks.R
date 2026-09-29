@@ -8,7 +8,7 @@ check.proportion <- function(...) {
 
   check <- vapply(args, function(x) length(x) == 1 && is.numeric(x) && x >= val.rng[1] && x <= val.rng[2], logical(1))
 
-  if (any(!check))
+  if (!all(check))
     stop(format_errmsg(arg.names[!check], fnc.name), call. = FALSE)
 
 } # check.proportion()
@@ -22,7 +22,7 @@ check.correlation <- function(...) {
 
   check <- vapply(args, function(x) length(x) == 1 && is.numeric(x) && x >= -1 && x <= 1, logical(1))
 
-  if (any(!check))
+  if (!all(check))
     stop(format_errmsg(arg.names[!check], as.character(match.call()[[1]])), call. = FALSE)
 
 } # check.correlation()
@@ -34,7 +34,7 @@ check.logical <- function(...) {
 
   check <- vapply(args, function(x) length(x) == 1 && is.logical(x) && !is.na(x), logical(1))
 
-  if (any(!check))
+  if (!all(check))
     stop(format_errmsg(arg.names[!check], as.character(match.call()[[1]])), call. = FALSE)
 
 } # check.logical()
@@ -47,7 +47,7 @@ check.sample.size <- function(...) {
 
   check <- vapply(args, function(x) length(x) == 1 && isInt(x) && is.finite(x) && x >= 2, logical(1))
 
-  if (any(!check))
+  if (!all(check))
     stop(format_errmsg(arg.names[!check], as.character(match.call()[[1]])), call. = FALSE)
 
 } # check.sample.size
@@ -61,7 +61,7 @@ check.size <- function(...) {
 
   check <- vapply(args, function(x) length(x) == 1 && isInt(x) && is.finite(x) && x >= 0, logical(1))
 
-  if (any(!check))
+  if (!all(check))
     stop(format_errmsg(arg.names[!check], as.character(match.call()[[1]])), call. = FALSE)
 
 } # check.size
@@ -73,7 +73,7 @@ check.nonnegative <- function(...) {
 
   check <- vapply(args, function(x) length(x) == 1 && is.numeric(x) && is.finite(x) && x >= 0, logical(1))
 
-  if (any(!check))
+  if (!all(check))
     stop(format_errmsg(arg.names[!check], as.character(match.call()[[1]])), call. = FALSE)
 
 } # check.nonnegative
@@ -85,7 +85,7 @@ check.positive <- function(...) {
 
   check <- vapply(args, function(x) length(x) == 1 && is.numeric(x) && is.finite(x) && x > 0, logical(1))
 
-  if (any(!check))
+  if (!all(check))
     stop(format_errmsg(arg.names[!check], as.character(match.call()[[1]])), call. = FALSE)
 
 } # check.positive
@@ -97,7 +97,7 @@ check.numeric <- function(...) {
 
   check <- vapply(args, function(x) length(x) == 1 && is.numeric(x) && is.finite(x), logical(1))
 
-  if (any(!check))
+  if (!all(check))
     stop(format_errmsg(arg.names[!check], as.character(match.call()[[1]])), call. = FALSE)
 
 } # check.positive
@@ -129,7 +129,7 @@ check.same.lengths <- function(...) {
   check[c(FALSE, !unlist(lapply(args, is.null))[-1])] <-
     unlist(lapply(args, length)[c(FALSE, !unlist(lapply(args, is.null))[-1])]) == length(args[[1]])
 
-  if (any(!check))
+  if (!all(check))
     stop(
       sprintf("%s should have the same length as %s.",
               paste(arg.names[!check], collapse = ifelse(sum(!check) == 2, " and ", ", ")),
@@ -149,17 +149,18 @@ check.margins <- function(x, fnc, alternative = "two.sided") {
            error = function(e) stop(err.msg, call. = FALSE))
 
   # if a margin needs order (typically the case for proportions), it can't be duplicated and the order needs checking
-  needs_order <- fnc.name %in% c("check.proportion")
+  needs_order <- fnc.name == "check.proportion"
 
   # ensure correct length and correct values of the variable
   if (alternative %in% c("two.sided", "one.sided") && length(x) != 1) {
-    stop(paste0("If `alternative` is \"two.sided\" or \"one.sided\", `", var.name, "` must be of length one."), call. = FALSE)
+    stop("If `alternative` is \"two.sided\" or \"one.sided\", `", var.name, "` must be of length one.", call. = FALSE)
   } else if (alternative == "two.one.sided" && !needs_order && length(x) == 1 && x != 0) {
     x <- abs(x) * c(-1, 1) # assumes equidistance from zero; if x is 0, a scalar is generated (thus: `x != 0` above)
   } else if (alternative == "two.one.sided" && (length(x) != 2 || (needs_order && x[1] > x[2]))) {
-    stop(paste0("If `alternative` is \"two.one.sided\", `", var.name, "` must be of ",
-                ifelse(!needs_order, "length one (absolute value, that must be different from 0), or ", ""), "length two ",
-                "(lower and upper bounds", ifelse(needs_order, ", with the upper bound being larger than the lower bound", ""), ")."),
+    stop("If `alternative` is \"two.one.sided\", `", var.name, "` must be of ",
+         ifelse(needs_order, "", "length one (absolute value, that must be different from 0), or "), "length two ",
+         "(lower and upper bounds",
+         ifelse(needs_order, ", with the upper bound being larger than the lower bound", ""), ").",
          call. = FALSE)
   }
 
@@ -244,7 +245,7 @@ check.null_sign <- function(req.sign, alternative) {
 } # check.null_sign
 
 # helper function(s) ---------------------------------------------------------------------------------------------------
-format_errmsg <- function(names = c(), fnc.name = NULL) {
+format_errmsg <- function(names = NULL, fnc.name = NULL) {
   sprintf("Argument%s %s %s not have %svalid %s value%s (must be length 1, %s).",
           ifelse(length(names) > 1, "s", ""),
           paste(names, collapse = ifelse(length(names) > 2, ", ", " and ")),
@@ -256,8 +257,10 @@ format_errmsg <- function(names = c(), fnc.name = NULL) {
 }
 
 fnc2type <- function(fnc.name = "") {
-  gsub("factor.level", "factor level", gsub("nonnegative", "non-negative", gsub("sample.size", "sample size",
-    gsub("check.", "", fnc.name))))
+  gsub("factor.level", "factor level", fixed = TRUE,
+       gsub("nonnegative", "non-negative", fixed = TRUE,
+       gsub("sample.size", "sample size", fixed = TRUE,
+       gsub("check.", "", fnc.name, fixed = TRUE))))
 }
 
 valid.cond <- function(fnc.name = "") {

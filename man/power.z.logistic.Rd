@@ -25,6 +25,25 @@ power.z.logistic(
   verbose = 1,
   utf = FALSE
 )
+
+power.z.logreg(
+  prob = NULL,
+  base.prob = NULL,
+  odds.ratio = NULL,
+  beta0 = NULL,
+  beta1 = NULL,
+  req.sign = "+",
+  n = NULL,
+  power = NULL,
+  r.squared.predictor = 0,
+  alpha = 0.05,
+  alternative = c("two.sided", "one.sided"),
+  method = c("demidenko(vc)", "demidenko", "hsieh"),
+  distribution = "normal",
+  ceil.n = TRUE,
+  verbose = 1,
+  utf = FALSE
+)
 }
 \arguments{
 \item{prob}{probability under alternative hypothesis

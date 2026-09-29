@@ -2,11 +2,11 @@ test_that("proportions.gof.R works", {
     # power.chisq.gof (= pwrss.chisq.gofit) ----------------------------------------------------------------------------
     mtxW <- probs.to.w(c(0.28, 0.72), verbose = 0)
     crrRes <- power.chisq.gof(w = mtxW$w, df = mtxW$df, power = 0.80, alpha = 0.05, verbose = 0)
-    expect_equal(class(crrRes), c("pwrss", "chisq", "gof"))
-    expect_equal(names(crrRes), c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
-    expect_equal(crrRes[["parms"]],
-                 list(w = mtxW$w, null.w = 0, df = mtxW$df, n = NULL, power = 0.80, alpha = 0.05, ceil.n = TRUE,
-                      verbose = 0, utf = FALSE))
+    expect_s3_class(crrRes, c("pwrss", "chisq", "gof"))
+    expect_named(crrRes, c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
+    expect_identical(crrRes[["parms"]],
+                     list(w = mtxW$w, null.w = 0, df = mtxW$df, n = NULL, power = 0.80, alpha = 0.05, ceil.n = TRUE,
+                          verbose = 0, utf = FALSE))
     expect_equal(crrRes[c("test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n")],
                  list(test = "chisq", df = mtxW$df, ncp = 7.9376, null.ncp = 0, chisq.alpha = 3.84145882, w = mtxW$w,
                       power = 0.8043919, n = 41))
@@ -16,83 +16,83 @@ test_that("proportions.gof.R works", {
     expect_equal(crrRes[-1], pwrss.chisq.gofit(w = mtxW$w, df = mtxW$df, n = 41, verbose = FALSE)[-1])
 
     crrRes <- power.chisq.gof(w = mtxW$w, df = mtxW$df, n = 41, alpha = 0.05, verbose = 0)
-    expect_equal(class(crrRes), c("pwrss", "chisq", "gof"))
-    expect_equal(names(crrRes), c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
-    expect_equal(crrRes[["parms"]],
-                 list(w = mtxW$w, null.w = 0, df = mtxW$df, n = 41, power = NULL, alpha = 0.05, ceil.n = TRUE,
-                      verbose = 0, utf = FALSE))
+    expect_s3_class(crrRes, c("pwrss", "chisq", "gof"))
+    expect_named(crrRes, c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
+    expect_identical(crrRes[["parms"]],
+                     list(w = mtxW$w, null.w = 0, df = mtxW$df, n = 41, power = NULL, alpha = 0.05, ceil.n = TRUE,
+                          verbose = 0, utf = FALSE))
     expect_equal(crrRes[c("test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n")],
                  list(test = "chisq", df = mtxW$df, ncp = 7.9376, null.ncp = 0,
                       chisq.alpha = 3.84145882, w = mtxW$w, power = 0.8043919, n = 41))
 
     crrRes <- power.chisq.gof(df = mtxW$df, n = 41, power = 0.80, alpha = 0.05, verbose = 0)
-    expect_equal(class(crrRes), c("pwrss", "chisq", "gof"))
-    expect_equal(names(crrRes), c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
-    expect_equal(crrRes[["parms"]],
-                 list(w = NULL, null.w = 0, df = mtxW$df, n = 41, power = 0.80, alpha = 0.05, ceil.n = TRUE,
-                      verbose = 0, utf = FALSE))
+    expect_s3_class(crrRes, c("pwrss", "chisq", "gof"))
+    expect_named(crrRes, c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
+    expect_identical(crrRes[["parms"]],
+                     list(w = NULL, null.w = 0, df = mtxW$df, n = 41, power = 0.80, alpha = 0.05, ceil.n = TRUE,
+                          verbose = 0, utf = FALSE))
     expect_equal(crrRes[c("test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n")],
                  list(test = "chisq", df = mtxW$df, ncp = 7.8486511, null.ncp = 0, chisq.alpha = 3.84145882,
                       w = 0.43752773, power = 0.79998954, n = 41))
 
     mtxW <- probs.to.w(rbind(c(0.056, 0.132), c(0.944, 0.868)), verbose = 0)
     crrRes <- power.chisq.gof(w = mtxW$w, df = mtxW$df, power = 0.80, alpha = 0.05, verbose = 0)
-    expect_equal(class(crrRes), c("pwrss", "chisq", "gof"))
-    expect_equal(names(crrRes), c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
-    expect_equal(crrRes[["parms"]],
-                 list(w = mtxW$w, null.w = 0, df = mtxW$df, n = NULL, power = 0.80, alpha = 0.05, ceil.n = TRUE,
-                      verbose = 0, utf = FALSE))
+    expect_s3_class(crrRes, c("pwrss", "chisq", "gof"))
+    expect_named(crrRes, c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
+    expect_identical(crrRes[["parms"]],
+                     list(w = mtxW$w, null.w = 0, df = mtxW$df, n = NULL, power = 0.80, alpha = 0.05, ceil.n = TRUE,
+                          verbose = 0, utf = FALSE))
     expect_equal(crrRes[c("test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n")],
                  list(test = "chisq", df = mtxW$df, ncp = 7.8504063, null.ncp = 0, chisq.alpha = 3.84145882,
                       w = mtxW$w, power = 0.80007722, n = 463))
 
     crrRes <- power.chisq.gof(w = mtxW$w, df = mtxW$df, n = 463, alpha = 0.05, verbose = 0)
-    expect_equal(class(crrRes), c("pwrss", "chisq", "gof"))
-    expect_equal(names(crrRes), c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
-    expect_equal(crrRes[["parms"]],
-                 list(w = mtxW$w, null.w = 0, df = mtxW$df, n = 463, power = NULL, alpha = 0.05, ceil.n = TRUE,
-                      verbose = 0, utf = FALSE))
+    expect_s3_class(crrRes, c("pwrss", "chisq", "gof"))
+    expect_named(crrRes, c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
+    expect_identical(crrRes[["parms"]],
+                     list(w = mtxW$w, null.w = 0, df = mtxW$df, n = 463, power = NULL, alpha = 0.05, ceil.n = TRUE,
+                          verbose = 0, utf = FALSE))
     expect_equal(crrRes[c("test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n")],
                  list(test = "chisq", df = mtxW$df, ncp = 7.8504063, null.ncp = 0, chisq.alpha = 3.84145882,
                       w = mtxW$w, power = 0.80007722, n = 463))
 
     crrRes <- power.chisq.gof(df = mtxW$df, n = 463, power = 0.80, alpha = 0.05, verbose = 0)
-    expect_equal(class(crrRes), c("pwrss", "chisq", "gof"))
-    expect_equal(names(crrRes), c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
-    expect_equal(crrRes[["parms"]],
-                 list(w = NULL, null.w = 0, df = mtxW$df, n = 463, power = 0.80, alpha = 0.05, ceil.n = TRUE,
-                      verbose = 0, utf = FALSE))
+    expect_s3_class(crrRes, c("pwrss", "chisq", "gof"))
+    expect_named(crrRes, c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
+    expect_identical(crrRes[["parms"]],
+                     list(w = NULL, null.w = 0, df = mtxW$df, n = 463, power = 0.80, alpha = 0.05, ceil.n = TRUE,
+                          verbose = 0, utf = FALSE))
     expect_equal(crrRes[c("test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n")],
                  list(test = "chisq", df = mtxW$df, ncp = 7.8461815, null.ncp = 0, chisq.alpha = 3.84145882,
                       w = 0.130178325, power = 0.7998661, n = 463))
 
     mtxW <- probs.to.w(cbind(c(0.6759, 0.1559, 0.1281, 0.0323, 0.0078), c(0.6771, 0.1519, 0.1368, 0.0241, 0.0101)), verbose = 0)
     crrRes <- power.chisq.gof(w = mtxW$w, df = mtxW$df, power = 0.80, alpha = 0.05, verbose = 0)
-    expect_equal(class(crrRes), c("pwrss", "chisq", "gof"))
-    expect_equal(names(crrRes), c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
-    expect_equal(crrRes[["parms"]],
-                 list(w = mtxW$w, null.w = 0, df = mtxW$df, n = NULL, power = 0.80, alpha = 0.05, ceil.n = TRUE,
-                      verbose = 0, utf = FALSE))
+    expect_s3_class(crrRes, c("pwrss", "chisq", "gof"))
+    expect_named(crrRes, c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
+    expect_identical(crrRes[["parms"]],
+                     list(w = mtxW$w, null.w = 0, df = mtxW$df, n = NULL, power = 0.80, alpha = 0.05, ceil.n = TRUE,
+                          verbose = 0, utf = FALSE))
     expect_equal(crrRes[c("test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n")],
                  list(test = "chisq", df = mtxW$df, ncp = 11.9353027, null.ncp = 0, chisq.alpha = 9.48772904,
                       w = mtxW$w, power = 0.80000063, n = 13069))
 
     crrRes <- power.chisq.gof(w = mtxW$w, df = mtxW$df, n = 13069, alpha = 0.05, verbose = 0)
-    expect_equal(class(crrRes), c("pwrss", "chisq", "gof"))
-    expect_equal(names(crrRes), c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
-    expect_equal(crrRes[["parms"]],
-                 list(w = mtxW$w, null.w = 0, df = mtxW$df, n = 13069, power = NULL, alpha = 0.05, ceil.n = TRUE,
-                      verbose = 0, utf = FALSE))
+    expect_s3_class(crrRes, c("pwrss", "chisq", "gof"))
+    expect_named(crrRes, c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
+    expect_identical(crrRes[["parms"]],
+                     list(w = mtxW$w, null.w = 0, df = mtxW$df, n = 13069, power = NULL, alpha = 0.05, ceil.n = TRUE,
+                          verbose = 0, utf = FALSE))
     expect_equal(crrRes[c("test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n")],
                  list(test = "chisq", df = mtxW$df, ncp = 11.9353027, null.ncp = 0, chisq.alpha = 9.48772904,
                       w = mtxW$w, power = 0.80000063, n = 13069))
 
     crrRes <- power.chisq.gof(df = mtxW$df, n = 13069, power = 0.80, alpha = 0.05, verbose = 0)
-    expect_equal(class(crrRes), c("pwrss", "chisq", "gof"))
-    expect_equal(names(crrRes), c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
-    expect_equal(crrRes[["parms"]],
-                 list(w = NULL, null.w = 0, df = mtxW$df, n = 13069, power = 0.80, alpha = 0.05, ceil.n = TRUE,
-                      verbose = 0, utf = FALSE))
+    expect_s3_class(crrRes, c("pwrss", "chisq", "gof"))
+    expect_named(crrRes, c("parms", "test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n"))
+    expect_identical(crrRes[["parms"]],
+                     list(w = NULL, null.w = 0, df = mtxW$df, n = 13069, power = 0.80, alpha = 0.05, ceil.n = TRUE,
+                          verbose = 0, utf = FALSE))
     expect_equal(crrRes[c("test", "df", "ncp", "null.ncp", "chisq.alpha", "w", "power", "n")],
                  list(test = "chisq", df = mtxW$df, ncp = 11.9548133, null.ncp = 0, chisq.alpha = 9.48772904,
                       w = 0.030244765, power = 0.800734563, n = 13069))

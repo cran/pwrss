@@ -25,6 +25,24 @@ power.np.wilcoxon(
   verbose = 1,
   utf = FALSE
 )
+
+power.np.wilcox(
+  d = NULL,
+  null.d = 0,
+  margin = 0,
+  req.sign = "+",
+  n.ratio = 1,
+  n2 = NULL,
+  power = NULL,
+  alpha = 0.05,
+  alternative = c("two.sided", "one.sided", "two.one.sided"),
+  design = c("independent", "paired", "one.sample"),
+  distribution = c("normal", "uniform", "double.exponential", "laplace", "logistic"),
+  method = c("guenther", "noether"),
+  ceil.n = TRUE,
+  verbose = 1,
+  utf = FALSE
+)
 }
 \arguments{
 \item{d}{Cohen's d or Hedges' g.}
@@ -33,8 +51,8 @@ power.np.wilcoxon(
 
 \item{margin}{margin - ignorable \code{d} - \code{null.d} difference.}
 
-\item{req.sign}{whether estimated d is smaller or larger than the null.d
-(when minimum detectable d is of interest).}
+\item{req.sign}{whether \code{d} is smaller or larger than \code{null.d} (when
+minimum detectable prob is of interest).}
 
 \item{n.ratio}{\code{n1 / n2} ratio (applies to independent samples
 only)}

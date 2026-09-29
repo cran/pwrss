@@ -64,6 +64,7 @@ means.to.etasq(mu.vector = c(0.50, 0), # marginal means
                n.vector = c(33, 33), # sample size (will be calculated)
                k.cov = 1, # number of covariates
                r.squared = 0.50)
+
 }
 \references{
 Keppel, G., & Wickens, T. D. (2004). Design and analysis: A researcher's

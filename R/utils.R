@@ -423,7 +423,7 @@ q.to.cors <- function(q, rho1 = NULL, rho2 = NULL, verbose = 1) {
 d.to.cles <- function(d, design = c("independent", "paired", "one.sample"), verbose = 1) {
 
   check.numeric(d)
-  design <- tolower(match.arg(design))
+  design <- match.arg(design)
   verbose <- ensure.verbose(verbose)
 
   prob <- stats::pnorm(d / sqrt(ifelse(design == "independent", 2, 1)))
@@ -435,12 +435,12 @@ d.to.cles <- function(d, design = c("independent", "paired", "one.sample"), verb
 
 } # d.to.cles
 
-
+#' @rdname d.to.cles
 #' @export cles.to.d
 cles.to.d <- function(cles, design = c("independent", "paired", "one.sample"), verbose = 1) {
 
   check.proportion(cles)
-  design <- tolower(match.arg(design))
+  design <- match.arg(design)
   verbose <- ensure.verbose(verbose)
 
   d <- sqrt(ifelse(design == "independent", 2, 1)) * stats::qnorm(cles)
@@ -576,8 +576,8 @@ probs.to.h <- function(prob1, prob2 = 0.50, verbose = 1) {
 } # probs.to.h
 
 
-#' Helper function to converts joint probabilities to marginal probabilities
-#' for the McNemar test applied to paired binary data.
+#' Conversion from joint probabilities to marginal probabilities for the
+#' McNemar test applied to paired binary data.
 #'
 #'
 #' @param prob1   (marginal) probability of success in case group (or after).
@@ -698,8 +698,8 @@ joint.probs.2x2 <- function(prob1, prob2, rho = 0.50, verbose = 1) {
   )
 
   if (rho < rho.min || rho > rho.max) {
-    stop(paste("Combination of `prob1`, `prob2` and `rho` is not feasible.\n`rho` should be between",
-               round(rho.min, 3), "and", round(rho.max, 3)), call. = FALSE)
+    stop("Combination of `prob1`, `prob2` and `rho` is not feasible.\n`rho` should be between ",
+         round(rho.min, 3), " and ", round(rho.max, 3), call. = FALSE)
   }
 
   prob11 <- rho * sqrt(prob1 * (1 - prob1) * prob2 * (1 - prob2)) + prob1 * prob2
@@ -760,7 +760,7 @@ prob.limits.paired <- function(prob1 = NULL, prob2 = NULL, rho = 0.50,
 
   # find the feasible region
   grid <- seq(grid.min, grid.max, by = step)
-  good <- sapply(grid, feasible)
+  good <- vapply(grid, feasible, logical(1))
 
   if (!any(good)) {
     stop("No feasible values found. Check that rho is achievable given the fixed probability.", call. = FALSE)
@@ -773,8 +773,8 @@ prob.limits.paired <- function(prob1 = NULL, prob2 = NULL, rho = 0.50,
 } # prob.limits.paired
 
 
-#' Helper function to converts marginal probabilities to joint probabilities
-#' for the McNemar test applied to paired binary data.
+#' Conversion from marginal probabilities to joint probabilities for the
+#' McNemar test applied to paired binary data.
 #'
 #'
 #' @param prob11  (joint) probability of success in both groups. 'prob11' and
@@ -1100,6 +1100,7 @@ probs.to.w <- function(prob.matrix, null.prob.matrix = NULL, verbose = 1) {
 #'                n.vector = c(33, 33), # sample size (will be calculated)
 #'                k.cov = 1, # number of covariates
 #'                r.squared = 0.50)
+#'
 #' @export means.to.etasq
 means.to.etasq <- function(mu.vector, sd.vector, n.vector, k.covariates = 0, r.squared = 0, factor.levels = NULL, verbose = 1) {
 

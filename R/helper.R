@@ -13,13 +13,14 @@ ensure.verbose <- function(verbose = NULL) {
 # check the input parameters n, power and es, and return which calculation is requested
 get.requested <- function(es = NULL, n = NULL, power = NULL) {
 
-  es_vars <- gsub("list", "", deparse(substitute(es), nlines = 1))
+  es_vars <- gsub("list", "", deparse(substitute(es), nlines = 1), fixed = TRUE)
   n_vars <- deparse(substitute(n), nlines = 1)
 
   if (is.list(es)) {
     if        (sum(unlist(lapply(es, is.null))) == 2) {
       stop(sprintf("Exactly one element / entry of `%s` can be NULL, not both.",
-                   paste(strsplit(gsub("[() ]", "", es_vars), ",")[[1]], collapse = "` or `")), call. = FALSE)
+                   paste(strsplit(gsub("[() ]", "", es_vars, fixed = TRUE), ",", fixed = TRUE)[[1]], collapse = "` or `")),
+           call. = FALSE)
     } else if (sum(unlist(lapply(es, is.null))) == 1) {
       es <- NULL
     }
@@ -32,9 +33,9 @@ get.requested <- function(es = NULL, n = NULL, power = NULL) {
          call. = FALSE)
 
   if (sum(check.not_null(n, power, es)) != 2) {
-    n.parms <- ifelse(!any(is_na), "two", "one")
+    n.parms <- ifelse(any(is_na), "one", "two")
     s.parms <- do.call(sprintf,
-                     list(ifelse(!any(is_na), "%s`, `%s`, or `%s", "%s` or `%s"), es_vars, n_vars, "power")[c(TRUE, !is_na)])
+                     list(ifelse(any(is_na), "%s` or `%s", "%s`, `%s`, or `%s"), es_vars, n_vars, "power")[c(TRUE, !is_na)])
     stop(sprintf("Exactly %s of the parameters `%s` must be given, one has to be NULL.", n.parms, s.parms), call. = FALSE)
   }
 
@@ -42,54 +43,57 @@ get.requested <- function(es = NULL, n = NULL, power = NULL) {
 
 } # get.requested
 
-get.interval <- function(null.ncp, distribution = c("z", "t", "lp", "binom"), alpha = 0.05, alternative = "two.sided",
-                         req.sign = "+", sd = NULL, df = NULL) {
+get.interval <- function(null.ncp, req.sign, distribution = c("z", "t", "lp", "binom"), alpha = 0.05,
+                         alternative = c("two.sided", "one.sided", "two.one.sided"),
+                         sd = NULL, df = NULL) {
 
-    if (distribution == "z") {
+  distribution <- match.arg(distribution)
+  alternative  <- match.arg(alternative)
+  if (distribution %in% c("lp", "t")) {
+    check.positive(df)
+  } else if (distribution == "z") {
+    check.positive(sd)
+  }
 
-      min.alt <- stats::qnorm(1e-10,     mean = stats::qnorm(alpha,     mean = min(null.ncp), sd = sd), sd = sd)
-      max.alt <- stats::qnorm(1 - 1e-10, mean = stats::qnorm(1 - alpha, mean = max(null.ncp), sd = sd), sd = sd)
+  if (check.null_sign(req.sign, alternative)) { # req.sign is "0" (or equivalent)
 
-    } else if (distribution == "t") {
+    sort(null.ncp)
 
-      suppressWarnings({
-        min.alt <- stats::qt(1e-10,     ncp = stats::qt(alpha,     ncp = min(null.ncp), df = df), df = df)
-        max.alt <- stats::qt(1 - 1e-10, ncp = stats::qt(1 - alpha, ncp = max(null.ncp), df = df), df = df)
-      })
+  } else if (check.pos_sign(req.sign)) { # req.sign is "+" (or equivalent)
 
-    } else if (distribution == "lp") {
+    alpha.upr <- ifelse(alternative == "two.sided", 1 - alpha / 2, 1 - alpha)
+    alt.upr <- switch(distribution,
+                      "z" = stats::qnorm(1 - 1e-10, mean = stats::qnorm(alpha.upr, mean = max(null.ncp), sd = sd), sd = sd),
+                      "t" = suppressWarnings(stats::qt(1 - 1e-10, ncp = stats::qt(alpha.upr, ncp = max(null.ncp), df = df), df = df)),
+                      "lp" = qlambdap(1 - 1e-10, ncp = qlambdap(alpha.upr, ncp = max(null.ncp), df = df), df = df),
+                      "binom" = 1 - 1e-4)
+    c(max(null.ncp), alt.upr)
 
-      suppressMessages({
-        min.alt <- sadists::qlambdap(1e-10,     t = sadists::qlambdap(alpha,     t = min(null.ncp), df = df), df = df)
-        max.alt <- sadists::qlambdap(1 - 1e-10, t = sadists::qlambdap(1 - alpha, t = max(null.ncp), df = df), df = df)
-      })
+  } else { # req.sign is "-" (or equivalent)
 
-    } else if (distribution == "binom") {
+    alpha.lwr <- ifelse(alternative == "two.sided", alpha / 2, alpha)
+    alt.lwr <- switch(distribution,
+                      "z" = stats::qnorm(1e-10, mean = stats::qnorm(alpha.lwr, mean = min(null.ncp), sd = sd), sd = sd),
+                      "t" = suppressWarnings(stats::qt(1e-10, ncp = stats::qt(alpha.lwr, ncp = min(null.ncp), df = df), df = df)),
+                      "lp" = qlambdap(1e-10, ncp = qlambdap(alpha.lwr, ncp = min(null.ncp), df = df), df = df),
+                      "binom" = 1e-4)
+    c(alt.lwr, min(null.ncp))
 
-        min.alt <- 1e-4
-        max.alt <- 1 - 1e-4
-
-    }
-
-    if (check.null_sign(req.sign, alternative)) {
-      sort(null.ncp)
-    } else if (check.pos_sign(req.sign)) {
-      c(max(null.ncp), max.alt)
-    } else { # req.sign neither null nor positive
-      c(min.alt, min(null.ncp))
-    }
+  }
 
 } # get.interval
 
-isInt <- function(x) is.numeric(x) && !any(abs(x - round(x)) > .Machine$double.eps ^ 2 / 3)
+isInt <- function(x) is.numeric(x) && !any(abs(x - round(x)) > .Machine$double.eps ^ (2 / 3))
 
 # lenInt <- function(n) ifelse(n <= 1, 1, ceiling(log10(abs(n))) + as.integer(n %% 10 == 0))
 
 check.snap4plot <- function(snpFle = "", pltFnc = NULL, pltPrm = list(), pltWdt = 800, pltHgh = 800) {
-  if (nchar(Sys.getenv("GITHUB_ACTIONS")) == 0) { # ensures that the code only runs on a local machine, not as GitHub action
+  # ensures that the code only runs on a local machine, not as GitHub action or in a Docker
+  if (nchar(Sys.getenv("GITHUB_ACTIONS")) > 0 || any(file.exists(c("/.dockerenv", "/run/.containerenv")))) {
+    testthat::announce_snapshot_file(name = snpFle)
+  } else {
     tmpFle <- tempfile(fileext = ".png")
     addPrm <- list(alpha = 0.05, verbose = 0)[c("alpha", "verbose") %in% names(formals(pltFnc))]
-    testthat::announce_snapshot_file(name = snpFle)
     grDevices::png(tmpFle, width = pltWdt, height = pltHgh)
     if (any(c("plot", "plot.main") %in% names(formals(pltFnc)))) {
       do.call(pltFnc, c(pltPrm, addPrm))
@@ -100,9 +104,4 @@ check.snap4plot <- function(snpFle = "", pltFnc = NULL, pltPrm = list(), pltWdt 
     testthat::expect_snapshot_file(path = tmpFle, name = snpFle, variant = Sys.info()[["sysname"]])
     unlink(tmpFle)
   }
-}
-
-uniroot_break <- function(ur.obj) {
-  !inherits(ur.obj, "try-error") ||
-    (inherits(ur.obj, "try-error") && attr(ur.obj, "condition")[["message"]] != "f() values at end points not of opposite sign")
 }

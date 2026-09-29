@@ -1,6 +1,6 @@
 test_that("printing.R works", {
     # .print.pwrss.ancova ----------------------------------------------------------------------------------------------
-    crrAsc <- capture.output(power.f.ancova(eta.squared = 0.059, factor.levels = 2, alpha = 0.05, power = .80, verbose = 2))
+    crrAsc <- capture.output(power.f.ancova(eta.squared = 0.059, factor.levels = 2, alpha = 0.05, power = 0.80, verbose = 2))
     expect_equal(crrAsc, c("+--------------------------------------------------+",
                            "|             SAMPLE SIZE CALCULATION              |",
                            "+--------------------------------------------------+", "",
@@ -32,7 +32,7 @@ test_that("printing.R works", {
                            "----------------------------------------------------",
                            "  eta.squared      : (Partial) eta-squared under alt.", ""))
 
-    crrUTF <- capture.output(power.f.ancova(eta.squared = 0.059, factor.levels = 2, alpha = 0.05, power = .80, verbose = 2, utf = TRUE))
+    crrUTF <- capture.output(power.f.ancova(eta.squared = 0.059, factor.levels = 2, alpha = 0.05, power = 0.80, verbose = 2, utf = TRUE))
     expect_equal(crrUTF, c("╔══════════════════════════════════════════════════╗",
                            "║           \033[34m SAMPLE SIZE CALCULATION \033[0m              ║",
                            "╚══════════════════════════════════════════════════╝", "",
@@ -724,7 +724,7 @@ test_that("printing.R works", {
                    "  Target Effect (rho1) = 0.200 (vs. rho2 = 0.300)",
                    "  rho1 : Correlation (for some V1 ~ V2) in group 1",
                    "  rho2 : Correlation (for some V1 ~ V2) in group 2"))
-    expect_equal(length(crrAsc), 38)
+    expect_length(crrAsc, 38)
 
     crrUTF <- capture.output(power.z.twocors(rho1 = 0.20, rho2 = 0.30, power = 0.80, alpha = 0.05, alternative = "one.sided",
                                              verbose = 2, utf = TRUE))
@@ -744,7 +744,7 @@ test_that("printing.R works", {
                    "  \033[36mρ₂ : Correlation (for some V1 ~ V2) in group 2\033[0m",
                    "  \033[36mμ  : Mean\033[0m",
                    "  \033[36mσ  : Standard deviation\033[0m"))
-    expect_equal(length(crrUTF), 40)
+    expect_length(crrUTF, 40)
 
     crrAsc <- capture.output(power.z.onecor(rho = 0.20, power = 0.80, alpha = 0.05, alternative = "two.sided", verbose = 2))
     expect_equal(crrAsc[c(5, 10:11, 16:22, 27, 36:37)],
@@ -761,7 +761,7 @@ test_that("printing.R works", {
                    "  Target Effect (rho)  = 0.200 (vs. null.rho = 0)",
                    "  rho      : Correlation (for some V1 ~ V2) under alt.",
                    "  null.rho : Correlation (for some V1 ~ V2) under null"))
-    expect_equal(length(crrAsc), 38)
+    expect_length(crrAsc, 38)
 
     crrUTF <- capture.output(power.z.onecor(rho = 0.20, power = 0.80, alpha = 0.05, alternative = "two.sided", verbose = 2, utf = TRUE))
     expect_equal(crrUTF[c(5, 10:11, 16:22, 27, 36:39)],
@@ -780,7 +780,7 @@ test_that("printing.R works", {
                    "  \033[36mρ₀ : Correlation (for some V1 ~ V2) under null\033[0m",
                    "  \033[36mμ  : Mean\033[0m",
                    "  \033[36mσ  : Standard deviation\033[0m"))
-    expect_equal(length(crrUTF), 40)
+    expect_length(crrUTF, 40)
 
     crrAsc <- capture.output(power.exact.onecor(rho = 0.20, power = 0.80, alpha = 0.05, alternative = "two.sided", verbose = 2))
     expect_equal(crrAsc[c(5, 10:11, 16:17, 22, 31:32)],
@@ -792,7 +792,7 @@ test_that("printing.R works", {
                    "  Target Effect (rho)  = 0.200 (vs. null.rho = 0)",
                    "  rho      : Correlation (for some V1 ~ V2) under alt.",
                    "  null.rho : Correlation (for some V1 ~ V2) under null"))
-    expect_equal(length(crrAsc), 33)
+    expect_length(crrAsc, 33)
 
     crrUTF <- capture.output(power.exact.onecor(rho = 0.20, power = 0.80, alpha = 0.05, alternative = "two.sided", verbose = 2, utf = TRUE))
     expect_equal(crrUTF[c(5, 10:11, 16:17, 22, 31:34)],
@@ -806,7 +806,7 @@ test_that("printing.R works", {
                    "  \033[36mρ₀ : Correlation (for some V1 ~ V2) under null\033[0m",
                    "  \033[36mμ  : Mean\033[0m",
                    "  \033[36mσ  : Standard deviation\033[0m"))
-    expect_equal(length(crrUTF), 35)
+    expect_length(crrUTF, 35)
     # ------------------------------------------------------------------------------------------------------------------
 
 
@@ -1073,8 +1073,8 @@ test_that("printing.R works", {
                            "  \033[36mλ₀ : Non-centrality parameter under null\033[0m", ""))
 
     crrAsc <- capture.output(power.t.test(ncp = 1.96, df = Inf, alpha = 0.05, alternative = "two.sided", plot = FALSE, verbose = 2))
-    expect_false(any(grepl("Degrees of Freedom", crrAsc)))
-    expect_equal(length(crrAsc), 33)
+    expect_false(any(grepl("Degrees of Freedom", crrAsc, fixed = TRUE)))
+    expect_length(crrAsc, 33)
     expect_equal(crrAsc[c(18, 25:26)], c("  Critical Value         = -1.960 and 1.960",
                                          "  Type 2 Error (beta)  = 0.500",
                                          "  Statistical Power    = 0.500  <<"))
@@ -1903,7 +1903,7 @@ test_that("printing.R works", {
                            "Hypotheses",
                            "────────────────────────────────────────────────────",
                            "  H₀ (Null)        : P ≥ P₀",
-                           "  H₁ (Alternative) : P < P₀", "",
+                           "  H₁ (Alternative) : P < P₀",   "",
                            "────────────────────────────────────────────────────",
                            "Key Parameters",
                            "────────────────────────────────────────────────────",

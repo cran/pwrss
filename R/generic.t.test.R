@@ -88,7 +88,7 @@ power.t.test <- function(power = NULL, ncp = NULL, req.sign = "+", null.ncp = 0,
                          alternative = c("two.sided", "one.sided", "two.one.sided"),
                          plot = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   if (!is.null(power)) check.power(power)
   if (!is.null(ncp)) check.numeric(ncp)
   null.ncp <- check.margins(null.ncp, check.numeric, alternative)

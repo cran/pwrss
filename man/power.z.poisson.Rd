@@ -25,6 +25,25 @@ power.z.poisson(
   verbose = 1,
   utf = FALSE
 )
+
+power.z.poisreg(
+  base.rate = NULL,
+  rate.ratio = NULL,
+  beta0 = NULL,
+  beta1 = NULL,
+  req.sign = "+",
+  n = NULL,
+  power = NULL,
+  r.squared.predictor = 0,
+  mean.exposure = 1,
+  alpha = 0.05,
+  alternative = c("two.sided", "one.sided"),
+  method = c("demidenko(vc)", "demidenko", "signorini"),
+  distribution = "normal",
+  ceil.n = TRUE,
+  verbose = 1,
+  utf = FALSE
+)
 }
 \arguments{
 \item{base.rate}{the base mean event rate.}
@@ -41,8 +60,8 @@ rate.}
 in the mean event rate for one unit increase in
 the predictor.}
 
-\item{req.sign}{sign of the beta1 coefficient (when minimum
-detectable effect or beta1 is of interest).}
+\item{req.sign}{sign of the \code{beta1} coefficient (when minimum
+detectable effect or \code{beta1} is of interest).}
 
 \item{n}{integer; sample size.}
 

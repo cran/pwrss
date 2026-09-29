@@ -23,6 +23,25 @@ power.z.twocors.steiger(
   verbose = 1,
   utf = FALSE
 )
+
+power.z.steiger(
+  rho12 = NULL,
+  rho13 = NULL,
+  rho23 = NULL,
+  rho14 = NULL,
+  rho24 = NULL,
+  rho34 = NULL,
+  req.sign = "+",
+  n = NULL,
+  power = NULL,
+  alpha = 0.05,
+  alternative = c("two.sided", "one.sided"),
+  pooled = TRUE,
+  common.index = FALSE,
+  ceil.n = TRUE,
+  verbose = 1,
+  utf = FALSE
+)
 }
 \arguments{
 \item{rho12}{correlation between variable V1 and V2 (one common index

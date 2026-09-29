@@ -11,14 +11,10 @@
   plot.window.dim <- grDevices::dev.size("cm")
   cex.axis <- min(plot.window.dim[1] / 15, plot.window.dim[2] / 15)
 
-  ifelse(type == 1,
-         color <- grDevices::adjustcolor(2, alpha.f = 1),
-         color <- grDevices::adjustcolor(4, alpha.f = 1))
+  color <- grDevices::adjustcolor(ifelse(type == 1, 2, 4), alpha.f = 1)
 
   # non-central t function
-  funt <- function(x) {
-    stats::dt(x, df = df, ncp = ncp)
-  }
+  funt <- function(x) stats::dt(x, df = df, ncp = ncp)
 
   # plot central t distribution
   graphics::plot(funt, xlim = xlim, ylim = ylim,
@@ -49,19 +45,10 @@
 # type = 1 for light red shade, 2 for light blue shade, 3 for light black stripes
 .paint.t.dist <- function(ncp = 0, df = Inf, xlim, type = 1) {
 
-  color <- switch(type,
-                  `1` = grDevices::adjustcolor(2, alpha.f = 0.3),
-                  `2` = grDevices::adjustcolor(4, alpha.f = 0.3),
-                  `3` = grDevices::adjustcolor(1, alpha.f = 0.3),
-                  `s` = grDevices::adjustcolor(2, alpha.f = 0.6))
+  color <- grDevices::adjustcolor(switch(type, `1` = 2, `2` = 4, `3` = 1), alpha.f = ifelse(type == "s", 0.6, 0.3))
 
-  # non-central t function
-  funt <- function(x) {
-    stats::dt(x, df = df, ncp = ncp)
-  }
-
-  x <- seq(min(xlim), max(xlim), by = .001)
-  y <- funt(x)
+  x <- seq(min(xlim), max(xlim), by = 0.001)
+  y <- stats::dt(x, df = df, ncp = ncp)
   xs <- c(x, rev(x))
   ys <- c(y, rep(0, length(y)))
 
@@ -80,7 +67,7 @@
                          alternative = c("one.sided", "two.sided", "two.one.sided"),
                          plot.main = NULL, plot.sub = NULL, digits = 2) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
 
   check.numeric(ncp)
   null.ncp <- check.margins(null.ncp, check.numeric, alternative)
@@ -123,17 +110,14 @@
 
   } else if (alternative == "one.sided") {
 
-    ifelse(ncp > null.ncp,
-           lower.tail <- FALSE,
-           lower.tail <- TRUE)
-    t.alpha <- stats::qt(alpha, df = df, ncp = null.ncp, lower.tail = lower.tail) # if ncp > null.ncp
+    t.alpha <- stats::qt(alpha, df = df, ncp = null.ncp, lower.tail = ncp <= null.ncp)
 
     yt.alpha <- stats::dt(t.alpha, df = df, ncp = null.ncp)
 
   } # alternative
 
   # x-axis limits
-  ifelse(df < 20, prob.extreme <- 0.001, prob.extreme <- 0.0001)
+  prob.extreme <- ifelse(df < 20, 0.001, 0.0001)
   lower <- min(min(stats::qt(prob.extreme,     df = df, ncp = ncp,      lower.tail = TRUE)),
                    stats::qt(prob.extreme,     df = df, ncp = null.ncp, lower.tail = TRUE))
   upper <- max(max(stats::qt(1 - prob.extreme, df = df, ncp = ncp,      lower.tail = TRUE)),
@@ -198,9 +182,9 @@
       .paint.t.dist(ncp = ncp, df = df, xlim = c(t.alpha[1], max(xlim)), type = 2)
       .paint.t.dist(ncp = ncp, df = df, xlim = c(min(xlim), t.alpha[2]), type = 2)
 
-      ifelse(t.alpha[1] > t.alpha[2],
-             power <- .paint.t.dist(ncp = ncp, df = df, xlim = t.alpha, type = 3),
-             power <- 0)
+      power <- ifelse(t.alpha[1] > t.alpha[2],
+                      .paint.t.dist(ncp = ncp, df = df, xlim = t.alpha, type = 3),
+                      0)
 
     }
 
@@ -260,17 +244,19 @@
 
   } else {
 
-    ifelse(ncp < null.ncp,
-           .paint.t.dist(ncp = null.ncp, df = df, xlim = c(t.alpha, min(xlim)), type = 1),
-           .paint.t.dist(ncp = null.ncp, df = df, xlim = c(t.alpha, max(xlim)), type = 1))
+    if (ncp < null.ncp) {
 
-    ifelse(ncp < null.ncp,
-           .paint.t.dist(ncp = ncp, df = df, xlim = c(t.alpha, max(xlim)), type = 2),
-           .paint.t.dist(ncp = ncp, df = df, xlim = c(t.alpha, min(xlim)), type = 2))
+               .paint.t.dist(ncp = null.ncp, df = df, xlim = c(t.alpha, min(xlim)), type = 1)
+               .paint.t.dist(ncp = ncp,      df = df, xlim = c(t.alpha, max(xlim)), type = 2)
+      power <- .paint.t.dist(ncp = ncp,      df = df, xlim = c(t.alpha, min(xlim)), type = 3)
 
-    ifelse(ncp < null.ncp,
-           power <- .paint.t.dist(ncp = ncp, df = df, xlim = c(t.alpha, min(xlim)), type = 3),
-           power <- .paint.t.dist(ncp = ncp, df = df, xlim = c(t.alpha, max(xlim)), type = 3))
+    } else {
+
+               .paint.t.dist(ncp = null.ncp, df = df, xlim = c(t.alpha, max(xlim)), type = 1)
+               .paint.t.dist(ncp = ncp,      df = df, xlim = c(t.alpha, min(xlim)), type = 2)
+      power <- .paint.t.dist(ncp = ncp,      df = df, xlim = c(t.alpha, max(xlim)), type = 3)
+
+    }
 
   } # end of paint regions
 

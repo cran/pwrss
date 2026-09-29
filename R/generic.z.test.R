@@ -88,7 +88,7 @@ power.z.test <- function(power = NULL, mean = NULL, sd = 1, null.mean = 0, null.
                          alpha = 0.05, alternative = c("two.sided", "one.sided", "two.one.sided"),
                          plot = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   if (!is.null(power)) check.power(power)
   if (!is.null(mean)) check.numeric(mean)
   check.positive(sd)

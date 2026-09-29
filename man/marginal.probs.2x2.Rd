@@ -2,8 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{marginal.probs.2x2}
 \alias{marginal.probs.2x2}
-\title{Helper function to converts marginal probabilities to joint probabilities
-for the McNemar test applied to paired binary data.}
+\title{Conversion from marginal probabilities to joint probabilities for the
+McNemar test applied to paired binary data.}
 \usage{
 marginal.probs.2x2(prob11, prob10, prob01, prob00, verbose = 1)
 }
@@ -36,8 +36,8 @@ on the console.}
 before (phi coefficient).}
 }
 \description{
-Helper function to converts marginal probabilities to joint probabilities
-for the McNemar test applied to paired binary data.
+Conversion from marginal probabilities to joint probabilities for the
+McNemar test applied to paired binary data.
 }
 \examples{
 # example data for a matched case-control design

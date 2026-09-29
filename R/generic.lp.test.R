@@ -56,32 +56,57 @@
 #' # two-sided
 #' # power defined as the probability of observing test statistics greater
 #' # than the positive critical value OR less than the negative critical value
-#' power.lp.test(ncp = 1.96, df = 100, alpha = 0.05, alternative = "two.sided")
-#' power.lp.test(power = 0.80, df = 100, alpha = 0.05, alternative = "two.sided")
+#' power.lp.test(ncp = 1.960, df = 100, alpha = 0.05,
+#'               alternative = "two.sided", plot = FALSE)
+#' power.lp.test(power = 0.800, df = 100, alpha = 0.05,
+#'               alternative = "two.sided", plot = FALSE)
+#'
+#' # the two examples below estimate the df's based upon the first example
+#' # (revealing a power of 0.498; df = 94.11) and the second example (revealing
+#' # a ncp of 2.825; df = 101.06)
+#' power.lp.test(ncp = 1.960, power = 0.498, alpha = 0.05,
+#'               alternative = "two.sided", plot = FALSE)
+#' power.lp.test(ncp = 2.825, power = 0.800, alpha = 0.05,
+#'               alternative = "two.sided", plot = FALSE)
 #'
 #' # one-sided
 #' # power is defined as the probability of observing a test statistic greater
 #' # than the critical value
-#' power.lp.test(ncp = 1.96, df = 100, alpha = 0.05, alternative = "one.sided")
-#' power.lp.test(power = 0.80, df = 100, alpha = 0.05, alternative = "one.sided")
+#' power.lp.test(ncp = 1.960, df = 100, alpha = 0.05, alternative = "one.sided")
+#' power.lp.test(power = 0.800, df = 100, alpha = 0.05, alternative = "one.sided")
+#' # the two examples below estimate the df's based upon the first example
+#' # (revealing a power of 0.6207; df = 100.323) and the second example (revealing
+#' # a ncp of 2.506; df = 99.12)
+#' power.lp.test(ncp = 1.960, power = 0.6207, alpha = 0.05,
+#'               alternative = "one.sided", plot = FALSE)
+#' power.lp.test(ncp = 2.506, power = 0.8000, alpha = 0.05,
+#'               alternative = "one.sided", plot = FALSE)
 #'
 #' # equivalence
 #' # power is defined as the probability of observing a test statistic greater
 #' # than the upper critical value (for the lower bound) AND less than the
 #' # lower critical value (for the upper bound)
-#' power.lp.test(ncp = 0, null.ncp = c(-2, 2), df = 100, alpha = 0.05,
-#'               alternative = "two.one.sided")
-#' power.lp.test(power = 0.80, req.sign = "0", null.ncp = c(-2, 2),
-#'               df = 100, alpha = 0.05, alternative = "two.one.sided")
+#' power.lp.test(ncp = 0, null.ncp = c(-3, 3), df = 100, alpha = 0.05,
+#'               alternative = "two.one.sided", plot = FALSE)
+#' power.lp.test(power = 0.80, req.sign = "0", null.ncp = c(-3, 3),
+#'               df = 100, alpha = 0.05, alternative = "two.one.sided", plot = FALSE)
+#' # adjust the power based upon what is returned from the example above in
+#' # order to get a valid estimate of the df's (100.321; power = 0.8 -> 58.911)
+#' power.lp.test(ncp = 0, power = 0.8103, req.sign = "0", null.ncp = c(-3, 3),
+#'               alpha = 0.05, alternative = "two.one.sided", plot = FALSE)
 #'
 #' # minimal effect testing
 #' # power is defined as the probability of observing a test statistic greater
 #' # than the upper critical value (for the upper bound) OR less than the lower
 #' # critical value (for the lower bound).
 #' power.lp.test(ncp = 2, null.ncp = c(-1, 1), df = 100, alpha = 0.05,
-#'               alternative = "two.one.sided")
+#'               alternative = "two.one.sided", plot = FALSE)
 #' power.lp.test(power = 0.80, req.sign = "+", null.ncp = c(-1, 1),
 #'               df = 100, alpha = 0.05, alternative = "two.one.sided")
+#' # the first example (ncp = 2) reveals insufficient power (0.169), hence
+#' # use the ncp returned from the example above for estimating the df's
+#' power.lp.test(ncp = 3.844, power = 0.8, req.sign = "+", null.ncp = c(-3, 3),
+#'               alpha = 0.05, alternative = "two.one.sided", plot = FALSE)
 #'
 #' @export power.lp.test
 power.lp.test <- function(power = NULL, ncp = NULL, req.sign = "+", null.ncp = 0,
@@ -89,7 +114,7 @@ power.lp.test <- function(power = NULL, ncp = NULL, req.sign = "+", null.ncp = 0
                           alternative = c("two.sided", "one.sided", "two.one.sided"),
                           plot = TRUE, verbose = 1, utf = FALSE) {
 
-  alternative <- tolower(match.arg(alternative))
+  alternative <- match.arg(alternative)
   if (!is.null(power)) check.power(power)
   if (!is.null(ncp)) check.numeric(ncp)
   null.ncp <- check.margins(null.ncp, check.numeric, alternative)
@@ -109,40 +134,40 @@ power.lp.test <- function(power = NULL, ncp = NULL, req.sign = "+", null.ncp = 0
 
     if (alternative == "two.sided") {
 
-      t.alpha <- c(sadists::qlambdap(p = alpha / 2, df = df, t = 0, lower.tail = TRUE),
-                   sadists::qlambdap(p = alpha / 2, df = df, t = 0, lower.tail = FALSE))
-      power <- 1 - sadists::plambdap(q = t.alpha[2], df = df, t = abs(ncp)) +
-                   sadists::plambdap(q = t.alpha[1], df = df, t = abs(ncp))
+      t.alpha <- c(qlambdap(p = alpha / 2, df = df, ncp = 0, lower.tail = TRUE),
+                   qlambdap(p = alpha / 2, df = df, ncp = 0, lower.tail = FALSE))
+      power <- 1 - plambdap(q = t.alpha[2], df = df, ncp = abs(ncp)) +
+                   plambdap(q = t.alpha[1], df = df, ncp = abs(ncp))
 
       Phi.p <- stats::pt(q = max(t.alpha), df = df, ncp = ncp)
       Phi.m <- stats::pt(q = min(t.alpha), df = df, ncp = ncp)
       type.s <- min(Phi.m, 1 - Phi.p) / (Phi.m + 1 - Phi.p)
 
       type.m <- suppressMessages({
-        bounds <- sadists::qlambdap(c(1e-10, 1 - 1e-10), df = df, t = ncp)
-        integrand <- function(t) abs(t) * sadists::dlambdap(t, df = df, t = ncp)
+        bounds <- qlambdap(c(1e-10, 1 - 1e-10), df = df, ncp = ncp)
+        integrand <- function(t) abs(t) * dlambdap(t, df = df, ncp = ncp)
         numerator <- stats::integrate(integrand, min(bounds), min(t.alpha))$value +
                      stats::integrate(integrand, max(t.alpha), max(bounds))$value
-        denominator  <- abs(ncp) * (sadists::plambdap(min(t.alpha), df = df, t = ncp) +
-                                    sadists::plambdap(max(t.alpha), df = df, t = ncp, lower.tail = FALSE))
+        denominator  <- abs(ncp) * (plambdap(min(t.alpha), df = df, ncp = ncp) +
+                                    plambdap(max(t.alpha), df = df, ncp = ncp, lower.tail = FALSE))
         numerator / denominator
       })
 
     } else if (alternative == "one.sided") {
 
       lower.tail <- ncp < null.ncp
-      t.alpha <- sadists::qlambdap(p = alpha,   df = df, t = null.ncp, lower.tail = lower.tail)
-      power   <- sadists::plambdap(q = t.alpha, df = df, t = ncp,      lower.tail = lower.tail)
+      t.alpha <- qlambdap(p = alpha,   df = df, ncp = null.ncp, lower.tail = lower.tail)
+      power   <- plambdap(q = t.alpha, df = df, ncp = ncp,      lower.tail = lower.tail)
 
       type.s <- 0
       type.m <- NA
 
     } else if (alternative == "two.one.sided" && (ncp > min(null.ncp) && ncp < max(null.ncp))) {  # equivalence test
 
-      t.alpha.left  <- sadists::qlambdap(p = alpha,     df = df, t = min(null.ncp), lower.tail = FALSE)
-      t.alpha.right <- sadists::qlambdap(p = 1 - alpha, df = df, t = max(null.ncp), lower.tail = FALSE)
-      power <- sadists::plambdap(q = t.alpha.right, df = df, t = ncp) -
-               sadists::plambdap(q = t.alpha.left,  df = df, t = ncp)
+      t.alpha.left  <- qlambdap(p = alpha,     df = df, ncp = min(null.ncp), lower.tail = FALSE)
+      t.alpha.right <- qlambdap(p = 1 - alpha, df = df, ncp = max(null.ncp), lower.tail = FALSE)
+      power <- plambdap(q = t.alpha.right, df = df, ncp = ncp) -
+               plambdap(q = t.alpha.left,  df = df, ncp = ncp)
 
       t.alpha <- c(t.alpha.left,  t.alpha.right)
 
@@ -151,10 +176,10 @@ power.lp.test <- function(power = NULL, ncp = NULL, req.sign = "+", null.ncp = 0
 
     } else if (alternative == "two.one.sided" && (ncp < min(null.ncp) || ncp > max(null.ncp))) {  # minimum effect test
 
-      t.alpha.right <- sadists::qlambdap(p = alpha / 2, df = df, t = max(null.ncp), lower.tail = FALSE)
-      t.alpha.left  <- sadists::qlambdap(p = alpha / 2, df = df, t = min(null.ncp), lower.tail = TRUE)
-      power <- sadists::plambdap(q = t.alpha.right, df = df, t = ncp, lower.tail = FALSE) +
-               sadists::plambdap(q = t.alpha.left,  df = df, t = ncp, lower.tail = TRUE)
+      t.alpha.right <- qlambdap(p = alpha / 2, df = df, ncp = max(null.ncp), lower.tail = FALSE)
+      t.alpha.left  <- qlambdap(p = alpha / 2, df = df, ncp = min(null.ncp), lower.tail = TRUE)
+      power <- plambdap(q = t.alpha.right, df = df, ncp = ncp, lower.tail = FALSE) +
+               plambdap(q = t.alpha.left,  df = df, ncp = ncp, lower.tail = TRUE)
 
       t.alpha <- c(t.alpha.left,  t.alpha.right)
 
@@ -181,8 +206,8 @@ power.lp.test <- function(power = NULL, ncp = NULL, req.sign = "+", null.ncp = 0
 
       lower.int <- c(min(null.ncp), mean(null.ncp))
       upper.int <- c(mean(null.ncp), max(null.ncp))
-      ncp.lower <- suppressMessages(stats::optimize(f = function(ncp) min.pwr(ncp, df, power) ^ 2, interval = lower.int, tol = 1e-12))$minimum
-      ncp.upper <- suppressMessages(stats::optimize(f = function(ncp) min.pwr(ncp, df, power) ^ 2, interval = upper.int, tol = 1e-12))$minimum
+      ncp.lower <- stats::optimize(f = function(ncp) min.pwr(ncp, df, power) ^ 2, interval = lower.int, tol = 1e-12)$minimum
+      ncp.upper <- stats::optimize(f = function(ncp) min.pwr(ncp, df, power) ^ 2, interval = upper.int, tol = 1e-12)$minimum
       ncp <- mean(c(ncp.lower, ncp.upper))
 
       warn.txt <- ifelse(max(abs(c(min.pwr(ncp.lower, df, power), min.pwr(ncp.upper, df, power)))) < 1e-6,
@@ -194,21 +219,20 @@ power.lp.test <- function(power = NULL, ncp = NULL, req.sign = "+", null.ncp = 0
 
       val.rng <- get.interval(null.ncp = null.ncp, distribution = "lp", alpha = alpha, alternative = alternative,
                               req.sign = req.sign, df = df)
-      ncp <- suppressMessages(stats::optimize(f = function(ncp) min.pwr(ncp, df, power) ^ 2, interval = val.rng, tol = 1e-12))$minimum
+      ncp <- stats::optimize(f = function(ncp) min.pwr(ncp, df, power) ^ 2, interval = val.rng, tol = 1e-12)$minimum
 
     }
 
   } else if (requested == "n") {
 
-    stop("Solving for degrees of freedom is currently not allowed due to numerical instability in PDQutils::AS269 function.", call. = FALSE)
-    #  df <- suppressMessages(stats::optimize(f = function(df) min.pwr(ncp, df, power) ^ 2, interval = c(1, 1e10))$minimum)
+    df <- stats::optimize(f = function(df) min.pwr(ncp, df, power) ^ 2, interval = c(1, 1e10))$minimum
 
   }
 
   pwr.obj <- pwr(ncp = ncp, null.ncp = null.ncp, df = df, alpha = alpha, alternative = alternative)
 
   if (plot)
-    suppressMessages(.plot.lp.t1t2(ncp = ncp, null.ncp = null.ncp, df = df, alpha = alpha, alternative = alternative))
+    .plot.lp.t1t2(ncp = ncp, null.ncp = null.ncp, df = df, alpha = alpha, alternative = alternative)
 
   if (verbose > 0) {
 

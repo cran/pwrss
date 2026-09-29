@@ -5,10 +5,30 @@
 \alias{power.z.twoprop}
 \alias{pwrss.z.2props}
 \alias{pwrss.z.2prop}
-\title{Power Analysis for Testing Difference Between Two Proportions (Normal
+\title{Power Analysis for Testing the Difference Between Two Proportions (Normal
 Approximation Method)}
 \usage{
 power.z.twoprops(
+  prob1 = NULL,
+  prob2 = NULL,
+  req.sign = "+",
+  margin = 0,
+  n.ratio = 1,
+  n2 = NULL,
+  power = NULL,
+  alpha = 0.05,
+  alternative = c("two.sided", "one.sided", "two.one.sided"),
+  arcsine = FALSE,
+  correct = FALSE,
+  paired = FALSE,
+  rho.paired = 0.5,
+  std.error = c("pooled", "unpooled"),
+  ceil.n = TRUE,
+  verbose = 1,
+  utf = FALSE
+)
+
+power.z.twoprop(
   prob1 = NULL,
   prob2 = NULL,
   req.sign = "+",
